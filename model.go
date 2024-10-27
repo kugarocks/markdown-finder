@@ -43,7 +43,6 @@ const (
 	pastingState
 	quittingState
 	editingState
-	editingTagsState
 )
 
 type input int
