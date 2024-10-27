@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 	"time"
-
+	
 	"github.com/aquilax/truncate"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
@@ -15,6 +15,7 @@ import (
 // FilterValue is the snippet filter value that can be used when searching.
 func (s Snippet) FilterValue() string {
 	return s.Folder + "/" + s.Name + "\n" + "+" + strings.Join(s.Tags, "+") + "\n" + s.Language
+	//return s.Folder + "/" + s.Name + "\n" + "+" + strings.Join(s.Tags, "+") + "\n" + s.Language
 }
 
 // snippetDelegate represents the snippet list item.
@@ -54,7 +55,7 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	if !ok {
 		return
 	}
-
+	
 	titleStyle := d.styles.SelectedTitle
 	subtitleStyle := d.styles.SelectedSubtitle
 	if d.state == copyingState {
@@ -64,14 +65,16 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 		titleStyle = d.styles.DeletedTitle
 		subtitleStyle = d.styles.DeletedSubtitle
 	}
-
+	
 	if index == m.Index() {
 		fmt.Fprintln(w, "  "+titleStyle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-		fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+		fmt.Fprint(w, "  "+subtitleStyle.Render("grep -V foobar..."))
+		//fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 		return
 	}
 	fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-	fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+	fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render("grep -V foobar..."))
+	//fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 }
 
 // Folder represents a group of snippets in a directory.
