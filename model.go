@@ -242,11 +242,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateActivePane(msg)
 		return m, cmd
 	case tea.WindowSizeMsg:
-		m.height = msg.Height - 4
+		m.height = msg.Height - 4 - m.config.MarginTop
 		for _, li := range m.Lists {
 			li.SetHeight(m.height)
 		}
-		m.Folders.SetHeight(m.height)
+		//m.Folders.SetHeight(m.height)
 		m.Code.Height = m.height
 		m.LineNumbers.Height = m.height
 		m.Code.Width = msg.Width - m.List().Width() - m.Folders.Width() - 20
@@ -669,11 +669,11 @@ func (m *Model) View() string {
 				name,
 				lipgloss.JoinHorizontal(lipgloss.Left,
 					m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),
-					m.ContentStyle.Base.Render(strings.ReplaceAll(m.Code.View(), "\t", strings.Repeat(" ", tabSpaces))),
+					m.ContentStyle.Code.Render(strings.ReplaceAll(m.Code.View(), "\t", strings.Repeat(" ", tabSpaces))),
 				),
 			),
 		),
-		marginStyle.Render(m.help.View(m.keys)),
+		helpStyle.Render(m.help.View(m.keys)),
 	)
 }
 
