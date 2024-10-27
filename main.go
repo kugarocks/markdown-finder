@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/glamour"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-
+	
 	"github.com/mattn/go-isatty"
-
+	
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -49,13 +50,13 @@ func runCLI(args []string) {
 	snippets := readSnippets(config)
 	snippets = migrateSnippets(config, snippets)
 	snippets = scanSnippets(config, snippets)
-
+	
 	stdin := readStdin()
 	if stdin != "" {
 		saveSnippet(stdin, args, config, snippets)
 		return
 	}
-
+	
 	if len(args) > 0 {
 		switch args[0] {
 		case "list":
@@ -68,7 +69,7 @@ func runCLI(args []string) {
 		}
 		return
 	}
-
+	
 	err := runInteractiveMode(config, snippets)
 	if err != nil {
 		fmt.Println("Alas, there's been an error", err)
@@ -90,7 +91,7 @@ func parseName(s string) (string, string, string) {
 		language  = defaultLanguage
 		remaining string
 	)
-
+	
 	tokens := strings.Split(s, "/")
 	if len(tokens) > 1 {
 		folder = tokens[0]
@@ -98,7 +99,7 @@ func parseName(s string) (string, string, string) {
 	} else {
 		remaining = tokens[0]
 	}
-
+	
 	tokens = strings.Split(remaining, ".")
 	if len(tokens) > 1 {
 		name = tokens[0]
@@ -106,7 +107,7 @@ func parseName(s string) (string, string, string) {
 	} else {
 		name = tokens[0]
 	}
-
+	
 	return folder, name, language
 }
 
@@ -116,14 +117,14 @@ func readStdin() string {
 	if err != nil {
 		return ""
 	}
-
+	
 	if stat.Mode()&os.ModeCharDevice != 0 {
 		return ""
 	}
-
+	
 	reader := bufio.NewReader(os.Stdin)
 	var b strings.Builder
-
+	
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil && err == io.EOF {
@@ -134,7 +135,7 @@ func readStdin() string {
 			return ""
 		}
 	}
-
+	
 	return b.String()
 }
 
@@ -207,13 +208,13 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		}
 		return false
 	}
-
+	
 	homeEntries, err := os.ReadDir(config.Home)
 	if err != nil {
 		fmt.Printf("could not scan config home: %v\n", err)
 		return snippets
 	}
-
+	
 	for _, homeEntry := range homeEntries {
 		if !homeEntry.IsDir() {
 			continue
@@ -221,19 +222,19 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		if strings.HasPrefix(homeEntry.Name(), ".") {
 			continue
 		}
-
+		
 		folderPath := filepath.Join(config.Home, homeEntry.Name())
 		folderEntries, err := os.ReadDir(folderPath)
 		if err != nil {
 			fmt.Printf("could not scan %q: %v\n", folderPath, err)
 			continue
 		}
-
+		
 		for _, folderEntry := range folderEntries {
 			if folderEntry.IsDir() {
 				continue
 			}
-
+			
 			snippetPath := filepath.Join(homeEntry.Name(), folderEntry.Name())
 			if !snippetExists(snippetPath) {
 				name := folderEntry.Name()
@@ -250,7 +251,7 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 			}
 		}
 	}
-
+	
 	var idx int
 	for _, snippet := range snippets {
 		snippetPath := filepath.Join(config.Home, snippet.Path())
@@ -261,11 +262,11 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		}
 	}
 	snippets = snippets[:idx]
-
+	
 	if modified {
 		writeSnippets(config, snippets)
 	}
-
+	
 	return snippets
 }
 
@@ -275,7 +276,7 @@ func saveSnippet(content string, args []string, config Config, snippets []Snippe
 	if len(args) > 0 {
 		name = strings.Join(args, " ")
 	}
-
+	
 	folder, name, language := parseName(name)
 	file := fmt.Sprintf("%s.%s", name, language)
 	filePath := filepath.Join(config.Home, folder, file)
@@ -288,7 +289,7 @@ func saveSnippet(content string, args []string, config Config, snippets []Snippe
 		fmt.Println("unable to create snippet")
 		return
 	}
-
+	
 	// Add snippet metadata
 	snippet := Snippet{
 		Folder:   folder,
@@ -297,7 +298,7 @@ func saveSnippet(content string, args []string, config Config, snippets []Snippe
 		File:     file,
 		Language: language,
 	}
-
+	
 	snippets = append([]Snippet{snippet}, snippets...)
 	writeSnippets(config, snippets)
 }
@@ -334,14 +335,14 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		snippets = append(snippets, defaultSnippet)
 	}
 	state := readState()
-
+	
 	folders := make(map[Folder][]list.Item)
 	for _, snippet := range snippets {
 		folders[Folder(snippet.Folder)] = append(folders[Folder(snippet.Folder)], list.Item(snippet))
 	}
-
+	
 	defaultStyles := DefaultStyles(config)
-
+	
 	var folderItems []list.Item
 	foldersSlice := maps.Keys(folders)
 	slices.Sort(foldersSlice)
@@ -353,25 +354,25 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	}
 	folderList := list.New(folderItems, folderDelegate{defaultStyles.Folders.Blurred}, 0, 0)
 	folderList.Title = "Folders"
-
+	
 	folderList.SetShowHelp(false)
 	folderList.SetFilteringEnabled(false)
 	folderList.SetShowStatusBar(false)
 	folderList.DisableQuitKeybindings()
 	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
 	folderList.SetStatusBarItemName("folder", "folders")
-
+	
 	for idx, folder := range foldersSlice {
 		if string(folder) == state.CurrentFolder {
 			folderList.Select(idx)
 			break
 		}
 	}
-
+	
 	content := viewport.New(80, 0)
-
+	
 	lists := map[Folder]*list.Model{}
-
+	
 	currentFolder := folderList.SelectedItem().(Folder)
 	for folder, items := range folders {
 		snippetList := newList(items, 20, defaultStyles.Snippets.Focused)
@@ -385,7 +386,11 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		}
 		lists[folder] = snippetList
 	}
-
+	
+	mdRender, _ := glamour.NewTermRenderer(
+		glamour.WithAutoStyle(),
+	)
+	
 	m := &Model{
 		Lists:        lists,
 		Folders:      folderList,
@@ -402,6 +407,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 			newTextInput(config.DefaultLanguage),
 		},
 		tagsInput: newTextInput("Tags"),
+		mdRender:  mdRender,
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	model, err := p.Run()
@@ -436,11 +442,12 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
 	snippetList.FilterInput.Prompt = "Find: "
 	snippetList.FilterInput.PromptStyle = styles.Title
-	snippetList.SetStatusBarItemName("snippet", "snippets")
+	snippetList.SetStatusBarItemName("Section", "Sections")
+	//snippetList.SetShowStatusBar(false)
 	snippetList.DisableQuitKeybindings()
 	snippetList.Styles.Title = styles.Title
 	snippetList.Styles.TitleBar = styles.TitleBar
-
+	
 	return &snippetList
 }
 

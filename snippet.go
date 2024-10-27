@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-
+	
 	"github.com/alecthomas/chroma/v2/quick"
 )
 
@@ -64,11 +64,11 @@ func (s Snippet) Content(highlight bool) string {
 	if err != nil {
 		return ""
 	}
-
+	
 	if !highlight {
 		return string(content)
 	}
-
+	
 	var b bytes.Buffer
 	err = quick.Highlight(&b, string(content), s.Language, "terminal16m", config.Theme)
 	if err != nil {

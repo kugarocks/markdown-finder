@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
+	
 	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
@@ -17,12 +17,13 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 )
 
-const maxPane = 3
+const maxPane = 2
 
 type pane int
 
@@ -85,16 +86,19 @@ type Model struct {
 	ListStyle    SnippetsBaseStyle
 	FoldersStyle FoldersBaseStyle
 	ContentStyle ContentBaseStyle
+	
+	// markdown render
+	mdRender *glamour.TermRenderer
 }
 
 // Init initialzes the application model.
 func (m *Model) Init() tea.Cmd {
 	rand.Seed(time.Now().Unix())
-
+	
 	m.Folders.Styles.Title = m.FoldersStyle.Title
 	m.Folders.Styles.TitleBar = m.FoldersStyle.TitleBar
 	m.updateKeyMap()
-
+	
 	return func() tea.Msg {
 		return updateContentMsg(m.selectedSnippet())
 	}
@@ -151,26 +155,26 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateContentView(msg)
 	case changeStateMsg:
 		m.List().SetDelegate(snippetDelegate{m.ListStyle, msg.newState})
-
+		
 		var cmd tea.Cmd
-
+		
 		if m.state == msg.newState {
 			break
 		}
-
+		
 		wasEditing := m.state == editingState
 		wasPasting := m.state == pastingState
 		wasCreating := m.state == creatingState
 		m.state = msg.newState
 		m.updateKeyMap()
 		m.updateActivePane(msg)
-
+		
 		switch msg.newState {
 		case navigatingState:
 			if wasPasting || wasCreating {
 				return m, m.updateContent()
 			}
-
+			
 			if wasEditing {
 				m.blurInputs()
 				i := m.List().Index()
@@ -233,7 +237,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return changeStateMsg{navigatingState}
 			})
 		}
-
+		
 		m.updateKeyMap()
 		m.updateActivePane(msg)
 		return m, cmd
@@ -252,7 +256,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.List().FilterState() == list.Filtering {
 			break
 		}
-
+		
 		if m.state == deletingState {
 			switch {
 			case key.Matches(msg, m.keys.Confirm):
@@ -281,7 +285,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return m, tea.Batch(cmds...)
 		}
-
+		
 		switch {
 		case key.Matches(msg, m.keys.NextPane):
 			m.nextPane()
@@ -309,7 +313,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		case key.Matches(msg, m.keys.ToggleHelp):
 			m.help.ShowAll = !m.help.ShowAll
-
+			
 			var newHeight int
 			if m.help.ShowAll {
 				newHeight = m.height - 4
@@ -346,7 +350,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.pane = snippetPane
 		}
 	}
-
+	
 	m.updateKeyMap()
 	cmd := m.updateActivePane(msg)
 	return m, cmd
@@ -426,7 +430,7 @@ func (m *Model) updateFoldersView() tea.Msg {
 		}
 	}
 	var folderItems []list.Item
-
+	
 	foldersSlice := maps.Keys(m.Lists)
 	slices.Sort(foldersSlice)
 	for i, folder := range foldersSlice {
@@ -435,7 +439,7 @@ func (m *Model) updateFoldersView() tea.Msg {
 			selectedFolderIndex = i
 		}
 	}
-
+	
 	return updateFoldersMsg{
 		items:               folderItems,
 		selectedFolderIndex: selectedFolderIndex,
@@ -451,29 +455,31 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 		})
 		return m, nil
 	}
-
+	
 	var b bytes.Buffer
 	content, err := os.ReadFile(filepath.Join(m.config.Home, Snippet(msg).Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
 		return m, nil
 	}
-
+	
 	if string(content) == "" {
 		m.displayKeyHint(m.noContentHints())
 		return m, nil
 	}
-
+	
 	// b.WriteString(string(content))
+	c, _ := m.mdRender.Render(string(content))
 	err = quick.Highlight(&b, string(content), msg.Language, "terminal16m", m.config.Theme)
 	if err != nil {
 		m.displayError("Unable to highlight file.")
 		return m, nil
 	}
-
+	
 	s := b.String()
 	m.writeLineNumbers(lipgloss.Height(s))
-	m.Code.SetContent(s)
+	m.Code.SetContent(c)
+	//m.Code.SetContent(b)
 	return m, nil
 }
 
@@ -509,8 +515,12 @@ func (m *Model) displayError(error string) {
 // viewport.
 func (m *Model) writeLineNumbers(n int) {
 	var lineNumbers strings.Builder
-	for i := 1; i < n; i++ {
-		lineNumbers.WriteString(fmt.Sprintf("%3d \n", i))
+	for i := 0; i < n; i++ {
+		if i == 0 {
+			lineNumbers.WriteString("\n")
+		} else {
+			lineNumbers.WriteString(fmt.Sprintf("%3d \n", i))
+		}
 	}
 	m.LineNumbers.SetContent(lineNumbers.String() + "  ~ \n")
 }
@@ -548,7 +558,7 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 	m.Folders.SetDelegate(folderDelegate{m.FoldersStyle})
 	m.Folders.Styles.TitleBar = m.FoldersStyle.TitleBar
 	m.Folders.Styles.Title = m.FoldersStyle.Title
-
+	
 	return tea.Batch(cmds...)
 }
 
@@ -613,9 +623,9 @@ func (m *Model) createNewSnippetFile() tea.Cmd {
 		if folderItem != nil && folderItem.FilterValue() != "" {
 			folder = folderItem.FilterValue()
 		}
-
+		
 		file := fmt.Sprintf("snippet-%d.%s", rand.Intn(1000000), m.config.DefaultLanguage)
-
+		
 		newSnippet := Snippet{
 			Name:     defaultSnippetName,
 			Date:     time.Now(),
@@ -624,9 +634,9 @@ func (m *Model) createNewSnippetFile() tea.Cmd {
 			Tags:     []string{},
 			Folder:   folder,
 		}
-
+		
 		_, _ = os.Create(filepath.Join(m.config.Home, newSnippet.Path()))
-
+		
 		m.List().InsertItem(m.List().Index(), newSnippet)
 		return changeStateMsg{navigatingState}
 	}
@@ -637,18 +647,19 @@ func (m *Model) View() string {
 	if m.state == quittingState {
 		return ""
 	}
-
+	
 	var (
-		folder   = m.ContentStyle.Title.Render(m.selectedSnippet().Folder)
-		name     = m.ContentStyle.Title.Render(m.selectedSnippet().Name)
-		language = m.ContentStyle.Title.Render(m.selectedSnippet().Language)
-		titleBar = m.ListStyle.TitleBar.Render("Snippets")
+		//folder = m.ContentStyle.Title.Render(m.selectedSnippet().Folder)
+		name = m.ContentStyle.Title.Render(m.selectedSnippet().Name)
+		//language = m.ContentStyle.Title.Render(m.selectedSnippet().Language)
+		titleBar = m.ListStyle.TitleBar.Render("grep")
 	)
-
+	
 	if m.state == editingState {
-		folder = m.inputs[folderInput].View()
-		name = m.inputs[nameInput].View()
-		language = m.inputs[languageInput].View()
+		//folder = m.inputs[folderInput].View()
+		//name = m.inputs[nameInput].View()
+		name = m.ListStyle.TitleBar.Render(m.inputs[nameInput].Value())
+		//language = m.inputs[languageInput].View()
 	} else if m.state == copyingState {
 		titleBar = m.ListStyle.CopiedTitleBar.Render("Copied Snippet!")
 	} else if m.state == deletingState {
@@ -656,21 +667,21 @@ func (m *Model) View() string {
 	} else if m.List().SettingFilter() {
 		titleBar = m.ListStyle.TitleBar.Render(m.List().FilterInput.View())
 	}
-
+	
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			m.FoldersStyle.Base.Render(m.Folders.View()),
+			//m.FoldersStyle.Base.Render(m.Folders.View()),
 			m.ListStyle.Base.Render(titleBar+m.List().View()),
 			lipgloss.JoinVertical(lipgloss.Top,
-				lipgloss.JoinHorizontal(lipgloss.Left,
-					folder,
-					m.ContentStyle.Separator.Render("/"),
-					name,
-					m.ContentStyle.Separator.Render("."),
-					language,
-				),
+				//lipgloss.JoinHorizontal(lipgloss.Left,
+				//	folder,
+				//	m.ContentStyle.Separator.Render("/"),
+				//	m.ContentStyle.Separator.Render("."),
+				//	language,
+				//),
+				name,
 				lipgloss.JoinHorizontal(lipgloss.Left,
 					m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),
 					m.ContentStyle.Base.Render(strings.ReplaceAll(m.Code.View(), "\t", strings.Repeat(" ", tabSpaces))),

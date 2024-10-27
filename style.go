@@ -69,7 +69,7 @@ type Styles struct {
 	Content  ContentStyle
 }
 
-var marginStyle = lipgloss.NewStyle().Margin(1, 0, 0, 1)
+var marginStyle = lipgloss.NewStyle().Margin(2, 0, 0, 1)
 
 // DefaultStyles is the default implementation of the styles struct for all
 // styling in the application.
@@ -84,7 +84,7 @@ func DefaultStyles(config Config) Styles {
 	blue := lipgloss.Color(config.PrimaryColorSubdued)
 	red := lipgloss.Color(config.RedColor)
 	brightRed := lipgloss.Color(config.BrightRedColor)
-
+	
 	return Styles{
 		Snippets: SnippetsStyle{
 			Focused: SnippetsBaseStyle{
@@ -135,17 +135,17 @@ func DefaultStyles(config Config) Styles {
 		Content: ContentStyle{
 			Focused: ContentBaseStyle{
 				Base:         lipgloss.NewStyle().Margin(0, 1),
-				Title:        lipgloss.NewStyle().Background(blue).Foreground(white).Margin(0, 0, 1, 1).Padding(0, 1),
-				Separator:    lipgloss.NewStyle().Foreground(white).Margin(0, 0, 1, 1),
+				Title:        lipgloss.NewStyle().Background(blue).Width(35-2).Foreground(white).Margin(0, 0, 0, 1).Padding(0, 1),
+				Separator:    lipgloss.NewStyle().Foreground(white).Margin(0, 0, 0, 1),
 				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack),
 				EmptyHint:    lipgloss.NewStyle().Foreground(gray),
 				EmptyHintKey: lipgloss.NewStyle().Foreground(brightBlue),
 			},
 			Blurred: ContentBaseStyle{
 				Base:         lipgloss.NewStyle().Margin(0, 1),
-				Title:        lipgloss.NewStyle().Background(black).Foreground(gray).Margin(0, 0, 1, 1).Padding(0, 1),
-				Separator:    lipgloss.NewStyle().Foreground(gray).Margin(0, 0, 1, 1),
-				LineNumber:   lipgloss.NewStyle().Foreground(black),
+				Title:        lipgloss.NewStyle().Background(black).Width(35-2).Foreground(gray).Margin(0, 0, 0, 1).Padding(0, 1),
+				Separator:    lipgloss.NewStyle().Foreground(gray).Margin(0, 0, 0, 1),
+				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack),
 				EmptyHint:    lipgloss.NewStyle().Foreground(gray),
 				EmptyHintKey: lipgloss.NewStyle().Foreground(brightBlue),
 			},
