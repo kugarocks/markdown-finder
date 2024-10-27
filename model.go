@@ -106,7 +106,7 @@ func (m *Model) Init() tea.Cmd {
 
 // updateContentMsg tells the application to update the content view with the
 // given snippet.
-type updateContentMsg Section
+type updateContentMsg Snippet
 
 // updateContent instructs the application to fetch the latest contents of the
 // snippet file.
@@ -412,7 +412,7 @@ func (m *Model) updateFoldersView() tea.Msg {
 	selectedFolderIndex := m.Folders.Index()
 	for folder, li := range m.Lists {
 		for i, item := range li.Items() {
-			snippet, ok := item.(Section)
+			snippet, ok := item.(Snippet)
 			if !ok {
 				continue
 			}
@@ -457,7 +457,7 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	}
 	
 	var b bytes.Buffer
-	content, err := os.ReadFile(filepath.Join(m.config.Home, Section(msg).Path()))
+	content, err := os.ReadFile(filepath.Join(m.config.Home, Snippet(msg).Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
 		return m, nil
@@ -574,12 +574,12 @@ func (m *Model) updateKeyMap() {
 }
 
 // selectedSnippet returns the currently selected snippet.
-func (m *Model) selectedSnippet() Section {
+func (m *Model) selectedSnippet() Snippet {
 	item := m.List().SelectedItem()
 	if item == nil {
 		return defaultSnippet
 	}
-	return item.(Section)
+	return item.(Snippet)
 }
 
 // selected folder returns the currently selected folder.
@@ -623,7 +623,7 @@ func (m *Model) createNewSnippetFile() tea.Cmd {
 		
 		file := fmt.Sprintf("snippet-%d.%s", rand.Intn(1000000), m.config.DefaultLanguage)
 		
-		newSnippet := Section{
+		newSnippet := Snippet{
 			Name:     defaultSnippetName,
 			Date:     time.Now(),
 			File:     file,
@@ -652,9 +652,9 @@ func (m *Model) View() string {
 	if m.state == editingState {
 		name = m.ListStyle.TitleBar.Render(m.inputs[nameInput].Value())
 	} else if m.state == copyingState {
-		titleBar = m.ListStyle.CopiedTitleBar.Render("Copied Section!")
+		titleBar = m.ListStyle.CopiedTitleBar.Render("Copied Snippet!")
 	} else if m.state == deletingState {
-		titleBar = m.ListStyle.DeletedTitleBar.Render("Delete Section? (y/N)")
+		titleBar = m.ListStyle.DeletedTitleBar.Render("Delete Snippet? (y/N)")
 	} else if m.List().SettingFilter() {
 		titleBar = m.ListStyle.TitleBar.Render(m.List().FilterInput.View())
 	}

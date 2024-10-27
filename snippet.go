@@ -14,13 +14,13 @@ import (
 const (
 	defaultSnippetFolder   = "misc"
 	defaultLanguage        = "md"
-	defaultSnippetName     = "Untitled Section"
+	defaultSnippetName     = "Untitled Snippet"
 	defaultSnippetFileName = defaultSnippetName + "." + defaultLanguage
 )
 
 // defaultSnippet is a snippet with all of the default values, used for when
 // there are no snippets available.
-var defaultSnippet = Section{
+var defaultSnippet = Snippet{
 	Name:     defaultSnippetName,
 	Folder:   defaultSnippetFolder,
 	Language: defaultLanguage,
@@ -28,9 +28,9 @@ var defaultSnippet = Section{
 	Date:     time.Now(),
 }
 
-// Section represents a snippet of code in a language.
+// Snippet represents a snippet of code in a language.
 // It is nested within a folder and can be tagged with metadata.
-type Section struct {
+type Snippet struct {
 	Folder   string    `json:"folder"`
 	Date     time.Time `json:"date"`
 	Name     string    `json:"title"`
@@ -39,22 +39,22 @@ type Section struct {
 }
 
 // String returns the folder/name.ext of the snippet.
-func (s Section) String() string {
+func (s Snippet) String() string {
 	return fmt.Sprintf("%s/%s.%s", s.Folder, s.Name, s.Language)
 }
 
 // LegacyPath returns the legacy path <folder>-<file>
-func (s Section) LegacyPath() string {
+func (s Snippet) LegacyPath() string {
 	return s.File
 }
 
 // Path returns the path <folder>/<file>
-func (s Section) Path() string {
+func (s Snippet) Path() string {
 	return filepath.Join(s.Folder, s.File)
 }
 
 // Content returns the snippet contents.
-func (s Section) Content(highlight bool) string {
+func (s Snippet) Content(highlight bool) string {
 	config := readConfig()
 	file := filepath.Join(config.Home, s.Path())
 	content, err := os.ReadFile(file)
@@ -77,7 +77,7 @@ func (s Section) Content(highlight bool) string {
 // Snippets is a wrapper for a snippets array to implement the fuzzy.Source
 // interface.
 type Snippets struct {
-	snippets []Section
+	snippets []Snippet
 }
 
 // String returns the string of the snippet at the specified position i

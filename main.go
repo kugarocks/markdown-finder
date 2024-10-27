@@ -140,8 +140,8 @@ func readStdin() string {
 }
 
 // readSnippets returns all the snippets read from the snippets.json file.
-func readSnippets(config Config) []Section {
-	var snippets []Section
+func readSnippets(config Config) []Snippet {
+	var snippets []Snippet
 	file := filepath.Join(config.Home, config.File)
 	dir, err := os.ReadFile(file)
 	if err != nil {
@@ -167,7 +167,7 @@ func readSnippets(config Config) []Section {
 }
 
 // migrateSnippets migrates any legacy snippet <dir>-<file> format to the new <dir>/<file> format
-func migrateSnippets(config Config, snippets []Section) []Section {
+func migrateSnippets(config Config, snippets []Snippet) []Snippet {
 	var migrated bool
 	for idx, snippet := range snippets {
 		legacyPath := filepath.Join(config.Home, snippet.LegacyPath())
@@ -198,7 +198,7 @@ func migrateSnippets(config Config, snippets []Section) []Section {
 }
 
 // scanSnippets scans for any new/removed snippets and adds them to snippets.json
-func scanSnippets(config Config, snippets []Section) []Section {
+func scanSnippets(config Config, snippets []Snippet) []Snippet {
 	var modified bool
 	snippetExists := func(path string) bool {
 		for _, snippet := range snippets {
@@ -239,7 +239,7 @@ func scanSnippets(config Config, snippets []Section) []Section {
 			if !snippetExists(snippetPath) {
 				name := folderEntry.Name()
 				ext := filepath.Ext(name)
-				snippets = append(snippets, Section{
+				snippets = append(snippets, Snippet{
 					Folder:   homeEntry.Name(),
 					Date:     time.Now(),
 					Name:     strings.TrimSuffix(name, ext),
@@ -269,7 +269,7 @@ func scanSnippets(config Config, snippets []Section) []Section {
 	return snippets
 }
 
-func saveSnippet(content string, args []string, config Config, snippets []Section) {
+func saveSnippet(content string, args []string, config Config, snippets []Snippet) {
 	// Save snippet to location
 	name := defaultSnippetName
 	if len(args) > 0 {
@@ -290,7 +290,7 @@ func saveSnippet(content string, args []string, config Config, snippets []Sectio
 	}
 	
 	// Add snippet metadata
-	snippet := Section{
+	snippet := Snippet{
 		Folder:   folder,
 		Date:     time.Now(),
 		Name:     name,
@@ -298,11 +298,11 @@ func saveSnippet(content string, args []string, config Config, snippets []Sectio
 		Language: language,
 	}
 	
-	snippets = append([]Section{snippet}, snippets...)
+	snippets = append([]Snippet{snippet}, snippets...)
 	writeSnippets(config, snippets)
 }
 
-func writeSnippets(config Config, snippets []Section) {
+func writeSnippets(config Config, snippets []Snippet) {
 	b, err := json.Marshal(snippets)
 	if err != nil {
 		fmt.Println("Could not marshal latest snippet data.", err)
@@ -314,21 +314,21 @@ func writeSnippets(config Config, snippets []Section) {
 	}
 }
 
-func listSnippets(snippets []Section) {
+func listSnippets(snippets []Snippet) {
 	for _, snippet := range snippets {
 		fmt.Println(snippet)
 	}
 }
 
-func findSnippet(search string, snippets []Section) Section {
+func findSnippet(search string, snippets []Snippet) Snippet {
 	matches := fuzzy.FindFrom(search, Snippets{snippets})
 	if len(matches) > 0 {
 		return snippets[matches[0].Index]
 	}
-	return Section{}
+	return Snippet{}
 }
 
-func runInteractiveMode(config Config, snippets []Section) error {
+func runInteractiveMode(config Config, snippets []Snippet) error {
 	if len(snippets) == 0 {
 		// welcome to nap!
 		snippets = append(snippets, defaultSnippet)
@@ -377,7 +377,7 @@ func runInteractiveMode(config Config, snippets []Section) error {
 		snippetList := newList(items, 20, defaultStyles.Snippets.Focused)
 		if folder == currentFolder {
 			for idx, item := range snippetList.Items() {
-				if s, ok := item.(Section); ok && s.File == state.CurrentSnippet {
+				if s, ok := item.(Snippet); ok && s.File == state.CurrentSnippet {
 					snippetList.Select(idx)
 					break
 				}
@@ -441,7 +441,7 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 3).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
 	snippetList.FilterInput.Prompt = "Find: "
 	snippetList.FilterInput.PromptStyle = styles.Title
-	snippetList.SetStatusBarItemName("Section", "Sections")
+	snippetList.SetStatusBarItemName("Snippet", "Sections")
 	//snippetList.SetShowStatusBar(false)
 	snippetList.DisableQuitKeybindings()
 	snippetList.Styles.Title = styles.Title

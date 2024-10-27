@@ -12,7 +12,7 @@ import (
 )
 
 // FilterValue is the snippet filter value that can be used when searching.
-func (s Section) FilterValue() string {
+func (s Snippet) FilterValue() string {
 	return s.Folder + "/" + s.Name + "\n"
 	//return s.Folder + "/" + s.Name + "\n" + "+" + strings.Join(s.Tags, "+") + "\n" + s.Language
 }
@@ -40,7 +40,7 @@ func (d snippetDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 		if m.SelectedItem() == nil {
 			return nil
 		}
-		return updateContentMsg(m.SelectedItem().(Section))
+		return updateContentMsg(m.SelectedItem().(Snippet))
 	}
 }
 
@@ -50,7 +50,7 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	if item == nil {
 		return
 	}
-	s, ok := item.(Section)
+	s, ok := item.(Snippet)
 	if !ok {
 		return
 	}
