@@ -1,6 +1,9 @@
 package main
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/lipgloss"
+)
 
 // SnippetsStyle is the style struct to handle the focusing and blurring of the
 // snippets pane in the application.
@@ -69,14 +72,14 @@ type Styles struct {
 	Content  ContentStyle
 }
 
-var marginStyle = lipgloss.NewStyle().Margin(2, 0, 0, 1)
+var marginStyle = lipgloss.NewStyle().Margin(0, 0, 0, 1)
 
 // DefaultStyles is the default implementation of the styles struct for all
 // styling in the application.
 func DefaultStyles(config Config) Styles {
 	white := lipgloss.Color(config.WhiteColor)
 	gray := lipgloss.Color(config.GrayColor)
-	black := lipgloss.Color(config.BackgroundColor)
+	//black := lipgloss.Color(config.BackgroundColor)
 	brightBlack := lipgloss.Color(config.BlackColor)
 	green := lipgloss.Color(config.GreenColor)
 	brightGreen := lipgloss.Color(config.BrightGreenColor)
@@ -85,15 +88,20 @@ func DefaultStyles(config Config) Styles {
 	red := lipgloss.Color(config.RedColor)
 	brightRed := lipgloss.Color(config.BrightRedColor)
 	
+	defaultItemStyle := list.NewDefaultItemStyles()
+	
+	contentBarWidth := 86
+	
 	return Styles{
 		Snippets: SnippetsStyle{
 			Focused: SnippetsBaseStyle{
-				Base:               lipgloss.NewStyle().Width(35),
-				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(white),
-				SelectedSubtitle:   lipgloss.NewStyle().Foreground(blue),
-				UnselectedSubtitle: lipgloss.NewStyle().Foreground(lipgloss.Color("237")),
-				SelectedTitle:      lipgloss.NewStyle().Foreground(brightBlue),
-				UnselectedTitle:    lipgloss.NewStyle().Foreground(gray),
+				Base: lipgloss.NewStyle().Width(36),
+				//TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(white),
+				TitleBar:           lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(lipgloss.Color("230")),
+				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
+				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
+				SelectedTitle:      defaultItemStyle.SelectedTitle,
+				UnselectedTitle:    defaultItemStyle.DimmedTitle,
 				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(white),
 				CopiedTitle:        lipgloss.NewStyle().Foreground(brightGreen),
 				CopiedSubtitle:     lipgloss.NewStyle().Foreground(green),
@@ -102,12 +110,13 @@ func DefaultStyles(config Config) Styles {
 				DeletedSubtitle:    lipgloss.NewStyle().Foreground(red),
 			},
 			Blurred: SnippetsBaseStyle{
-				Base:               lipgloss.NewStyle().Width(35),
-				TitleBar:           lipgloss.NewStyle().Background(black).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(gray),
-				SelectedSubtitle:   lipgloss.NewStyle().Foreground(blue),
-				UnselectedSubtitle: lipgloss.NewStyle().Foreground(black),
-				SelectedTitle:      lipgloss.NewStyle().Foreground(brightBlue),
-				UnselectedTitle:    lipgloss.NewStyle().Foreground(lipgloss.Color("237")),
+				Base: lipgloss.NewStyle().Width(36),
+				//TitleBar:           lipgloss.NewStyle().Background(black).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(gray),
+				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
+				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
+				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
+				SelectedTitle:      defaultItemStyle.SelectedTitle,
+				UnselectedTitle:    defaultItemStyle.DimmedTitle,
 				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1),
 				CopiedTitle:        lipgloss.NewStyle().Foreground(brightGreen),
 				CopiedSubtitle:     lipgloss.NewStyle().Foreground(green),
@@ -116,36 +125,22 @@ func DefaultStyles(config Config) Styles {
 				DeletedSubtitle:    lipgloss.NewStyle().Foreground(red),
 			},
 		},
-		Folders: FoldersStyle{
-			Focused: FoldersBaseStyle{
-				Base:       lipgloss.NewStyle().Width(22),
-				Title:      lipgloss.NewStyle().Padding(0, 1).Foreground(white),
-				TitleBar:   lipgloss.NewStyle().Background(blue).Width(22-2).Margin(0, 1, 1, 1),
-				Selected:   lipgloss.NewStyle().Foreground(brightBlue),
-				Unselected: lipgloss.NewStyle().Foreground(gray),
-			},
-			Blurred: FoldersBaseStyle{
-				Base:       lipgloss.NewStyle().Width(22),
-				Title:      lipgloss.NewStyle().Padding(0, 1).Foreground(gray),
-				TitleBar:   lipgloss.NewStyle().Background(black).Width(22-2).Margin(0, 1, 1, 1),
-				Selected:   lipgloss.NewStyle().Foreground(brightBlue),
-				Unselected: lipgloss.NewStyle().Foreground(lipgloss.Color("237")),
-			},
-		},
 		Content: ContentStyle{
 			Focused: ContentBaseStyle{
-				Base:         lipgloss.NewStyle().Margin(0, 1),
-				Title:        lipgloss.NewStyle().Background(blue).Width(35-2).Foreground(white).Margin(0, 0, 0, 1).Padding(0, 1),
-				Separator:    lipgloss.NewStyle().Foreground(white).Margin(0, 0, 0, 1),
-				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack),
+				Base:  lipgloss.NewStyle().Margin(1, 1),
+				Title: lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(contentBarWidth).Margin(0, 0, 0, 1).Padding(0, 1).Foreground(lipgloss.Color("230")),
+				//Title:        lipgloss.NewStyle().Background(blue).Width(35-2).Foreground(white).Margin(0, 0, 0, 1).Padding(0, 1),
+				//Separator:    lipgloss.NewStyle().Foreground(white).Margin(0, 0, 0, 1),
+				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack).MarginTop(1),
 				EmptyHint:    lipgloss.NewStyle().Foreground(gray),
 				EmptyHintKey: lipgloss.NewStyle().Foreground(brightBlue),
 			},
 			Blurred: ContentBaseStyle{
-				Base:         lipgloss.NewStyle().Margin(0, 1),
-				Title:        lipgloss.NewStyle().Background(black).Width(35-2).Foreground(gray).Margin(0, 0, 0, 1).Padding(0, 1),
-				Separator:    lipgloss.NewStyle().Foreground(gray).Margin(0, 0, 0, 1),
-				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack),
+				Base:  lipgloss.NewStyle().Margin(1, 1),
+				Title: lipgloss.NewStyle().Background(blue).Width(contentBarWidth).Margin(0, 0, 0, 1).Padding(0, 1).Foreground(white),
+				//Title:        lipgloss.NewStyle().Background(black).Width(35-2).Foreground(gray).Margin(0, 0, 0, 1).Padding(0, 1),
+				//Separator:    lipgloss.NewStyle().Foreground(gray).Margin(0, 0, 0, 1),
+				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack).MarginTop(1),
 				EmptyHint:    lipgloss.NewStyle().Foreground(gray),
 				EmptyHintKey: lipgloss.NewStyle().Foreground(brightBlue),
 			},

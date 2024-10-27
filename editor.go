@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-const defaultEditor = "nano"
+const defaultEditor = "vim"
 
 // Cmd returns a *exec.Cmd editing the given path with $EDITOR or nano if no
 // $EDITOR is set.

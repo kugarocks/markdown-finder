@@ -476,10 +476,11 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	
-	s := b.String()
-	m.writeLineNumbers(lipgloss.Height(s))
+	//s := b.String()
+	c = strings.TrimPrefix(c, "\n")
+	m.writeLineNumbers(lipgloss.Height(c))
 	m.Code.SetContent(c)
-	//m.Code.SetContent(b)
+	//m.Code.SetContent(b.String())
 	return m, nil
 }
 
@@ -515,14 +516,10 @@ func (m *Model) displayError(error string) {
 // viewport.
 func (m *Model) writeLineNumbers(n int) {
 	var lineNumbers strings.Builder
-	for i := 0; i < n; i++ {
-		if i == 0 {
-			lineNumbers.WriteString("\n")
-		} else {
-			lineNumbers.WriteString(fmt.Sprintf("%3d \n", i))
-		}
+	for i := 1; i < n; i++ {
+		lineNumbers.WriteString(fmt.Sprintf("%3d\n", i))
 	}
-	m.LineNumbers.SetContent(lineNumbers.String() + "  ~ \n")
+	m.LineNumbers.SetContent(lineNumbers.String() + "  ~\n")
 }
 
 const tabSpaces = 4
@@ -649,17 +646,12 @@ func (m *Model) View() string {
 	}
 	
 	var (
-		//folder = m.ContentStyle.Title.Render(m.selectedSnippet().Folder)
-		name = m.ContentStyle.Title.Render(m.selectedSnippet().Name)
-		//language = m.ContentStyle.Title.Render(m.selectedSnippet().Language)
+		name     = m.ContentStyle.Title.Render(m.selectedSnippet().Name)
 		titleBar = m.ListStyle.TitleBar.Render("grep")
 	)
 	
 	if m.state == editingState {
-		//folder = m.inputs[folderInput].View()
-		//name = m.inputs[nameInput].View()
 		name = m.ListStyle.TitleBar.Render(m.inputs[nameInput].Value())
-		//language = m.inputs[languageInput].View()
 	} else if m.state == copyingState {
 		titleBar = m.ListStyle.CopiedTitleBar.Render("Copied Snippet!")
 	} else if m.state == deletingState {
@@ -672,15 +664,8 @@ func (m *Model) View() string {
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			//m.FoldersStyle.Base.Render(m.Folders.View()),
 			m.ListStyle.Base.Render(titleBar+m.List().View()),
 			lipgloss.JoinVertical(lipgloss.Top,
-				//lipgloss.JoinHorizontal(lipgloss.Left,
-				//	folder,
-				//	m.ContentStyle.Separator.Render("/"),
-				//	m.ContentStyle.Separator.Render("."),
-				//	language,
-				//),
 				name,
 				lipgloss.JoinHorizontal(lipgloss.Left,
 					m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),

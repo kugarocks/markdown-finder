@@ -438,8 +438,8 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.SetShowHelp(false)
 	snippetList.SetShowFilter(false)
 	snippetList.SetShowTitle(false)
-	snippetList.Styles.StatusBar = lipgloss.NewStyle().Margin(1, 2).Foreground(lipgloss.Color("240")).MaxWidth(35 - 2)
-	snippetList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
+	snippetList.Styles.StatusBar = lipgloss.NewStyle().Margin(1, 3).Foreground(lipgloss.Color("240")).MaxWidth(35 - 2)
+	snippetList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 3).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
 	snippetList.FilterInput.Prompt = "Find: "
 	snippetList.FilterInput.PromptStyle = styles.Title
 	snippetList.SetStatusBarItemName("Section", "Sections")
