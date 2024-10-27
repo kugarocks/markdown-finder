@@ -33,7 +33,6 @@ var defaultSnippet = Section{
 type Section struct {
 	Folder   string    `json:"folder"`
 	Date     time.Time `json:"date"`
-	Favorite bool      `json:"favorite"`
 	Name     string    `json:"title"`
 	File     string    `json:"file"`
 	Language string    `json:"language"`
