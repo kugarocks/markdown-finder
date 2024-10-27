@@ -89,13 +89,13 @@ func DefaultStyles(config Config) Styles {
 	brightRed := lipgloss.Color(config.BrightRedColor)
 	
 	defaultItemStyle := list.NewDefaultItemStyles()
-	
+	sectionBarWidth := 36
 	contentBarWidth := 86
 	
 	return Styles{
 		Snippets: SnippetsStyle{
 			Focused: SnippetsBaseStyle{
-				Base: lipgloss.NewStyle().Width(36).MarginTop(config.MarginTop),
+				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
 				//TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(white),
 				TitleBar:           lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(lipgloss.Color("230")),
 				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
@@ -110,7 +110,7 @@ func DefaultStyles(config Config) Styles {
 				DeletedSubtitle:    lipgloss.NewStyle().Foreground(red),
 			},
 			Blurred: SnippetsBaseStyle{
-				Base: lipgloss.NewStyle().Width(36).MarginTop(config.MarginTop),
+				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
 				//TitleBar:           lipgloss.NewStyle().Background(black).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(gray),
 				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
 				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
