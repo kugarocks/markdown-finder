@@ -14,13 +14,13 @@ import (
 const (
 	defaultSnippetFolder   = "misc"
 	defaultLanguage        = "go"
-	defaultSnippetName     = "Untitled Snippet"
+	defaultSnippetName     = "Untitled Section"
 	defaultSnippetFileName = defaultSnippetName + "." + defaultLanguage
 )
 
 // defaultSnippet is a snippet with all of the default values, used for when
 // there are no snippets available.
-var defaultSnippet = Snippet{
+var defaultSnippet = Section{
 	Name:     defaultSnippetName,
 	Folder:   defaultSnippetFolder,
 	Language: defaultLanguage,
@@ -29,9 +29,9 @@ var defaultSnippet = Snippet{
 	Tags:     make([]string, 0),
 }
 
-// Snippet represents a snippet of code in a language.
+// Section represents a snippet of code in a language.
 // It is nested within a folder and can be tagged with metadata.
-type Snippet struct {
+type Section struct {
 	Tags     []string  `json:"tags"`
 	Folder   string    `json:"folder"`
 	Date     time.Time `json:"date"`
@@ -42,22 +42,22 @@ type Snippet struct {
 }
 
 // String returns the folder/name.ext of the snippet.
-func (s Snippet) String() string {
+func (s Section) String() string {
 	return fmt.Sprintf("%s/%s.%s", s.Folder, s.Name, s.Language)
 }
 
 // LegacyPath returns the legacy path <folder>-<file>
-func (s Snippet) LegacyPath() string {
+func (s Section) LegacyPath() string {
 	return s.File
 }
 
 // Path returns the path <folder>/<file>
-func (s Snippet) Path() string {
+func (s Section) Path() string {
 	return filepath.Join(s.Folder, s.File)
 }
 
 // Content returns the snippet contents.
-func (s Snippet) Content(highlight bool) string {
+func (s Section) Content(highlight bool) string {
 	config := readConfig()
 	file := filepath.Join(config.Home, s.Path())
 	content, err := os.ReadFile(file)
@@ -80,7 +80,7 @@ func (s Snippet) Content(highlight bool) string {
 // Snippets is a wrapper for a snippets array to implement the fuzzy.Source
 // interface.
 type Snippets struct {
-	snippets []Snippet
+	snippets []Section
 }
 
 // String returns the string of the snippet at the specified position i
