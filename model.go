@@ -628,7 +628,6 @@ func (m *Model) createNewSnippetFile() tea.Cmd {
 			Date:     time.Now(),
 			File:     file,
 			Language: m.config.DefaultLanguage,
-			Tags:     []string{},
 			Folder:   folder,
 		}
 		

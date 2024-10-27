@@ -245,7 +245,6 @@ func scanSnippets(config Config, snippets []Section) []Section {
 					Name:     strings.TrimSuffix(name, ext),
 					File:     name,
 					Language: strings.TrimPrefix(ext, "."),
-					Tags:     make([]string, 0),
 				})
 				modified = true
 			}

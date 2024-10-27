@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"strings"
 	"time"
 	
 	"github.com/aquilax/truncate"
@@ -14,7 +13,7 @@ import (
 
 // FilterValue is the snippet filter value that can be used when searching.
 func (s Section) FilterValue() string {
-	return s.Folder + "/" + s.Name + "\n" + "+" + strings.Join(s.Tags, "+") + "\n" + s.Language
+	return s.Folder + "/" + s.Name + "\n"
 	//return s.Folder + "/" + s.Name + "\n" + "+" + strings.Join(s.Tags, "+") + "\n" + s.Language
 }
 
