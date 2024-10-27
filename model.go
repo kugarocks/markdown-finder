@@ -66,7 +66,9 @@ type Model struct {
 	height int
 	// the working directory.
 	Workdir string
-	// the Snippets of snippets to display to the user.
+	// the list of Sections to display to the user.
+	Sections *list.Model
+	// the map of Snippets to display to the user.
 	SnippetsMap map[Folder]*list.Model
 	// the list of Folders to display to the user.
 	Folders list.Model

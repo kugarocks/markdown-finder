@@ -5,6 +5,13 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+// FoldersStyle is the style struct to handle the focusing and blurring of the
+// folders pane in the application.
+type FoldersStyle struct {
+	Focused FoldersBaseStyle
+	Blurred FoldersBaseStyle
+}
+
 // SnippetsStyle is the style struct to handle the focusing and blurring of the
 // snippets pane in the application.
 type SnippetsStyle struct {
@@ -12,11 +19,11 @@ type SnippetsStyle struct {
 	Blurred SnippetsBaseStyle
 }
 
-// FoldersStyle is the style struct to handle the focusing and blurring of the
-// folders pane in the application.
-type FoldersStyle struct {
-	Focused FoldersBaseStyle
-	Blurred FoldersBaseStyle
+// SectionsStyle is the style struct to handle the focusing and blurring of the
+// sections pane in the application.
+type SectionsStyle struct {
+	Focused SectionsBaseStyle
+	Blurred SectionsBaseStyle
 }
 
 // ContentStyle is the style struct to handle the focusing and blurring of the
@@ -26,7 +33,17 @@ type ContentStyle struct {
 	Blurred ContentBaseStyle
 }
 
-// SnippetsBaseStyle holds the neccessary styling for the snippets pane of
+// FoldersBaseStyle holds the necessary styling for the folders pane of
+// the application.
+type FoldersBaseStyle struct {
+	Base       lipgloss.Style
+	Title      lipgloss.Style
+	TitleBar   lipgloss.Style
+	Selected   lipgloss.Style
+	Unselected lipgloss.Style
+}
+
+// SnippetsBaseStyle holds the necessary styling for the snippets pane of
 // the application.
 type SnippetsBaseStyle struct {
 	Base               lipgloss.Style
@@ -44,17 +61,22 @@ type SnippetsBaseStyle struct {
 	DeletedSubtitle    lipgloss.Style
 }
 
-// FoldersBaseStyle holds the neccessary styling for the folders pane of
+// SectionsBaseStyle holds the necessary styling for the sections pane of
 // the application.
-type FoldersBaseStyle struct {
-	Base       lipgloss.Style
-	Title      lipgloss.Style
-	TitleBar   lipgloss.Style
-	Selected   lipgloss.Style
-	Unselected lipgloss.Style
+type SectionsBaseStyle struct {
+	Base               lipgloss.Style
+	Title              lipgloss.Style
+	TitleBar           lipgloss.Style
+	SelectedSubtitle   lipgloss.Style
+	UnselectedSubtitle lipgloss.Style
+	SelectedTitle      lipgloss.Style
+	UnselectedTitle    lipgloss.Style
+	CopiedTitleBar     lipgloss.Style
+	CopiedTitle        lipgloss.Style
+	CopiedSubtitle     lipgloss.Style
 }
 
-// ContentBaseStyle holds the neccessary styling for the content pane of the
+// ContentBaseStyle holds the necessary styling for the content pane of the
 // application.
 type ContentBaseStyle struct {
 	Code         lipgloss.Style
@@ -67,8 +89,9 @@ type ContentBaseStyle struct {
 
 // Styles is the struct of all styles for the application.
 type Styles struct {
-	Snippets SnippetsStyle
 	Folders  FoldersStyle
+	Snippets SnippetsStyle
+	Sections SectionsStyle
 	Content  ContentStyle
 }
 
@@ -123,6 +146,32 @@ func DefaultStyles(config Config) Styles {
 				DeletedTitleBar:    lipgloss.NewStyle().Background(red).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1),
 				DeletedTitle:       lipgloss.NewStyle().Foreground(brightRed),
 				DeletedSubtitle:    lipgloss.NewStyle().Foreground(red),
+			},
+		},
+		Sections: SectionsStyle{
+			Focused: SectionsBaseStyle{
+				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
+				//TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(white),
+				TitleBar:           lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(lipgloss.Color("230")),
+				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
+				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
+				SelectedTitle:      defaultItemStyle.SelectedTitle,
+				UnselectedTitle:    defaultItemStyle.DimmedTitle,
+				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
+				CopiedTitle:        list.NewDefaultItemStyles().SelectedTitle.Foreground(brightGreen).BorderLeftForeground(brightGreen),
+				CopiedSubtitle:     list.NewDefaultItemStyles().SelectedDesc.Foreground(brightGreen).BorderLeftForeground(brightGreen),
+			},
+			Blurred: SectionsBaseStyle{
+				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
+				//TitleBar:           lipgloss.NewStyle().Background(black).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(gray),
+				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
+				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
+				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
+				SelectedTitle:      defaultItemStyle.SelectedTitle,
+				UnselectedTitle:    defaultItemStyle.DimmedTitle,
+				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1),
+				CopiedTitle:        list.NewDefaultItemStyles().DimmedTitle,
+				CopiedSubtitle:     list.NewDefaultItemStyles().DimmedDesc,
 			},
 		},
 		Content: ContentStyle{
