@@ -141,8 +141,8 @@ func changeState(newState state) tea.Cmd {
 }
 
 // Update updates the model based on user interaction.
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := teaMsg.(type) {
 	case updateFoldersMsg:
 		setItemsCmd := m.Folders.SetItems(msg.items)
 		m.Folders.Select(msg.selectedFolderIndex)
@@ -350,7 +350,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 	
 	m.updateKeyMap()
-	cmd := m.updateActivePane(msg)
+	cmd := m.updateActivePane(teaMsg)
 	return m, cmd
 }
 
