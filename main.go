@@ -370,7 +370,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	
 	content := viewport.New(80, 0)
 	
-	lists := map[Folder]*list.Model{}
+	snippetsMap := map[Folder]*list.Model{}
 	
 	currentFolder := folderList.SelectedItem().(Folder)
 	for folder, items := range folders {
@@ -383,7 +383,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 				}
 			}
 		}
-		lists[folder] = snippetList
+		snippetsMap[folder] = snippetList
 	}
 	
 	mdRender, _ := glamour.NewTermRenderer(
@@ -391,7 +391,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	)
 	
 	m := &Model{
-		Lists:        lists,
+		SnippetsMap:  snippetsMap,
 		Folders:      folderList,
 		Code:         content,
 		ContentStyle: defaultStyles.Content.Blurred,
@@ -417,7 +417,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		return err
 	}
 	var allSnippets []list.Item
-	for _, list := range fm.Lists {
+	for _, list := range fm.SnippetsMap {
 		allSnippets = append(allSnippets, list.Items()...)
 	}
 	b, err := json.Marshal(allSnippets)

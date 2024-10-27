@@ -66,8 +66,8 @@ type Model struct {
 	height int
 	// the working directory.
 	Workdir string
-	// the List of snippets to display to the user.
-	Lists map[Folder]*list.Model
+	// the Snippets of snippets to display to the user.
+	SnippetsMap map[Folder]*list.Model
 	// the list of Folders to display to the user.
 	Folders list.Model
 	// the viewport of the Code snippet.
@@ -150,7 +150,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateContentMsg:
 		return m.updateContentView(msg)
 	case changeStateMsg:
-		m.List().SetDelegate(snippetDelegate{m.ListStyle, msg.newState})
+		m.Snippets().SetDelegate(snippetDelegate{m.ListStyle, msg.newState})
 		
 		var cmd tea.Cmd
 		
@@ -173,7 +173,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			
 			if wasEditing {
 				m.blurInputs()
-				i := m.List().Index()
+				i := m.Snippets().Index()
 				snippet := m.selectedSnippet()
 				if m.inputs[nameInput].Value() != "" {
 					snippet.Name = m.inputs[nameInput].Value()
@@ -195,7 +195,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				newPath := filepath.Join(m.config.Home, snippet.Path())
 				_ = os.MkdirAll(filepath.Dir(newPath), os.ModePerm)
 				_ = os.Rename(m.selectedSnippetFilePath(), newPath)
-				setCmd := m.List().SetItem(i, snippet)
+				setCmd := m.Snippets().SetItem(i, snippet)
 				m.pane = snippetPane
 				cmd = tea.Batch(setCmd, m.updateFolders(), m.updateContent())
 			}
@@ -239,17 +239,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, cmd
 	case tea.WindowSizeMsg:
 		m.height = msg.Height - 4 - m.config.MarginTop
-		for _, li := range m.Lists {
+		for _, li := range m.SnippetsMap {
 			li.SetHeight(m.height)
 		}
 		//m.Folders.SetHeight(m.height)
 		m.Code.Height = m.height
 		m.LineNumbers.Height = m.height
-		m.Code.Width = msg.Width - m.List().Width() - m.Folders.Width() - 20
+		m.Code.Width = msg.Width - m.Snippets().Width() - m.Folders.Width() - 20
 		m.LineNumbers.Width = 5
 		return m, nil
 	case tea.KeyMsg:
-		if m.List().FilterState() == list.Filtering {
+		if m.Snippets().FilterState() == list.Filtering {
 			break
 		}
 		
@@ -257,7 +257,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch {
 			case key.Matches(msg, m.keys.Confirm):
 				_ = os.Remove(m.selectedSnippetFilePath())
-				m.List().RemoveItem(m.List().Index())
+				m.Snippets().RemoveItem(m.Snippets().Index())
 				m.state = navigatingState
 				m.updateKeyMap()
 				return m, tea.Batch(changeState(navigatingState), func() tea.Msg {
@@ -316,7 +316,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else {
 				newHeight = m.height
 			}
-			m.List().SetHeight(newHeight)
+			m.Snippets().SetHeight(newHeight)
 			m.Folders.SetHeight(newHeight)
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
@@ -338,7 +338,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.DeleteSnippet):
 			m.pane = snippetPane
 			m.updateActivePane(msg)
-			m.List().Title = "Delete? (y/N)"
+			m.Snippets().Title = "Delete? (y/N)"
 			return m, changeState(deletingState)
 		case key.Matches(msg, m.keys.EditSnippet):
 			return m, m.editSnippet()
@@ -406,28 +406,28 @@ func (m *Model) noContentHints() []keyHint {
 func (m *Model) updateFoldersView() tea.Msg {
 	var selectedFolder Folder
 	selectedFolderIndex := m.Folders.Index()
-	for folder, li := range m.Lists {
+	for folder, li := range m.SnippetsMap {
 		for i, item := range li.Items() {
 			snippet, ok := item.(Snippet)
 			if !ok {
 				continue
 			}
 			f := Folder(snippet.Folder)
-			_, ok = m.Lists[f]
+			_, ok = m.SnippetsMap[f]
 			if !ok {
-				m.Lists[f] = newList([]list.Item{}, m.height, m.ListStyle)
+				m.SnippetsMap[f] = newList([]list.Item{}, m.height, m.ListStyle)
 				selectedFolder = f
 			}
 			if f != folder {
 				li.RemoveItem(i)
-				m.Lists[f].InsertItem(0, item)
+				m.SnippetsMap[f].InsertItem(0, item)
 				selectedFolder = f
 			}
 		}
 	}
 	var folderItems []list.Item
 	
-	foldersSlice := maps.Keys(m.Lists)
+	foldersSlice := maps.Keys(m.SnippetsMap)
 	slices.Sort(foldersSlice)
 	for i, folder := range foldersSlice {
 		folderItems = append(folderItems, Folder(folder))
@@ -445,7 +445,7 @@ func (m *Model) updateFoldersView() tea.Msg {
 // updateContentView updates the content view with the correct content based on
 // the active snippet or display the appropriate error message / hint message.
 func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
-	if len(m.List().Items()) <= 0 {
+	if len(m.Snippets().Items()) <= 0 {
 		m.displayKeyHint([]keyHint{
 			{m.keys.NewSnippet, "create a new snippet."},
 		})
@@ -534,7 +534,7 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 	case snippetPane:
 		m.ListStyle = DefaultStyles(m.config).Snippets.Focused
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
-		*m.List(), cmd = (*m.List()).Update(msg)
+		*m.Snippets(), cmd = (*m.Snippets()).Update(msg)
 		cmds = append(cmds, cmd)
 	case contentPane:
 		m.ListStyle = DefaultStyles(m.config).Snippets.Blurred
@@ -544,7 +544,7 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 		m.LineNumbers, cmd = m.LineNumbers.Update(msg)
 		cmds = append(cmds, cmd)
 	}
-	m.List().SetDelegate(snippetDelegate{m.ListStyle, m.state})
+	m.Snippets().SetDelegate(snippetDelegate{m.ListStyle, m.state})
 	
 	return tea.Batch(cmds...)
 }
@@ -552,8 +552,8 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 // updateKeyMap disables or enables the keys based on the current state of the
 // snippet list.
 func (m *Model) updateKeyMap() {
-	hasItems := len(m.List().VisibleItems()) > 0
-	isFiltering := m.List().FilterState() == list.Filtering
+	hasItems := len(m.Snippets().VisibleItems()) > 0
+	isFiltering := m.Snippets().FilterState() == list.Filtering
 	isEditing := m.state == editingState
 	m.keys.DeleteSnippet.SetEnabled(hasItems && !isFiltering && !isEditing)
 	m.keys.CopySnippet.SetEnabled(hasItems && !isFiltering && !isEditing)
@@ -565,7 +565,7 @@ func (m *Model) updateKeyMap() {
 
 // selectedSnippet returns the currently selected snippet.
 func (m *Model) selectedSnippet() Snippet {
-	item := m.List().SelectedItem()
+	item := m.Snippets().SelectedItem()
 	if item == nil {
 		return defaultSnippet
 	}
@@ -581,25 +581,25 @@ func (m *Model) selectedFolder() Folder {
 	return item.(Folder)
 }
 
-// List returns the active list.
-func (m *Model) List() *list.Model {
-	return m.Lists[m.selectedFolder()]
+// Snippets returns the active list.
+func (m *Model) Snippets() *list.Model {
+	return m.SnippetsMap[m.selectedFolder()]
 }
 
 func (m *Model) moveSnippetDown() {
-	currentPosition := m.List().Index()
-	currentItem := m.List().SelectedItem()
-	m.List().InsertItem(currentPosition+2, currentItem)
-	m.List().RemoveItem(currentPosition)
-	m.List().CursorDown()
+	currentPosition := m.Snippets().Index()
+	currentItem := m.Snippets().SelectedItem()
+	m.Snippets().InsertItem(currentPosition+2, currentItem)
+	m.Snippets().RemoveItem(currentPosition)
+	m.Snippets().CursorDown()
 }
 
 func (m *Model) moveSnippetUp() {
-	currentPosition := m.List().Index()
-	currentItem := m.List().SelectedItem()
-	m.List().RemoveItem(currentPosition)
-	m.List().InsertItem(currentPosition-1, currentItem)
-	m.List().CursorUp()
+	currentPosition := m.Snippets().Index()
+	currentItem := m.Snippets().SelectedItem()
+	m.Snippets().RemoveItem(currentPosition)
+	m.Snippets().InsertItem(currentPosition-1, currentItem)
+	m.Snippets().CursorUp()
 }
 
 // createNewSnippet creates a new snippet file and adds it to the the list.
@@ -623,7 +623,7 @@ func (m *Model) createNewSnippetFile() tea.Cmd {
 		
 		_, _ = os.Create(filepath.Join(m.config.Home, newSnippet.Path()))
 		
-		m.List().InsertItem(m.List().Index(), newSnippet)
+		m.Snippets().InsertItem(m.Snippets().Index(), newSnippet)
 		return changeStateMsg{navigatingState}
 	}
 }
@@ -645,15 +645,15 @@ func (m *Model) View() string {
 		titleBar = m.ListStyle.CopiedTitleBar.Render("Copied Snippet!")
 	} else if m.state == deletingState {
 		titleBar = m.ListStyle.DeletedTitleBar.Render("Delete Snippet? (y/N)")
-	} else if m.List().SettingFilter() {
-		titleBar = m.ListStyle.TitleBar.Render(m.List().FilterInput.View())
+	} else if m.Snippets().SettingFilter() {
+		titleBar = m.ListStyle.TitleBar.Render(m.Snippets().FilterInput.View())
 	}
 	
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			m.ListStyle.Base.Render(titleBar+m.List().View()),
+			m.ListStyle.Base.Render(titleBar+m.Snippets().View()),
 			lipgloss.JoinVertical(lipgloss.Top,
 				name,
 				lipgloss.JoinHorizontal(lipgloss.Left,
