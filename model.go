@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"math/rand"
 	"os"
@@ -9,7 +8,6 @@ import (
 	"strings"
 	"time"
 	
-	"github.com/alecthomas/chroma/v2/quick"
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -454,7 +452,6 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	
-	var b bytes.Buffer
 	content, err := os.ReadFile(filepath.Join(m.config.Home, Snippet(msg).Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
@@ -466,19 +463,11 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	
-	// b.WriteString(string(content))
 	c, _ := m.mdRender.Render(string(content))
-	err = quick.Highlight(&b, string(content), msg.Language, "terminal16m", m.config.Theme)
-	if err != nil {
-		m.displayError("Unable to highlight file.")
-		return m, nil
-	}
-	
-	//s := b.String()
 	c = strings.TrimPrefix(c, "\n")
 	m.writeLineNumbers(lipgloss.Height(c))
 	m.Code.SetContent(c)
-	//m.Code.SetContent(b.String())
+	
 	return m, nil
 }
 
