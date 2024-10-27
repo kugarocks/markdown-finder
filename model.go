@@ -17,8 +17,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
-	"golang.org/x/exp/maps"
-	"golang.org/x/exp/slices"
 )
 
 const maxPane = 2
@@ -28,7 +26,7 @@ type pane int
 const (
 	snippetPane pane = iota
 	contentPane
-	folderPane
+	sectionPane
 )
 
 type state int
@@ -82,7 +80,8 @@ type Model struct {
 	// the current state / action of the application.
 	state state
 	// stying for components
-	ListStyle    SnippetsBaseStyle
+	SnippetStyle SnippetsBaseStyle
+	SectionStyle SectionsBaseStyle
 	ContentStyle ContentBaseStyle
 	
 	// markdown render
@@ -119,15 +118,6 @@ type updateFoldersMsg struct {
 	selectedFolderIndex int
 }
 
-// updateFolders returns a Cmd to  tell the application that there are possible
-// folder changes to update.
-func (m *Model) updateFolders() tea.Cmd {
-	return func() tea.Msg {
-		msg := m.updateFoldersView()
-		return msg
-	}
-}
-
 // changeStateMsg tells the application to enter a different state.
 type changeStateMsg struct{ newState state }
 
@@ -150,7 +140,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateContentMsg:
 		return m.updateContentView(msg)
 	case changeStateMsg:
-		m.Snippets().SetDelegate(snippetDelegate{m.ListStyle, msg.newState})
+		m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, msg.newState})
 		
 		var cmd tea.Cmd
 		
@@ -197,7 +187,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 				_ = os.Rename(m.selectedSnippetFilePath(), newPath)
 				setCmd := m.Snippets().SetItem(i, snippet)
 				m.pane = snippetPane
-				cmd = tea.Batch(setCmd, m.updateFolders(), m.updateContent())
+				cmd = tea.Batch(setCmd, m.updateContent())
 			}
 		case pastingState:
 			content, err := clipboard.ReadAll()
@@ -402,46 +392,6 @@ func (m *Model) noContentHints() []keyHint {
 	}
 }
 
-// updateFolderView updates the folders list to display the current folders.
-func (m *Model) updateFoldersView() tea.Msg {
-	var selectedFolder Folder
-	selectedFolderIndex := m.Folders.Index()
-	for folder, li := range m.SnippetsMap {
-		for i, item := range li.Items() {
-			snippet, ok := item.(Snippet)
-			if !ok {
-				continue
-			}
-			f := Folder(snippet.Folder)
-			_, ok = m.SnippetsMap[f]
-			if !ok {
-				m.SnippetsMap[f] = newList([]list.Item{}, m.height, m.ListStyle)
-				selectedFolder = f
-			}
-			if f != folder {
-				li.RemoveItem(i)
-				m.SnippetsMap[f].InsertItem(0, item)
-				selectedFolder = f
-			}
-		}
-	}
-	var folderItems []list.Item
-	
-	foldersSlice := maps.Keys(m.SnippetsMap)
-	slices.Sort(foldersSlice)
-	for i, folder := range foldersSlice {
-		folderItems = append(folderItems, Folder(folder))
-		if folder == selectedFolder {
-			selectedFolderIndex = i
-		}
-	}
-	
-	return updateFoldersMsg{
-		items:               folderItems,
-		selectedFolderIndex: selectedFolderIndex,
-	}
-}
-
 // updateContentView updates the content view with the correct content based on
 // the active snippet or display the appropriate error message / hint message.
 func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
@@ -516,26 +466,28 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
 	switch m.pane {
-	case folderPane:
-		m.ListStyle = DefaultStyles(m.config).Snippets.Blurred
-		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
-		m.Folders, cmd = m.Folders.Update(msg)
-		m.updateKeyMap()
-		cmds = append(cmds, cmd, m.updateContent())
 	case snippetPane:
-		m.ListStyle = DefaultStyles(m.config).Snippets.Focused
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Focused
+		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 		*m.Snippets(), cmd = (*m.Snippets()).Update(msg)
 		cmds = append(cmds, cmd)
+	case sectionPane:
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
+		m.SectionStyle = DefaultStyles(m.config).Sections.Focused
+		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
+		*m.Sections, cmd = (*m.Sections).Update(msg)
+		cmds = append(cmds, cmd)
 	case contentPane:
-		m.ListStyle = DefaultStyles(m.config).Snippets.Blurred
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
+		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
 		m.ContentStyle = DefaultStyles(m.config).Content.Focused
 		m.Code, cmd = m.Code.Update(msg)
 		cmds = append(cmds, cmd)
 		m.LineNumbers, cmd = m.LineNumbers.Update(msg)
 		cmds = append(cmds, cmd)
 	}
-	m.Snippets().SetDelegate(snippetDelegate{m.ListStyle, m.state})
+	m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, m.state})
 	
 	return tea.Batch(cmds...)
 }
@@ -551,7 +503,7 @@ func (m *Model) updateKeyMap() {
 	m.keys.PasteSnippet.SetEnabled(hasItems && !isFiltering && !isEditing)
 	m.keys.EditSnippet.SetEnabled(hasItems && !isFiltering && !isEditing)
 	m.keys.NewSnippet.SetEnabled(!isFiltering && !isEditing)
-	m.keys.ChangeFolder.SetEnabled(m.pane == folderPane)
+	m.keys.ChangeFolder.SetEnabled(false)
 }
 
 // selectedSnippet returns the currently selected snippet.
@@ -627,24 +579,24 @@ func (m *Model) View() string {
 	
 	var (
 		name     = m.ContentStyle.Title.Render(m.selectedSnippet().Name)
-		titleBar = m.ListStyle.TitleBar.Render("grep")
+		titleBar = m.SnippetStyle.TitleBar.Render("grep")
 	)
 	
 	if m.state == editingState {
-		name = m.ListStyle.TitleBar.Render(m.inputs[nameInput].Value())
+		name = m.SnippetStyle.TitleBar.Render(m.inputs[nameInput].Value())
 	} else if m.state == copyingState {
-		titleBar = m.ListStyle.CopiedTitleBar.Render("Copied Snippet!")
+		titleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied Snippet!")
 	} else if m.state == deletingState {
-		titleBar = m.ListStyle.DeletedTitleBar.Render("Delete Snippet? (y/N)")
+		titleBar = m.SnippetStyle.DeletedTitleBar.Render("Delete Snippet? (y/N)")
 	} else if m.Snippets().SettingFilter() {
-		titleBar = m.ListStyle.TitleBar.Render(m.Snippets().FilterInput.View())
+		titleBar = m.SnippetStyle.TitleBar.Render(m.Snippets().FilterInput.View())
 	}
 	
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			m.ListStyle.Base.Render(titleBar+m.Snippets().View()),
+			m.SnippetStyle.Base.Render(titleBar+m.Snippets().View()),
 			lipgloss.JoinVertical(lipgloss.Top,
 				name,
 				lipgloss.JoinHorizontal(lipgloss.Left,
