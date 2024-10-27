@@ -396,7 +396,6 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		Code:         content,
 		ContentStyle: defaultStyles.Content.Blurred,
 		ListStyle:    defaultStyles.Snippets.Focused,
-		FoldersStyle: defaultStyles.Folders.Blurred,
 		keys:         DefaultKeyMap,
 		help:         help.New(),
 		config:       config,

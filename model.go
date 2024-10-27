@@ -84,7 +84,6 @@ type Model struct {
 	state state
 	// stying for components
 	ListStyle    SnippetsBaseStyle
-	FoldersStyle FoldersBaseStyle
 	ContentStyle ContentBaseStyle
 	
 	// markdown render
@@ -95,8 +94,6 @@ type Model struct {
 func (m *Model) Init() tea.Cmd {
 	rand.Seed(time.Now().Unix())
 	
-	m.Folders.Styles.Title = m.FoldersStyle.Title
-	m.Folders.Styles.TitleBar = m.FoldersStyle.TitleBar
 	m.updateKeyMap()
 	
 	return func() tea.Msg {
@@ -532,29 +529,23 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 	case folderPane:
 		m.ListStyle = DefaultStyles(m.config).Snippets.Blurred
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
-		m.FoldersStyle = DefaultStyles(m.config).Folders.Focused
 		m.Folders, cmd = m.Folders.Update(msg)
 		m.updateKeyMap()
 		cmds = append(cmds, cmd, m.updateContent())
 	case snippetPane:
 		m.ListStyle = DefaultStyles(m.config).Snippets.Focused
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
-		m.FoldersStyle = DefaultStyles(m.config).Folders.Blurred
 		*m.List(), cmd = (*m.List()).Update(msg)
 		cmds = append(cmds, cmd)
 	case contentPane:
 		m.ListStyle = DefaultStyles(m.config).Snippets.Blurred
 		m.ContentStyle = DefaultStyles(m.config).Content.Focused
-		m.FoldersStyle = DefaultStyles(m.config).Folders.Blurred
 		m.Code, cmd = m.Code.Update(msg)
 		cmds = append(cmds, cmd)
 		m.LineNumbers, cmd = m.LineNumbers.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 	m.List().SetDelegate(snippetDelegate{m.ListStyle, m.state})
-	m.Folders.SetDelegate(folderDelegate{m.FoldersStyle})
-	m.Folders.Styles.TitleBar = m.FoldersStyle.TitleBar
-	m.Folders.Styles.Title = m.FoldersStyle.Title
 	
 	return tea.Batch(cmds...)
 }
