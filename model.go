@@ -325,11 +325,18 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, changeState(editingState)
 		case key.Matches(msg, m.keys.CopySnippet):
 			return m, func() tea.Msg {
-				content, err := os.ReadFile(m.selectedSnippetFilePath())
-				if err != nil {
-					return changeStateMsg{navigatingState}
+				switch m.pane {
+				case snippetPane:
+					content, err := os.ReadFile(m.selectedSnippetFilePath())
+					if err != nil {
+						return changeStateMsg{navigatingState}
+					}
+					clipboard.WriteAll(string(content))
+				case sectionPane:
+					clipboard.WriteAll(m.selectedSection().Content)
+				default:
+					panic("unhandled default case")
 				}
-				clipboard.WriteAll(string(content))
 				return changeStateMsg{copyingState}
 			}
 		case key.Matches(msg, m.keys.DeleteSnippet):
