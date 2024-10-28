@@ -152,7 +152,7 @@ func DefaultStyles(config Config) Styles {
 			Focused: SectionsBaseStyle{
 				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
 				//TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(white),
-				TitleBar:           lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(lipgloss.Color("230")),
+				TitleBar:           lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(lipgloss.Color("230")),
 				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
 				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
 				SelectedTitle:      defaultItemStyle.SelectedTitle,
@@ -164,7 +164,7 @@ func DefaultStyles(config Config) Styles {
 			Blurred: SectionsBaseStyle{
 				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
 				//TitleBar:           lipgloss.NewStyle().Background(black).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(gray),
-				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
+				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(white),
 				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
 				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
 				SelectedTitle:      defaultItemStyle.SelectedTitle,
@@ -176,8 +176,8 @@ func DefaultStyles(config Config) Styles {
 		},
 		Content: ContentStyle{
 			Focused: ContentBaseStyle{
-				Code:  lipgloss.NewStyle().Margin(1, 1),
-				Title: lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(contentBarWidth).Margin(config.MarginTop, 0, 0, 1).Padding(0, 1).Foreground(lipgloss.Color("230")),
+				Code:  lipgloss.NewStyle().Margin(1, 0),
+				Title: lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(contentBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(0, 1).Foreground(lipgloss.Color("230")),
 				//Title:        lipgloss.NewStyle().Background(blue).Width(35-2).Foreground(white).Margin(0, 0, 0, 1).Padding(0, 1),
 				//Separator:    lipgloss.NewStyle().Foreground(white).Margin(0, 0, 0, 1),
 				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack).MarginTop(1),
@@ -185,8 +185,8 @@ func DefaultStyles(config Config) Styles {
 				EmptyHintKey: lipgloss.NewStyle().Foreground(brightBlue),
 			},
 			Blurred: ContentBaseStyle{
-				Code:  lipgloss.NewStyle().Margin(1, 1),
-				Title: lipgloss.NewStyle().Background(blue).Width(contentBarWidth).Margin(config.MarginTop, 0, 0, 1).Padding(0, 1).Foreground(white),
+				Code:  lipgloss.NewStyle().Margin(1, 0),
+				Title: lipgloss.NewStyle().Background(blue).Width(contentBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(0, 1).Foreground(white),
 				//Title:        lipgloss.NewStyle().Background(black).Width(35-2).Foreground(gray).Margin(0, 0, 0, 1).Padding(0, 1),
 				//Separator:    lipgloss.NewStyle().Foreground(gray).Margin(0, 0, 0, 1),
 				LineNumber:   lipgloss.NewStyle().Foreground(brightBlack).MarginTop(1),

@@ -19,14 +19,14 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-const maxPane = 2
+const maxPane = 3
 
 type pane int
 
 const (
 	snippetPane pane = iota
-	contentPane
 	sectionPane
+	contentPane
 )
 
 type state int
@@ -62,8 +62,8 @@ type Model struct {
 	height int
 	// the working directory.
 	Workdir string
-	// the list of Sections to display to the user.
-	Sections *list.Model
+	// the map of Sections to display to the user.
+	SectionsMap map[Snippet]*list.Model
 	// the map of Snippets to display to the user.
 	SnippetsMap map[Folder]*list.Model
 	// the list of Folders to display to the user.
@@ -92,16 +92,21 @@ type Model struct {
 func (m *Model) Init() tea.Cmd {
 	rand.Seed(time.Now().Unix())
 	
+	m.SectionsMap = make(map[Snippet]*list.Model)
 	m.updateKeyMap()
 	
 	return func() tea.Msg {
-		return updateContentMsg(m.selectedSnippet())
+		return updateContentMsg(m.selectedSection())
 	}
 }
 
-// updateContentMsg tells the application to update the content view with the
+// updateSectionMsg tells the application to update the section view with the
 // given snippet.
-type updateContentMsg Snippet
+type updateSectionMsg Snippet
+
+// updateContentMsg tells the application to update the content view with the
+// given section.
+type updateContentMsg Section
 
 // updateContent instructs the application to fetch the latest contents of the
 // snippet file.
@@ -109,7 +114,7 @@ type updateContentMsg Snippet
 // This is useful after a Paste or Edit.
 func (m *Model) updateContent() tea.Cmd {
 	return func() tea.Msg {
-		return updateContentMsg(m.selectedSnippet())
+		return updateContentMsg(m.selectedSection())
 	}
 }
 
@@ -137,6 +142,8 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		var cmd tea.Cmd
 		m.Folders, cmd = m.Folders.Update(msg)
 		return m, tea.Batch(setItemsCmd, cmd)
+	case updateSectionMsg:
+		return m.updateSectionView(msg)
 	case updateContentMsg:
 		return m.updateContentView(msg)
 	case changeStateMsg:
@@ -251,7 +258,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = navigatingState
 				m.updateKeyMap()
 				return m, tea.Batch(changeState(navigatingState), func() tea.Msg {
-					return updateContentMsg(m.selectedSnippet())
+					return updateSectionMsg(m.selectedSnippet())
 				})
 			case key.Matches(msg, m.keys.Quit, m.keys.Cancel):
 				return m, changeState(navigatingState)
@@ -378,7 +385,7 @@ func (m *Model) previousPane() {
 // editSnippet opens the editor with the selected snippet file path.
 func (m *Model) editSnippet() tea.Cmd {
 	return tea.ExecProcess(editorCmd(m.selectedSnippetFilePath()), func(err error) tea.Msg {
-		return updateContentMsg(m.selectedSnippet())
+		return updateSectionMsg(m.selectedSnippet())
 	})
 }
 
@@ -392,8 +399,75 @@ func (m *Model) noContentHints() []keyHint {
 	}
 }
 
-// updateContentView updates the content view with the correct content based on
+// updateSectionView updates the section view with the correct section based on
 // the active snippet or display the appropriate error message / hint message.
+func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
+	snippet := Snippet(msg)
+	
+	// init item list
+	itemList := make([]list.Item, 0)
+	styles := m.SectionStyle
+	delegate := sectionDelegate{styles, navigatingState}
+	sections := list.New(itemList, delegate, 25, 20)
+	sections.SetShowHelp(false)
+	sections.SetShowFilter(false)
+	sections.SetShowTitle(false)
+	sections.Styles.StatusBar = lipgloss.NewStyle().Margin(1, 3).Foreground(lipgloss.Color("240")).MaxWidth(35 - 2)
+	sections.Styles.NoItems = lipgloss.NewStyle().Margin(0, 3).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
+	sections.FilterInput.Prompt = "Find: "
+	sections.FilterInput.PromptStyle = styles.Title
+	sections.SetStatusBarItemName("Section", "Sections")
+	sections.DisableQuitKeybindings()
+	sections.Styles.Title = styles.Title
+	sections.Styles.TitleBar = styles.TitleBar
+	
+	m.SectionsMap[snippet] = &sections
+	
+	if len(m.Snippets().Items()) <= 0 {
+		m.displayKeyHint([]keyHint{
+			{m.keys.NewSnippet, "create a new snippet."},
+		})
+		return m, nil
+	}
+	
+	contentBytes, err := os.ReadFile(filepath.Join(m.config.Home, snippet.Path()))
+	if err != nil {
+		m.displayKeyHint(m.noContentHints())
+		return m, nil
+	}
+	content := strings.TrimSpace(string(contentBytes))
+	
+	if content == "" {
+		m.displayKeyHint(m.noContentHints())
+		return m, nil
+	}
+	
+	// split content to sections
+	contentParts := strings.Split(content, "---")
+	sectionSlice := make([]Section, 0, len(contentParts))
+	for _, subContent := range contentParts {
+		subContent = strings.TrimSpace(subContent)
+		title := getMarkdownFirstTitle(subContent)
+		if title == "" {
+			title = "No Title"
+		}
+		sectionSlice = append(sectionSlice, Section{
+			Folder:  snippet.Folder,
+			File:    snippet.File,
+			Title:   title,
+			Content: subContent,
+		})
+	}
+	
+	for i, sec := range sectionSlice {
+		sections.InsertItem(i, list.Item(sec))
+	}
+	
+	return m, m.updateContent()
+}
+
+// updateContentView updates the content view with the correct content based on
+// the active section or display the appropriate error message / hint message.
 func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	if len(m.Snippets().Items()) <= 0 {
 		m.displayKeyHint([]keyHint{
@@ -402,18 +476,8 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	
-	content, err := os.ReadFile(filepath.Join(m.config.Home, Snippet(msg).Path()))
-	if err != nil {
-		m.displayKeyHint(m.noContentHints())
-		return m, nil
-	}
-	
-	if string(content) == "" {
-		m.displayKeyHint(m.noContentHints())
-		return m, nil
-	}
-	
-	c, _ := m.mdRender.Render(string(content))
+	section := Section(msg)
+	c, _ := m.mdRender.Render(section.Content)
 	c = strings.TrimPrefix(c, "\n")
 	m.writeLineNumbers(lipgloss.Height(c))
 	m.Code.SetContent(c)
@@ -471,12 +535,13 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 		*m.Snippets(), cmd = (*m.Snippets()).Update(msg)
-		cmds = append(cmds, cmd)
+		//m.updateSectionView(updateSectionMsg(m.selectedSnippet()))
+		cmds = append(cmds, cmd, m.updateContent())
 	case sectionPane:
 		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
 		m.SectionStyle = DefaultStyles(m.config).Sections.Focused
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
-		*m.Sections, cmd = (*m.Sections).Update(msg)
+		*m.Sections(), cmd = (*m.Sections()).Update(msg)
 		cmds = append(cmds, cmd)
 	case contentPane:
 		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
@@ -488,6 +553,7 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 		cmds = append(cmds, cmd)
 	}
 	m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, m.state})
+	m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, m.state})
 	
 	return tea.Batch(cmds...)
 }
@@ -506,15 +572,6 @@ func (m *Model) updateKeyMap() {
 	m.keys.ChangeFolder.SetEnabled(false)
 }
 
-// selectedSnippet returns the currently selected snippet.
-func (m *Model) selectedSnippet() Snippet {
-	item := m.Snippets().SelectedItem()
-	if item == nil {
-		return defaultSnippet
-	}
-	return item.(Snippet)
-}
-
 // selected folder returns the currently selected folder.
 func (m *Model) selectedFolder() Folder {
 	item := m.Folders.SelectedItem()
@@ -524,9 +581,37 @@ func (m *Model) selectedFolder() Folder {
 	return item.(Folder)
 }
 
+// selectedSnippet returns the currently selected snippet.
+func (m *Model) selectedSnippet() Snippet {
+	item := m.Snippets().SelectedItem()
+	if item == nil {
+		return defaultSnippet
+	}
+	return item.(Snippet)
+}
+
+// selectedSection returns the currently selected section.
+func (m *Model) selectedSection() Section {
+	item := m.Sections().SelectedItem()
+	if item == nil {
+		return defaultSection
+	}
+	return item.(Section)
+}
+
 // Snippets returns the active list.
 func (m *Model) Snippets() *list.Model {
 	return m.SnippetsMap[m.selectedFolder()]
+}
+
+// Sections returns the active list.
+func (m *Model) Sections() *list.Model {
+	snippet := m.selectedSnippet()
+	if sections, ok := m.SectionsMap[snippet]; ok {
+		return sections
+	}
+	m.updateSectionView(updateSectionMsg(snippet))
+	return m.SectionsMap[snippet]
 }
 
 func (m *Model) moveSnippetDown() {
@@ -577,28 +662,30 @@ func (m *Model) View() string {
 		return ""
 	}
 	
-	var (
-		name     = m.ContentStyle.Title.Render(m.selectedSnippet().Name)
-		titleBar = m.SnippetStyle.TitleBar.Render("grep")
-	)
+	snippet := m.selectedSnippet()
+	section := m.selectedSection()
+	snippetTitleBar := m.SnippetStyle.TitleBar.Render("Snippets")
+	sectionTitleBar := m.SectionStyle.TitleBar.Render(snippet.Name)
+	contentTitleBar := m.ContentStyle.Title.Render(section.Title)
 	
 	if m.state == editingState {
-		name = m.SnippetStyle.TitleBar.Render(m.inputs[nameInput].Value())
+		contentTitleBar = m.SnippetStyle.TitleBar.Render(m.inputs[nameInput].Value())
 	} else if m.state == copyingState {
-		titleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied Snippet!")
+		snippetTitleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied Snippet!")
 	} else if m.state == deletingState {
-		titleBar = m.SnippetStyle.DeletedTitleBar.Render("Delete Snippet? (y/N)")
+		snippetTitleBar = m.SnippetStyle.DeletedTitleBar.Render("Delete Snippet? (y/N)")
 	} else if m.Snippets().SettingFilter() {
-		titleBar = m.SnippetStyle.TitleBar.Render(m.Snippets().FilterInput.View())
+		snippetTitleBar = m.SnippetStyle.TitleBar.Render(m.Snippets().FilterInput.View())
 	}
 	
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			m.SnippetStyle.Base.Render(titleBar+m.Snippets().View()),
+			m.SnippetStyle.Base.Render(snippetTitleBar+m.Snippets().View()),
+			m.SectionStyle.Base.Render(sectionTitleBar+m.Sections().View()),
 			lipgloss.JoinVertical(lipgloss.Top,
-				name,
+				contentTitleBar,
 				lipgloss.JoinHorizontal(lipgloss.Left,
 					m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),
 					m.ContentStyle.Code.Render(strings.ReplaceAll(m.Code.View(), "\t", strings.Repeat(" ", tabSpaces))),

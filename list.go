@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/charmbracelet/lipgloss"
 	"io"
 	"time"
 	
@@ -34,14 +35,15 @@ func (d snippetDelegate) Spacing() int {
 }
 
 // Update is called when the list is updated.
-// We use this to update the snippet code view.
+// We use this to update the section view.
 func (d snippetDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd {
-	return func() tea.Msg {
-		if m.SelectedItem() == nil {
-			return nil
-		}
-		return updateContentMsg(m.SelectedItem().(Snippet))
-	}
+	return nil
+	//return func() tea.Msg {
+	//	if m.SelectedItem() == nil {
+	//		return nil
+	//	}
+	//	return updateSectionMsg(m.SelectedItem().(Snippet))
+	//}
 }
 
 // Render renders the list item for the snippet which includes the title,
@@ -74,6 +76,65 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
 	fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render("grep -V foobar..."))
 	//fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+}
+
+// FilterValue is the section filter value that can be used when searching.
+func (s Section) FilterValue() string {
+	return s.Folder + "/" + s.File + s.Title + "\n"
+}
+
+// sectionDelegate represents the section list item.
+type sectionDelegate struct {
+	styles SectionsBaseStyle
+	state  state
+}
+
+// Height is the number of lines the section list item takes up.
+func (d sectionDelegate) Height() int {
+	return 1
+}
+
+// Spacing is the number of lines to insert between list items.
+func (d sectionDelegate) Spacing() int {
+	return 0
+}
+
+// Update is called when the list is updated.
+// We use this to update the section code view.
+func (d sectionDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd {
+	return func() tea.Msg {
+		if m.SelectedItem() == nil {
+			return nil
+		}
+		return updateContentMsg(m.SelectedItem().(Section))
+	}
+}
+
+// Render renders the list item for the section.
+func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
+	if item == nil {
+		return
+	}
+	s, ok := item.(Section)
+	if !ok {
+		return
+	}
+	
+	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
+	selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	
+	//titleStyle := d.styles.SelectedTitle
+	//if d.state == copyingState {
+	//	titleStyle = d.styles.CopiedTitle
+	//}
+	
+	if index == m.Index() {
+		//fmt.Fprintln(w, "> "+titleStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+		fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+		return
+	}
+	fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+	//fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 }
 
 // Folder represents a group of snippets in a directory.

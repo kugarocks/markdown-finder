@@ -12,13 +12,13 @@ import (
 
 // default values for empty state.
 const (
-	defaultSnippetFolder   = "misc"
+	defaultSnippetFolder   = "default"
 	defaultLanguage        = "md"
 	defaultSnippetName     = "Untitled Snippet"
 	defaultSnippetFileName = defaultSnippetName + "." + defaultLanguage
 )
 
-// defaultSnippet is a snippet with all of the default values, used for when
+// defaultSnippet is a snippet with all the default values, used for when
 // there are no snippets available.
 var defaultSnippet = Snippet{
 	Name:     defaultSnippetName,

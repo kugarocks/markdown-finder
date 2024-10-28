@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/glamour"
 	"io"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -390,6 +391,14 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		glamour.WithAutoStyle(),
 	)
 	
+	// log file
+	file, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("无法打开日志文件: %v", err)
+	}
+	defer file.Close()
+	log.SetOutput(file)
+	
 	m := &Model{
 		SnippetsMap:  snippetsMap,
 		Folders:      folderList,
@@ -441,7 +450,7 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 3).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
 	snippetList.FilterInput.Prompt = "Find: "
 	snippetList.FilterInput.PromptStyle = styles.Title
-	snippetList.SetStatusBarItemName("Snippet", "Sections")
+	snippetList.SetStatusBarItemName("Snippet", "Snippets")
 	//snippetList.SetShowStatusBar(false)
 	snippetList.DisableQuitKeybindings()
 	snippetList.Styles.Title = styles.Title

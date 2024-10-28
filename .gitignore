@@ -1,3 +1,4 @@
 tapes/*.gif
 /nap*
 .idea
+app.log

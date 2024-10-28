@@ -5,11 +5,29 @@ import (
 	"path/filepath"
 )
 
+// default values for empty state.
+const (
+	defaultSectionFolder  = "default"
+	defaultSectionFile    = "example.md"
+	defaultSectionTitle   = "No Title"
+	defaultSectionContent = ""
+)
+
 // Section represents a partial content of section in markdown file.
 type Section struct {
-	Folder string `json:"folder"`
-	File   string `json:"file"`
-	Title  string `json:"title"`
+	Folder  string `json:"folder"`
+	File    string `json:"file"`
+	Title   string `json:"title"`
+	Content string `json:"content"`
+}
+
+// defaultSection is a section with all the default values, used for when
+// there are no section available.
+var defaultSection = Section{
+	Folder:  defaultSectionFolder,
+	File:    defaultSectionFile,
+	Title:   defaultSectionTitle,
+	Content: defaultSectionContent,
 }
 
 // String returns the folder/file#title of the section.
