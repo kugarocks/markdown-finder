@@ -1,6 +1,10 @@
 # Markdown Finder
 
-Forked from [maaslalani/nap](https://github.com/maaslalani/nap) <sub><sub>z</sub></sub><sub>z</sub>z
+> Forked from [maaslalani/nap](https://github.com/maaslalani/nap) which is a code snippet manager for your terminal.
+
+Markdown finder is a tool focused on quickly locating code snippets within Markdown files.
+You can use the separator line `---` to divide different sections of a Markdown file,
+allowing you to quickly copy the code within each section.
 
 ## License
 
