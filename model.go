@@ -148,6 +148,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.updateContentView(msg)
 	case changeStateMsg:
 		m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, msg.newState})
+		m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, msg.newState})
 		
 		var cmd tea.Cmd
 		
@@ -223,7 +224,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			cmd = m.focusInput(m.activeInput)
 		case creatingState:
 		case copyingState:
-			m.pane = snippetPane
+			//m.pane = snippetPane
 			m.state = copyingState
 			m.updateActivePane(msg)
 			cmd = tea.Tick(time.Second, func(t time.Time) tea.Msg {
@@ -675,6 +676,7 @@ func (m *Model) View() string {
 	sectionTitleBar := m.SectionStyle.TitleBar.Render(snippet.Name)
 	contentTitleBar := m.ContentStyle.Title.Render(section.Title)
 	
+	// todo add pane
 	if m.state == editingState {
 		contentTitleBar = m.SnippetStyle.TitleBar.Render(m.inputs[nameInput].Value())
 	} else if m.state == copyingState {
