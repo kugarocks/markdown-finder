@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,7 +10,6 @@ import (
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
@@ -59,7 +57,6 @@ type Model struct {
 	// the viewport of the Code snippet.
 	Code        viewport.Model
 	LineNumbers viewport.Model
-	tagsInput   textinput.Model
 	// the current active pane of focus.
 	pane pane
 	// the current state / action of the application.
@@ -75,8 +72,6 @@ type Model struct {
 
 // Init initialzes the application model.
 func (m *Model) Init() tea.Cmd {
-	rand.Seed(time.Now().Unix())
-	
 	m.SectionsMap = make(map[Snippet]*list.Model)
 	m.updateKeyMap()
 	
@@ -103,11 +98,6 @@ func (m *Model) updateContent() tea.Cmd {
 	}
 }
 
-type updateFoldersMsg struct {
-	items               []list.Item
-	selectedFolderIndex int
-}
-
 // changeStateMsg tells the application to enter a different state.
 type changeStateMsg struct{ newState state }
 
@@ -121,12 +111,6 @@ func changeState(newState state) tea.Cmd {
 // Update updates the model based on user interaction.
 func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := teaMsg.(type) {
-	case updateFoldersMsg:
-		setItemsCmd := m.Folders.SetItems(msg.items)
-		m.Folders.Select(msg.selectedFolderIndex)
-		var cmd tea.Cmd
-		m.Folders, cmd = m.Folders.Update(msg)
-		return m, tea.Batch(setItemsCmd, cmd)
 	case updateSectionMsg:
 		return m.updateSectionView(msg)
 	case updateContentMsg:
@@ -476,32 +460,6 @@ func (m *Model) moveSnippetUp() {
 	m.Snippets().RemoveItem(currentPosition)
 	m.Snippets().InsertItem(currentPosition-1, currentItem)
 	m.Snippets().CursorUp()
-}
-
-// createNewSnippet creates a new snippet file and adds it to the the list.
-func (m *Model) createNewSnippetFile() tea.Cmd {
-	return func() tea.Msg {
-		folder := defaultSnippetFolder
-		folderItem := m.Folders.SelectedItem()
-		if folderItem != nil && folderItem.FilterValue() != "" {
-			folder = folderItem.FilterValue()
-		}
-		
-		file := fmt.Sprintf("snippet-%d.%s", rand.Intn(1000000), m.config.DefaultLanguage)
-		
-		newSnippet := Snippet{
-			Name:     defaultSnippetName,
-			Date:     time.Now(),
-			File:     file,
-			Language: m.config.DefaultLanguage,
-			Folder:   folder,
-		}
-		
-		_, _ = os.Create(filepath.Join(m.config.Home, newSnippet.Path()))
-		
-		m.Snippets().InsertItem(m.Snippets().Index(), newSnippet)
-		return changeStateMsg{navigatingState}
-	}
 }
 
 // View returns the view string for the application model.
