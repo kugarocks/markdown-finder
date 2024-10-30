@@ -120,18 +120,15 @@ func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	
-	//titleStyle := d.styles.SelectedTitle
-	//if d.state == copyingState {
-	//	titleStyle = d.styles.CopiedTitle
-	//}
+	if d.state == copyingState {
+		selectedItemStyle = d.styles.CopiedTitle
+	}
 	
 	if index == m.Index() {
-		//fmt.Fprintln(w, "> "+titleStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
-		fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+		_, _ = fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 		return
 	}
-	fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
-	//fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+	_, _ = fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 }
 
 // Folder represents a group of snippets in a directory.

@@ -108,12 +108,11 @@ func DefaultStyles(config Config) Styles {
 	brightGreen := lipgloss.Color(config.BrightGreenColor)
 	brightBlue := lipgloss.Color(config.PrimaryColor)
 	blue := lipgloss.Color(config.PrimaryColorSubdued)
-	red := lipgloss.Color(config.RedColor)
-	brightRed := lipgloss.Color(config.BrightRedColor)
 	
 	defaultItemStyle := list.NewDefaultItemStyles()
 	sectionBarWidth := 36
 	contentBarWidth := 86
+	snippetListMarginLeft := 1
 	
 	return Styles{
 		Snippets: SnippetsStyle{
@@ -121,31 +120,25 @@ func DefaultStyles(config Config) Styles {
 				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
 				//TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(white),
 				TitleBar:           lipgloss.NewStyle().Background(lipgloss.Color("62")).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(lipgloss.Color("230")),
-				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
-				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
-				SelectedTitle:      defaultItemStyle.SelectedTitle,
-				UnselectedTitle:    defaultItemStyle.DimmedTitle,
+				SelectedSubtitle:   defaultItemStyle.SelectedDesc.MarginLeft(snippetListMarginLeft),
+				UnselectedSubtitle: defaultItemStyle.DimmedDesc.MarginLeft(snippetListMarginLeft),
+				SelectedTitle:      defaultItemStyle.SelectedTitle.MarginLeft(snippetListMarginLeft),
+				UnselectedTitle:    defaultItemStyle.DimmedTitle.MarginLeft(snippetListMarginLeft),
 				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
-				CopiedTitle:        list.NewDefaultItemStyles().SelectedTitle.Foreground(brightGreen).BorderLeftForeground(brightGreen),
-				CopiedSubtitle:     list.NewDefaultItemStyles().SelectedDesc.Foreground(brightGreen).BorderLeftForeground(brightGreen),
-				DeletedTitleBar:    lipgloss.NewStyle().Background(red).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(white),
-				DeletedTitle:       lipgloss.NewStyle().Foreground(brightRed),
-				DeletedSubtitle:    lipgloss.NewStyle().Foreground(red),
+				CopiedTitle:        list.NewDefaultItemStyles().SelectedTitle.Foreground(brightGreen).BorderLeftForeground(brightGreen).MarginLeft(snippetListMarginLeft),
+				CopiedSubtitle:     list.NewDefaultItemStyles().SelectedDesc.Foreground(brightGreen).BorderLeftForeground(brightGreen).MarginLeft(snippetListMarginLeft),
 			},
 			Blurred: SnippetsBaseStyle{
 				Base: lipgloss.NewStyle().Width(sectionBarWidth).MarginTop(config.MarginTop),
 				//TitleBar:           lipgloss.NewStyle().Background(black).Width(35-2).Margin(0, 1, 1, 4).Padding(0, 1).Foreground(gray),
 				TitleBar:           lipgloss.NewStyle().Background(blue).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
-				SelectedSubtitle:   defaultItemStyle.SelectedDesc,
-				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
-				SelectedTitle:      defaultItemStyle.SelectedTitle,
-				UnselectedTitle:    defaultItemStyle.DimmedTitle,
+				SelectedSubtitle:   defaultItemStyle.SelectedDesc.MarginLeft(snippetListMarginLeft),
+				UnselectedSubtitle: defaultItemStyle.DimmedDesc.MarginLeft(snippetListMarginLeft),
+				SelectedTitle:      defaultItemStyle.SelectedTitle.MarginLeft(snippetListMarginLeft),
+				UnselectedTitle:    defaultItemStyle.DimmedTitle.MarginLeft(snippetListMarginLeft),
 				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1),
-				CopiedTitle:        list.NewDefaultItemStyles().DimmedTitle,
-				CopiedSubtitle:     list.NewDefaultItemStyles().DimmedDesc,
-				DeletedTitleBar:    lipgloss.NewStyle().Background(red).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1),
-				DeletedTitle:       lipgloss.NewStyle().Foreground(brightRed),
-				DeletedSubtitle:    lipgloss.NewStyle().Foreground(red),
+				CopiedTitle:        list.NewDefaultItemStyles().DimmedTitle.MarginLeft(snippetListMarginLeft),
+				CopiedSubtitle:     list.NewDefaultItemStyles().DimmedDesc.MarginLeft(snippetListMarginLeft),
 			},
 		},
 		Sections: SectionsStyle{
@@ -157,7 +150,7 @@ func DefaultStyles(config Config) Styles {
 				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
 				SelectedTitle:      defaultItemStyle.SelectedTitle,
 				UnselectedTitle:    defaultItemStyle.DimmedTitle,
-				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1).Foreground(white),
+				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1).Foreground(white),
 				CopiedTitle:        list.NewDefaultItemStyles().SelectedTitle.Foreground(brightGreen).BorderLeftForeground(brightGreen),
 				CopiedSubtitle:     list.NewDefaultItemStyles().SelectedDesc.Foreground(brightGreen).BorderLeftForeground(brightGreen),
 			},
@@ -169,7 +162,7 @@ func DefaultStyles(config Config) Styles {
 				UnselectedSubtitle: defaultItemStyle.DimmedDesc,
 				SelectedTitle:      defaultItemStyle.SelectedTitle,
 				UnselectedTitle:    defaultItemStyle.DimmedTitle,
-				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 2).Padding(0, 1),
+				CopiedTitleBar:     lipgloss.NewStyle().Background(green).Width(35-2).Margin(0, 1, 1, 1).Padding(0, 1),
 				CopiedTitle:        list.NewDefaultItemStyles().DimmedTitle,
 				CopiedSubtitle:     list.NewDefaultItemStyles().DimmedDesc,
 			},

@@ -117,8 +117,12 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateContentMsg:
 		return m.updateContentView(msg)
 	case changeStateMsg:
-		m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, msg.newState})
-		m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, msg.newState})
+		if m.pane == snippetPane {
+			m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, msg.newState})
+		}
+		if m.pane == sectionPane {
+			m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, msg.newState})
+		}
 		
 		var cmd tea.Cmd
 		
@@ -132,7 +136,6 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		
 		switch msg.newState {
 		case copyingState:
-			//m.pane = snippetPane
 			m.state = copyingState
 			m.updateActivePane(msg)
 			cmd = tea.Tick(time.Second, func(t time.Time) tea.Msg {
@@ -266,8 +269,8 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	sections.SetShowHelp(false)
 	sections.SetShowFilter(false)
 	sections.SetShowTitle(false)
-	sections.Styles.StatusBar = lipgloss.NewStyle().Margin(1, 3).Foreground(lipgloss.Color("240")).MaxWidth(35 - 2)
-	sections.Styles.NoItems = lipgloss.NewStyle().Margin(0, 3).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
+	sections.Styles.StatusBar = lipgloss.NewStyle().Margin(1, 2).Foreground(lipgloss.Color("240")).MaxWidth(35 - 2)
+	sections.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color("8")).MaxWidth(35 - 2)
 	sections.FilterInput.Prompt = "Find: "
 	sections.FilterInput.PromptStyle = styles.Title
 	sections.SetStatusBarItemName("Section", "Sections")
@@ -401,8 +404,8 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 		m.LineNumbers, cmd = m.LineNumbers.Update(msg)
 		cmds = append(cmds, cmd)
 	}
-	m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, m.state})
-	m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, m.state})
+	//m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, m.state})
+	//m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, m.state})
 	
 	return tea.Batch(cmds...)
 }
