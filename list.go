@@ -62,9 +62,6 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	if d.state == copyingState {
 		titleStyle = d.styles.CopiedTitle
 		subtitleStyle = d.styles.CopiedSubtitle
-	} else if d.state == deletingState {
-		titleStyle = d.styles.DeletedTitle
-		subtitleStyle = d.styles.DeletedSubtitle
 	}
 	
 	if index == m.Index() {

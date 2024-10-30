@@ -18,7 +18,6 @@ import (
 	
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -409,13 +408,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		keys:         DefaultKeyMap,
 		help:         help.New(),
 		config:       config,
-		inputs: []textinput.Model{
-			newTextInput(defaultSnippetFolder + " "),
-			newTextInput(defaultSnippetName + " "),
-			newTextInput(config.DefaultLanguage),
-		},
-		tagsInput: newTextInput("Tags"),
-		mdRender:  mdRender,
+		mdRender:     mdRender,
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	model, err := p.Run()
@@ -457,12 +450,4 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.Styles.TitleBar = styles.TitleBar
 	
 	return &snippetList
-}
-
-func newTextInput(placeholder string) textinput.Model {
-	i := textinput.New()
-	i.Prompt = ""
-	i.PromptStyle = lipgloss.NewStyle().Margin(0, 1)
-	i.Placeholder = placeholder
-	return i
 }
