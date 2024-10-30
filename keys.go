@@ -9,6 +9,7 @@ type KeyMap struct {
 	ToggleHelp      key.Binding
 	MoveSnippetUp   key.Binding
 	MoveSnippetDown key.Binding
+	CopySnippet     key.Binding
 	EditSnippet     key.Binding
 	Confirm         key.Binding
 	Cancel          key.Binding
@@ -23,6 +24,7 @@ var DefaultKeyMap = KeyMap{
 	ToggleHelp:      key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
 	MoveSnippetDown: key.NewBinding(key.WithKeys("J"), key.WithHelp("J", "move snippet down")),
 	MoveSnippetUp:   key.NewBinding(key.WithKeys("K"), key.WithHelp("K", "move snippet up")),
+	CopySnippet:     key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "copy")),
 	EditSnippet:     key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit")),
 	Confirm:         key.NewBinding(key.WithKeys("y"), key.WithHelp("y", "confirm")),
 	Cancel:          key.NewBinding(key.WithKeys("N", "esc"), key.WithHelp("N", "cancel")),
@@ -43,9 +45,10 @@ func (k KeyMap) ShortHelp() []key.Binding {
 // FullHelp returns all help options in a more detailed view.
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.EditSnippet},
+		{k.CopySnippet, k.EditSnippet},
 		{k.MoveSnippetDown, k.MoveSnippetUp},
 		{k.NextPane, k.PreviousPane},
-		{k.Search, k.ToggleHelp, k.Quit},
+		{k.Search, k.ToggleHelp},
+		{k.Quit},
 	}
 }

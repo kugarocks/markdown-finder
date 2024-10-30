@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/atotto/clipboard"
 	"os"
 	"path/filepath"
 	"strings"
@@ -138,7 +139,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 				return changeStateMsg{navigatingState}
 			})
 		default:
-			panic("unhandled default case")
+			// do nothing
 		}
 		
 		m.updateKeyMap()
@@ -182,7 +183,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			
 			var newHeight int
 			if m.help.ShowAll {
-				newHeight = m.height - 4
+				newHeight = m.height - 1
 			} else {
 				newHeight = m.height
 			}
@@ -190,6 +191,15 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Folders.SetHeight(newHeight)
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
+		case key.Matches(msg, m.keys.CopySnippet):
+			return m, func() tea.Msg {
+				content, err := os.ReadFile(m.selectedSnippetFilePath())
+				if err != nil {
+					return changeStateMsg{navigatingState}
+				}
+				clipboard.WriteAll(string(content))
+				return changeStateMsg{copyingState}
+			}
 		case key.Matches(msg, m.keys.EditSnippet):
 			return m, m.editSnippet()
 		case key.Matches(msg, m.keys.Search):
