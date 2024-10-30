@@ -160,6 +160,9 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.Snippets().FilterState() == list.Filtering {
 			break
 		}
+		if m.Sections().FilterState() == list.Filtering {
+			break
+		}
 		
 		if m.state == copyingState {
 			return m, changeState(navigatingState)
@@ -197,13 +200,13 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					return changeStateMsg{navigatingState}
 				}
-				clipboard.WriteAll(string(content))
+				_ = clipboard.WriteAll(string(content))
 				return changeStateMsg{copyingState}
 			}
 		case key.Matches(msg, m.keys.EditSnippet):
 			return m, m.editSnippet()
 		case key.Matches(msg, m.keys.Search):
-			m.pane = snippetPane
+			//m.pane = sectionPane
 		}
 	}
 	
@@ -382,7 +385,6 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
 		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 		*m.Snippets(), cmd = (*m.Snippets()).Update(msg)
-		//m.updateSectionView(updateSectionMsg(m.selectedSnippet()))
 		cmds = append(cmds, cmd, m.updateContent())
 	case sectionPane:
 		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
@@ -478,25 +480,34 @@ func (m *Model) View() string {
 		return ""
 	}
 	
-	snippet := m.selectedSnippet()
-	section := m.selectedSection()
+	snippetList := m.Snippets()
+	sectionList := m.Sections()
+	selectedSnippet := m.selectedSnippet()
+	selectedSection := m.selectedSection()
 	snippetTitleBar := m.SnippetStyle.TitleBar.Render("Snippets")
-	sectionTitleBar := m.SectionStyle.TitleBar.Render(snippet.Name)
-	contentTitleBar := m.ContentStyle.Title.Render(section.Title)
+	sectionTitleBar := m.SectionStyle.TitleBar.Render(selectedSnippet.Name)
+	contentTitleBar := m.ContentStyle.Title.Render(selectedSection.Title)
 	
-	// todo add pane
-	if m.state == copyingState {
-		snippetTitleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied Snippet!")
-	} else if m.Snippets().SettingFilter() {
-		snippetTitleBar = m.SnippetStyle.TitleBar.Render(m.Snippets().FilterInput.View())
+	if m.pane == snippetPane {
+		if m.state == copyingState {
+			snippetTitleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied")
+		} else if snippetList.SettingFilter() {
+			snippetTitleBar = m.SnippetStyle.TitleBar.Render(snippetList.FilterInput.View())
+		}
+	} else if m.pane == sectionPane {
+		if m.state == copyingState {
+			sectionTitleBar = m.SectionStyle.CopiedTitleBar.Render("Copied")
+		} else if sectionList.SettingFilter() {
+			sectionTitleBar = m.SectionStyle.TitleBar.Render(sectionList.FilterInput.View())
+		}
 	}
 	
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
 			lipgloss.Left,
-			m.SnippetStyle.Base.Render(snippetTitleBar+m.Snippets().View()),
-			m.SectionStyle.Base.Render(sectionTitleBar+m.Sections().View()),
+			m.SnippetStyle.Base.Render(snippetTitleBar+snippetList.View()),
+			m.SectionStyle.Base.Render(sectionTitleBar+sectionList.View()),
 			lipgloss.JoinVertical(lipgloss.Top,
 				contentTitleBar,
 				lipgloss.JoinHorizontal(lipgloss.Left,
