@@ -11,8 +11,6 @@ type KeyMap struct {
 	MoveSnippetDown key.Binding
 	CopySnippet     key.Binding
 	EditSnippet     key.Binding
-	Confirm         key.Binding
-	Cancel          key.Binding
 	NextPane        key.Binding
 	PreviousPane    key.Binding
 }
@@ -26,8 +24,6 @@ var DefaultKeyMap = KeyMap{
 	MoveSnippetUp:   key.NewBinding(key.WithKeys("K"), key.WithHelp("K", "move snippet up")),
 	CopySnippet:     key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "copy")),
 	EditSnippet:     key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit")),
-	Confirm:         key.NewBinding(key.WithKeys("y"), key.WithHelp("y", "confirm")),
-	Cancel:          key.NewBinding(key.WithKeys("N", "esc"), key.WithHelp("N", "cancel")),
 	NextPane:        key.NewBinding(key.WithKeys("tab", "right"), key.WithHelp("tab", "navigate")),
 	PreviousPane:    key.NewBinding(key.WithKeys("shift+tab", "left"), key.WithHelp("shift+tab", "navigate")),
 }

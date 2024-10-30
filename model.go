@@ -294,7 +294,7 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	}
 	
 	// split content to sections
-	contentParts := strings.Split(content, "---")
+	contentParts := strings.Split(content, "\n---\n")
 	sectionSlice := make([]Section, 0, len(contentParts))
 	for _, subContent := range contentParts {
 		subContent = strings.TrimSpace(subContent)
@@ -498,6 +498,10 @@ func (m *Model) View() string {
 			sectionTitleBar = m.SectionStyle.CopiedTitleBar.Render("Copied")
 		} else if sectionList.SettingFilter() {
 			sectionTitleBar = m.SectionStyle.TitleBar.Render(sectionList.FilterInput.View())
+		}
+	} else if m.pane == contentPane {
+		if m.state == copyingState {
+			contentTitleBar = m.ContentStyle.CopiedTitleBar.Render("Copied")
 		}
 	}
 	

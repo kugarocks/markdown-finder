@@ -387,7 +387,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	}
 	
 	mdRender, _ := glamour.NewTermRenderer(
-		glamour.WithAutoStyle(),
+		glamour.WithStylesFromJSONFile("dark.json"),
 	)
 	
 	// log file
