@@ -435,7 +435,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 }
 
 func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Model {
-	snippetList := list.New(items, snippetDelegate{styles, navigatingState}, 25, height)
+	snippetList := list.New(items, snippetDelegate{snippetPane, styles, navigatingState}, 25, height)
 	snippetList.SetShowHelp(false)
 	snippetList.SetShowFilter(false)
 	snippetList.SetShowTitle(false)

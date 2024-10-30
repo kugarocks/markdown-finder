@@ -20,6 +20,7 @@ func (s Snippet) FilterValue() string {
 
 // snippetDelegate represents the snippet list item.
 type snippetDelegate struct {
+	pane   pane
 	styles SnippetsBaseStyle
 	state  state
 }
@@ -59,7 +60,7 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	
 	titleStyle := d.styles.SelectedTitle
 	subtitleStyle := d.styles.SelectedSubtitle
-	if d.state == copyingState {
+	if d.state == copyingState && d.pane == snippetPane {
 		titleStyle = d.styles.CopiedTitle
 		subtitleStyle = d.styles.CopiedSubtitle
 	}
@@ -82,6 +83,7 @@ func (s Section) FilterValue() string {
 
 // sectionDelegate represents the section list item.
 type sectionDelegate struct {
+	pane   pane
 	styles SectionsBaseStyle
 	state  state
 }
@@ -118,9 +120,10 @@ func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	}
 	
 	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
-	selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	//selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	selectedItemStyle := d.styles.SelectedTitle
 	
-	if d.state == copyingState {
+	if d.state == copyingState && d.pane == sectionPane {
 		selectedItemStyle = d.styles.CopiedTitle
 	}
 	

@@ -117,12 +117,8 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	case updateContentMsg:
 		return m.updateContentView(msg)
 	case changeStateMsg:
-		if m.pane == snippetPane {
-			m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, msg.newState})
-		}
-		if m.pane == sectionPane {
-			m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, msg.newState})
-		}
+		m.Snippets().SetDelegate(snippetDelegate{m.pane, m.SnippetStyle, msg.newState})
+		m.Sections().SetDelegate(sectionDelegate{m.pane, m.SectionStyle, msg.newState})
 		
 		var cmd tea.Cmd
 		
@@ -264,7 +260,7 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	// init item list
 	itemList := make([]list.Item, 0)
 	styles := m.SectionStyle
-	delegate := sectionDelegate{styles, navigatingState}
+	delegate := sectionDelegate{m.pane, styles, navigatingState}
 	sections := list.New(itemList, delegate, 25, 20)
 	sections.SetShowHelp(false)
 	sections.SetShowFilter(false)
@@ -404,8 +400,8 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 		m.LineNumbers, cmd = m.LineNumbers.Update(msg)
 		cmds = append(cmds, cmd)
 	}
-	//m.Snippets().SetDelegate(snippetDelegate{m.SnippetStyle, m.state})
-	//m.Sections().SetDelegate(sectionDelegate{m.SectionStyle, m.state})
+	m.Snippets().SetDelegate(snippetDelegate{m.pane, m.SnippetStyle, m.state})
+	m.Sections().SetDelegate(sectionDelegate{m.pane, m.SectionStyle, m.state})
 	
 	return tea.Batch(cmds...)
 }
