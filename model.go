@@ -1,13 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
-	"github.com/atotto/clipboard"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 	
+	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -15,6 +16,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/ast"
+	"github.com/yuin/goldmark/text"
 )
 
 const maxPane = 3
@@ -194,6 +198,8 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
 		case key.Matches(msg, m.keys.CopySnippet):
+			//log.Println(msg.String())
+			//log.Println(m.keys.CopySnippet.Keys())
 			return m, func() tea.Msg {
 				content, err := os.ReadFile(m.selectedSnippetFilePath())
 				if err != nil {
@@ -297,16 +303,18 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	contentParts := strings.Split(content, "\n---\n")
 	sectionSlice := make([]Section, 0, len(contentParts))
 	for _, subContent := range contentParts {
+		markdown := &Markdown{}
 		subContent = strings.TrimSpace(subContent)
-		title := getMarkdownFirstTitle(subContent)
-		if title == "" {
-			title = "No Title"
+		markdown, err = m.parseMarkdown(subContent)
+		if err != nil {
+			return m, nil
 		}
 		sectionSlice = append(sectionSlice, Section{
-			Folder:  snippet.Folder,
-			File:    snippet.File,
-			Title:   title,
-			Content: subContent,
+			Folder:     snippet.Folder,
+			File:       snippet.File,
+			Title:      markdown.FirstTitle,
+			Content:    markdown.ProcessedContent,
+			CodeBlocks: markdown.CodeBlocks,
 		})
 	}
 	
@@ -328,6 +336,8 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	section := Section(msg)
 	c, _ := m.mdRender.Render(section.Content)
 	c = strings.TrimPrefix(c, "\n")
+	c = strings.ReplaceAll(c, "\t", strings.Repeat(" ", tabSpaces))
+	c = m.rewriteCodeBlockPrefix(c)
 	m.writeLineNumbers(lipgloss.Height(c))
 	m.Code.SetContent(c)
 	
@@ -515,7 +525,7 @@ func (m *Model) View() string {
 				contentTitleBar,
 				lipgloss.JoinHorizontal(lipgloss.Left,
 					m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),
-					m.ContentStyle.Code.Render(strings.ReplaceAll(m.Code.View(), "\t", strings.Repeat(" ", tabSpaces))),
+					m.ContentStyle.Code.Render(m.Code.View()),
 				),
 			),
 		),
@@ -532,4 +542,107 @@ func (m *Model) saveState() {
 	if err != nil {
 		panic(err.Error())
 	}
+}
+
+func (m *Model) rewriteCodeBlockPrefix(code string) string {
+	oldPrefix := "------------- CodeBlock -------------"
+	for _, k := range m.keys.CopySnippet.Keys() {
+		prefixFormat := "---------- Press %s to copy ----------"
+		newPrefix := fmt.Sprintf(prefixFormat, strings.ToUpper(k))
+		code = strings.Replace(code, oldPrefix, newPrefix, 1)
+	}
+	return code
+}
+
+type Markdown struct {
+	OriginalContent  string
+	ProcessedContent string
+	FirstTitle       string
+	CodeBlocks       []string
+}
+
+func (m *Model) parseMarkdown(source string) (*Markdown, error) {
+	markdown := &Markdown{
+		OriginalContent: source,
+		CodeBlocks:      make([]string, 0),
+	}
+	
+	// create parser
+	md := goldmark.New()
+	reader := text.NewReader([]byte(source))
+	doc := md.Parser().Parse(reader)
+	
+	// get first title and code block
+	firstTitle := ""
+	var walker = func(n ast.Node, entering bool) (ast.WalkStatus, error) {
+		if !entering {
+			return ast.WalkContinue, nil
+		}
+		
+		switch node := n.(type) {
+		case *ast.Heading:
+			if firstTitle == "" {
+				title := string(node.Text(reader.Source()))
+				firstTitle = title
+				markdown.FirstTitle = title
+			}
+		case *ast.FencedCodeBlock:
+			var content bytes.Buffer
+			lines := node.Lines()
+			for i := 0; i < lines.Len(); i++ {
+				line := lines.At(i)
+				content.Write(line.Value(reader.Source()))
+			}
+			markdown.CodeBlocks = append(markdown.CodeBlocks, content.String())
+		}
+		return ast.WalkContinue, nil
+	}
+	if err := ast.Walk(doc, walker); err != nil {
+		return nil, err
+	}
+	
+	// add code block divider
+	lines := strings.Split(source, "\n")
+	var processedLines []string
+	inCodeBlock := false
+	codeBlockIndex := 0
+	//copyKeys := m.keys.CopySnippet.Keys()
+	
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		trimmedLine := strings.TrimSpace(line)
+		
+		if strings.HasPrefix(trimmedLine, "```") {
+			if !inCodeBlock {
+				// check previous new line
+				if len(processedLines) > 0 && processedLines[len(processedLines)-1] != "" {
+					processedLines = append(processedLines, "")
+				}
+				//divider := "---------- CodeBlock ----------"
+				//if codeBlockIndex < len(copyKeys) {
+				//	k := strings.ToUpper(copyKeys[codeBlockIndex])
+				//	divider = fmt.Sprintf("------- Press %s to copy -------", k)
+				//}
+				processedLines = append(processedLines, line)
+				//processedLines = append(processedLines, divider)
+				inCodeBlock = true
+				codeBlockIndex++
+			} else {
+				//divider := "------------- End -------------"
+				//processedLines = append(processedLines, divider)
+				processedLines = append(processedLines, line)
+				
+				// check next new line
+				if i+1 < len(lines) && strings.TrimSpace(lines[i+1]) != "" {
+					processedLines = append(processedLines, "")
+				}
+				inCodeBlock = false
+			}
+		} else {
+			processedLines = append(processedLines, line)
+		}
+	}
+	
+	markdown.ProcessedContent = strings.Join(processedLines, "\n")
+	return markdown, nil
 }

@@ -91,6 +91,8 @@
   "code_block": {
     "color": "244",
     "margin": 0,
+    "block_prefix": "------------- CodeBlock -------------\n",
+    "block_suffix": "---------------- End ----------------\n",
     "chroma": {
       "text": {
         "color": "#C4C4C4"

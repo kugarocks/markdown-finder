@@ -15,10 +15,11 @@ const (
 
 // Section represents a partial content of section in markdown file.
 type Section struct {
-	Folder  string `json:"folder"`
-	File    string `json:"file"`
-	Title   string `json:"title"`
-	Content string `json:"content"`
+	Folder     string   `json:"folder"`
+	File       string   `json:"file"`
+	Title      string   `json:"title"`
+	Content    string   `json:"content"`
+	CodeBlocks []string `json:"code_blocks"`
 }
 
 // defaultSection is a section with all the default values, used for when

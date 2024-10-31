@@ -22,7 +22,7 @@ var DefaultKeyMap = KeyMap{
 	ToggleHelp:      key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
 	MoveSnippetDown: key.NewBinding(key.WithKeys("J"), key.WithHelp("J", "move snippet down")),
 	MoveSnippetUp:   key.NewBinding(key.WithKeys("K"), key.WithHelp("K", "move snippet up")),
-	CopySnippet:     key.NewBinding(key.WithKeys("c"), key.WithHelp("c", "copy")),
+	CopySnippet:     key.NewBinding(key.WithKeys("c", "d", "f"), key.WithHelp("c", "copy")),
 	EditSnippet:     key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit")),
 	NextPane:        key.NewBinding(key.WithKeys("tab", "right"), key.WithHelp("tab", "navigate")),
 	PreviousPane:    key.NewBinding(key.WithKeys("shift+tab", "left"), key.WithHelp("shift+tab", "navigate")),
