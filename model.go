@@ -287,34 +287,34 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	
-	contentBytes, err := os.ReadFile(filepath.Join(m.config.Home, snippet.Path()))
+	snippetContentBytes, err := os.ReadFile(filepath.Join(m.config.Home, snippet.Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
 		return m, nil
 	}
-	content := strings.TrimSpace(string(contentBytes))
+	snippetContent := strings.TrimSpace(string(snippetContentBytes))
 	
-	if content == "" {
+	if snippetContent == "" {
 		m.displayKeyHint(m.noContentHints())
 		return m, nil
 	}
 	
-	// split content to sections
-	contentParts := strings.Split(content, "\n---\n")
+	// split snippetContent to sections
+	contentParts := strings.Split(snippetContent, "\n---\n")
 	sectionSlice := make([]Section, 0, len(contentParts))
-	for _, subContent := range contentParts {
-		markdown := &Markdown{}
-		subContent = strings.TrimSpace(subContent)
-		markdown, err = m.parseMarkdown(subContent)
+	for _, content := range contentParts {
+		mdElem := &MarkdownElem{}
+		content = strings.TrimSpace(content)
+		mdElem, err = m.parseMarkdown(content)
 		if err != nil {
 			return m, nil
 		}
 		sectionSlice = append(sectionSlice, Section{
 			Folder:     snippet.Folder,
 			File:       snippet.File,
-			Title:      markdown.FirstTitle,
-			Content:    markdown.ProcessedContent,
-			CodeBlocks: markdown.CodeBlocks,
+			Content:    content,
+			Title:      mdElem.FirstTitle,
+			CodeBlocks: mdElem.CodeBlocks,
 		})
 	}
 	
@@ -554,17 +554,14 @@ func (m *Model) rewriteCodeBlockPrefix(code string) string {
 	return code
 }
 
-type Markdown struct {
-	OriginalContent  string
-	ProcessedContent string
-	FirstTitle       string
-	CodeBlocks       []string
+type MarkdownElem struct {
+	FirstTitle string
+	CodeBlocks []string
 }
 
-func (m *Model) parseMarkdown(source string) (*Markdown, error) {
-	markdown := &Markdown{
-		OriginalContent: source,
-		CodeBlocks:      make([]string, 0),
+func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
+	mdElem := &MarkdownElem{
+		CodeBlocks: make([]string, 0),
 	}
 	
 	// create parser
@@ -584,7 +581,7 @@ func (m *Model) parseMarkdown(source string) (*Markdown, error) {
 			if firstTitle == "" {
 				title := string(node.Text(reader.Source()))
 				firstTitle = title
-				markdown.FirstTitle = title
+				mdElem.FirstTitle = title
 			}
 		case *ast.FencedCodeBlock:
 			var content bytes.Buffer
@@ -593,7 +590,7 @@ func (m *Model) parseMarkdown(source string) (*Markdown, error) {
 				line := lines.At(i)
 				content.Write(line.Value(reader.Source()))
 			}
-			markdown.CodeBlocks = append(markdown.CodeBlocks, content.String())
+			mdElem.CodeBlocks = append(mdElem.CodeBlocks, content.String())
 		}
 		return ast.WalkContinue, nil
 	}
@@ -601,48 +598,5 @@ func (m *Model) parseMarkdown(source string) (*Markdown, error) {
 		return nil, err
 	}
 	
-	// add code block divider
-	lines := strings.Split(source, "\n")
-	var processedLines []string
-	inCodeBlock := false
-	codeBlockIndex := 0
-	//copyKeys := m.keys.CopySnippet.Keys()
-	
-	for i := 0; i < len(lines); i++ {
-		line := lines[i]
-		trimmedLine := strings.TrimSpace(line)
-		
-		if strings.HasPrefix(trimmedLine, "```") {
-			if !inCodeBlock {
-				// check previous new line
-				if len(processedLines) > 0 && processedLines[len(processedLines)-1] != "" {
-					processedLines = append(processedLines, "")
-				}
-				//divider := "---------- CodeBlock ----------"
-				//if codeBlockIndex < len(copyKeys) {
-				//	k := strings.ToUpper(copyKeys[codeBlockIndex])
-				//	divider = fmt.Sprintf("------- Press %s to copy -------", k)
-				//}
-				processedLines = append(processedLines, line)
-				//processedLines = append(processedLines, divider)
-				inCodeBlock = true
-				codeBlockIndex++
-			} else {
-				//divider := "------------- End -------------"
-				//processedLines = append(processedLines, divider)
-				processedLines = append(processedLines, line)
-				
-				// check next new line
-				if i+1 < len(lines) && strings.TrimSpace(lines[i+1]) != "" {
-					processedLines = append(processedLines, "")
-				}
-				inCodeBlock = false
-			}
-		} else {
-			processedLines = append(processedLines, line)
-		}
-	}
-	
-	markdown.ProcessedContent = strings.Join(processedLines, "\n")
-	return markdown, nil
+	return mdElem, nil
 }
