@@ -198,14 +198,34 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
 		case key.Matches(msg, m.keys.CopySnippet):
-			//log.Println(msg.String())
-			//log.Println(m.keys.CopySnippet.Keys())
 			return m, func() tea.Msg {
-				content, err := os.ReadFile(m.selectedSnippetFilePath())
-				if err != nil {
-					return changeStateMsg{navigatingState}
+				var content string
+				
+				switch m.pane {
+				case snippetPane:
+					contentBytes, err := os.ReadFile(m.selectedSnippetFilePath())
+					if err != nil {
+						return changeStateMsg{navigatingState}
+					}
+					content = string(contentBytes)
+				default:
+					k := msg.String()
+					index := -1
+					for i, copyKey := range m.keys.CopySnippet.Keys() {
+						if k == copyKey {
+							index = i
+							break
+						}
+					}
+					codeBlocks := m.selectedSection().CodeBlocks
+					if index >= 0 && index < len(codeBlocks) {
+						content = codeBlocks[index]
+					} else {
+						return changeStateMsg{navigatingState}
+					}
 				}
-				_ = clipboard.WriteAll(string(content))
+				
+				_ = clipboard.WriteAll(content)
 				return changeStateMsg{copyingState}
 			}
 		case key.Matches(msg, m.keys.EditSnippet):
@@ -242,7 +262,8 @@ func (m *Model) previousPane() {
 // editSnippet opens the editor with the selected snippet file path.
 func (m *Model) editSnippet() tea.Cmd {
 	return tea.ExecProcess(editorCmd(m.selectedSnippetFilePath()), func(err error) tea.Msg {
-		return updateSectionMsg(m.selectedSnippet())
+		m.updateSectionView(updateSectionMsg(m.selectedSnippet()))
+		return updateContentMsg(m.selectedSection())
 	})
 }
 
@@ -321,7 +342,6 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	for i, sec := range sectionSlice {
 		sections.InsertItem(i, list.Item(sec))
 	}
-	
 	return m, m.updateContent()
 }
 
