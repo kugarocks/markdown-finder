@@ -116,8 +116,6 @@ func changeState(newState state) tea.Cmd {
 // Update updates the model based on user interaction.
 func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := teaMsg.(type) {
-	case updateSectionMsg:
-		return m.updateSectionView(msg)
 	case updateContentMsg:
 		return m.updateContentView(msg)
 	case changeStateMsg:
@@ -262,7 +260,7 @@ func (m *Model) previousPane() {
 // editSnippet opens the editor with the selected snippet file path.
 func (m *Model) editSnippet() tea.Cmd {
 	return tea.ExecProcess(editorCmd(m.selectedSnippetFilePath()), func(err error) tea.Msg {
-		m.updateSectionView(updateSectionMsg(m.selectedSnippet()))
+		m.updateSnippetSections(m.selectedSnippet())
 		return updateContentMsg(m.selectedSection())
 	})
 }
@@ -279,11 +277,8 @@ func (m *Model) noSnippetHints() []keyHint {
 	}
 }
 
-// updateSectionView updates the section view with the correct section based on
-// the active snippet or display the appropriate error message / hint message.
-func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
-	snippet := Snippet(msg)
-	
+// updateSnippetSections updates the snippet sections
+func (m *Model) updateSnippetSections(snippet Snippet) {
 	// init item list
 	itemList := make([]list.Item, 0)
 	styles := m.SectionStyle
@@ -305,19 +300,19 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	
 	if len(m.Snippets().Items()) <= 0 {
 		m.displayKeyHint(m.noSnippetHints())
-		return m, nil
+		return
 	}
 	
 	snippetContentBytes, err := os.ReadFile(filepath.Join(m.config.Home, snippet.Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
-		return m, nil
+		return
 	}
 	snippetContent := strings.TrimSpace(string(snippetContentBytes))
 	
 	if snippetContent == "" {
 		m.displayKeyHint(m.noContentHints())
-		return m, nil
+		return
 	}
 	
 	// split snippetContent to sections
@@ -328,7 +323,7 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 		content = strings.TrimSpace(content)
 		mdElem, err = m.parseMarkdown(content)
 		if err != nil {
-			return m, nil
+			return
 		}
 		sectionSlice = append(sectionSlice, Section{
 			Folder:     snippet.Folder,
@@ -342,7 +337,6 @@ func (m *Model) updateSectionView(msg updateSectionMsg) (tea.Model, tea.Cmd) {
 	for i, sec := range sectionSlice {
 		sections.InsertItem(i, list.Item(sec))
 	}
-	return m, m.updateContent()
 }
 
 // updateContentView updates the content view with the correct content based on
@@ -483,7 +477,7 @@ func (m *Model) Sections() *list.Model {
 	if sections, ok := m.SectionsMap[snippet]; ok {
 		return sections
 	}
-	m.updateSectionView(updateSectionMsg(snippet))
+	m.updateSnippetSections(snippet)
 	return m.SectionsMap[snippet]
 }
 
