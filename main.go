@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/charmbracelet/glamour"
 	"io"
 	"io/fs"
 	"log"
@@ -13,14 +12,14 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	
-	"github.com/mattn/go-isatty"
-	
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/mattn/go-isatty"
 	"github.com/sahilm/fuzzy"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -39,6 +38,8 @@ Usage:
 Create:
   nap < main.go                 - save snippet from stdin
   nap example/main.go < main.go - save snippet with name`)
+
+	defaultSnippetsJson = `{"snippet_list":[]}`
 )
 
 func main() {
@@ -50,13 +51,13 @@ func runCLI(args []string) {
 	snippets := readSnippets(config)
 	snippets = migrateSnippets(config, snippets)
 	snippets = scanSnippets(config, snippets)
-	
+
 	stdin := readStdin()
 	if stdin != "" {
 		saveSnippet(stdin, args, config, snippets)
 		return
 	}
-	
+
 	if len(args) > 0 {
 		switch args[0] {
 		case "list":
@@ -69,7 +70,7 @@ func runCLI(args []string) {
 		}
 		return
 	}
-	
+
 	err := runInteractiveMode(config, snippets)
 	if err != nil {
 		fmt.Println("Alas, there's been an error", err)
@@ -91,7 +92,7 @@ func parseName(s string) (string, string, string) {
 		language  = defaultLanguage
 		remaining string
 	)
-	
+
 	tokens := strings.Split(s, "/")
 	if len(tokens) > 1 {
 		folder = tokens[0]
@@ -99,7 +100,7 @@ func parseName(s string) (string, string, string) {
 	} else {
 		remaining = tokens[0]
 	}
-	
+
 	tokens = strings.Split(remaining, ".")
 	if len(tokens) > 1 {
 		name = tokens[0]
@@ -107,7 +108,7 @@ func parseName(s string) (string, string, string) {
 	} else {
 		name = tokens[0]
 	}
-	
+
 	return folder, name, language
 }
 
@@ -117,14 +118,14 @@ func readStdin() string {
 	if err != nil {
 		return ""
 	}
-	
+
 	if stat.Mode()&os.ModeCharDevice != 0 {
 		return ""
 	}
-	
+
 	reader := bufio.NewReader(os.Stdin)
 	var b strings.Builder
-	
+
 	for {
 		r, _, err := reader.ReadRune()
 		if err != nil && err == io.EOF {
@@ -135,11 +136,11 @@ func readStdin() string {
 			return ""
 		}
 	}
-	
+
 	return b.String()
 }
 
-// readSnippets returns all the snippets read from the snippets.json file.
+// readSnippets reads the snippets file and returns the snippets
 func readSnippets(config Config) []Snippet {
 	var snippets []Snippet
 	file := filepath.Join(config.Home, config.File)
@@ -155,15 +156,17 @@ func readSnippets(config Config) []Snippet {
 			fmt.Printf("Unable to create file %s, %+v", file, err)
 		}
 		defer f.Close()
-		dir = []byte("[]")
+		dir = []byte(defaultSnippetsJson)
 		_, _ = f.Write(dir)
 	}
-	err = json.Unmarshal(dir, &snippets)
+
+	var wrapper SnippetsWrapper
+	err = json.Unmarshal(dir, &wrapper)
 	if err != nil {
 		fmt.Printf("Unable to unmarshal %s file, %+v\n", file, err)
 		return snippets
 	}
-	return snippets
+	return wrapper.SnippetList
 }
 
 // migrateSnippets migrates any legacy snippet <dir>-<file> format to the new <dir>/<file> format
@@ -208,13 +211,13 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		}
 		return false
 	}
-	
+
 	homeEntries, err := os.ReadDir(config.Home)
 	if err != nil {
 		fmt.Printf("could not scan config home: %v\n", err)
 		return snippets
 	}
-	
+
 	for _, homeEntry := range homeEntries {
 		if !homeEntry.IsDir() {
 			continue
@@ -222,19 +225,19 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		if strings.HasPrefix(homeEntry.Name(), ".") {
 			continue
 		}
-		
+
 		folderPath := filepath.Join(config.Home, homeEntry.Name())
 		folderEntries, err := os.ReadDir(folderPath)
 		if err != nil {
 			fmt.Printf("could not scan %q: %v\n", folderPath, err)
 			continue
 		}
-		
+
 		for _, folderEntry := range folderEntries {
 			if folderEntry.IsDir() {
 				continue
 			}
-			
+
 			snippetPath := filepath.Join(homeEntry.Name(), folderEntry.Name())
 			if !snippetExists(snippetPath) {
 				name := folderEntry.Name()
@@ -250,7 +253,7 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 			}
 		}
 	}
-	
+
 	var idx int
 	for _, snippet := range snippets {
 		snippetPath := filepath.Join(config.Home, snippet.Path())
@@ -261,11 +264,11 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		}
 	}
 	snippets = snippets[:idx]
-	
+
 	if modified {
 		writeSnippets(config, snippets)
 	}
-	
+
 	return snippets
 }
 
@@ -275,7 +278,7 @@ func saveSnippet(content string, args []string, config Config, snippets []Snippe
 	if len(args) > 0 {
 		name = strings.Join(args, " ")
 	}
-	
+
 	folder, name, language := parseName(name)
 	file := fmt.Sprintf("%s.%s", name, language)
 	filePath := filepath.Join(config.Home, folder, file)
@@ -288,7 +291,7 @@ func saveSnippet(content string, args []string, config Config, snippets []Snippe
 		fmt.Println("unable to create snippet")
 		return
 	}
-	
+
 	// Add snippet metadata
 	snippet := Snippet{
 		Folder:   folder,
@@ -297,17 +300,24 @@ func saveSnippet(content string, args []string, config Config, snippets []Snippe
 		File:     file,
 		Language: language,
 	}
-	
+
 	snippets = append([]Snippet{snippet}, snippets...)
 	writeSnippets(config, snippets)
 }
 
+// writeSnippets writes the snippets to the snippets file
 func writeSnippets(config Config, snippets []Snippet) {
-	b, err := json.Marshal(snippets)
+	wrapper := SnippetsWrapper{
+		SnippetList: snippets,
+	}
+
+	b, err := json.MarshalIndent(wrapper, "", "  ")
 	if err != nil {
 		fmt.Println("Could not marshal latest snippet data.", err)
 		return
 	}
+	b = append(b, '\n')
+
 	err = os.WriteFile(filepath.Join(config.Home, config.File), b, os.ModePerm)
 	if err != nil {
 		fmt.Println("Could not save snippets file.", err)
@@ -334,14 +344,14 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		snippets = append(snippets, defaultSnippet)
 	}
 	state := readState()
-	
+
 	folders := make(map[Folder][]list.Item)
 	for _, snippet := range snippets {
 		folders[Folder(snippet.Folder)] = append(folders[Folder(snippet.Folder)], list.Item(snippet))
 	}
-	
+
 	defaultStyles := DefaultStyles(config)
-	
+
 	var folderItems []list.Item
 	foldersSlice := maps.Keys(folders)
 	slices.Sort(foldersSlice)
@@ -353,25 +363,25 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	}
 	folderList := list.New(folderItems, folderDelegate{defaultStyles.Folders.Blurred}, 0, 0)
 	folderList.Title = "Folders"
-	
+
 	folderList.SetShowHelp(false)
 	folderList.SetFilteringEnabled(false)
 	folderList.SetShowStatusBar(false)
 	folderList.DisableQuitKeybindings()
 	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
 	folderList.SetStatusBarItemName("folder", "folders")
-	
+
 	for idx, folder := range foldersSlice {
 		if string(folder) == state.CurrentFolder {
 			folderList.Select(idx)
 			break
 		}
 	}
-	
+
 	content := viewport.New(80, 0)
-	
+
 	snippetsMap := map[Folder]*list.Model{}
-	
+
 	currentFolder := folderList.SelectedItem().(Folder)
 	for folder, items := range folders {
 		snippetList := newList(items, 20, defaultStyles.Snippets.Focused)
@@ -385,11 +395,11 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		}
 		snippetsMap[folder] = snippetList
 	}
-	
+
 	mdRender, _ := glamour.NewTermRenderer(
 		glamour.WithStylesFromJSONFile("dark.json"),
 	)
-	
+
 	// log file
 	file, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -397,7 +407,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	}
 	defer file.Close()
 	log.SetOutput(file)
-	
+
 	m := &Model{
 		SnippetsMap:  snippetsMap,
 		Folders:      folderList,
@@ -419,18 +429,13 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	if !ok {
 		return err
 	}
-	var allSnippets []list.Item
+	var allSnippets []Snippet
 	for _, list := range fm.SnippetsMap {
-		allSnippets = append(allSnippets, list.Items()...)
+		for _, item := range list.Items() {
+			allSnippets = append(allSnippets, item.(Snippet))
+		}
 	}
-	b, err := json.Marshal(allSnippets)
-	if err != nil {
-		return err
-	}
-	err = os.WriteFile(filepath.Join(config.Home, config.File), b, os.ModePerm)
-	if err != nil {
-		return err
-	}
+	writeSnippets(config, allSnippets)
 	return nil
 }
 
@@ -448,6 +453,6 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.DisableQuitKeybindings()
 	snippetList.Styles.Title = styles.Title
 	snippetList.Styles.TitleBar = styles.TitleBar
-	
+
 	return &snippetList
 }

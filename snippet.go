@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"time"
-	
+
 	"github.com/alecthomas/chroma/v2/quick"
 )
 
@@ -38,6 +38,11 @@ type Snippet struct {
 	Language string    `json:"language"`
 }
 
+// SnippetsWrapper represents the root JSON structure that contains the snippet list
+type SnippetsWrapper struct {
+	SnippetList []Snippet `json:"snippet_list"`
+}
+
 // String returns the folder/name.ext of the snippet.
 func (s Snippet) String() string {
 	return fmt.Sprintf("%s/%s.%s", s.Folder, s.Name, s.Language)
@@ -61,11 +66,11 @@ func (s Snippet) Content(highlight bool) string {
 	if err != nil {
 		return ""
 	}
-	
+
 	if !highlight {
 		return string(content)
 	}
-	
+
 	var b bytes.Buffer
 	err = quick.Highlight(&b, string(content), s.Language, "terminal16m", config.Theme)
 	if err != nil {

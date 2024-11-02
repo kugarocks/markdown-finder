@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-	
+
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
@@ -70,7 +70,7 @@ type Model struct {
 	SnippetStyle SnippetsBaseStyle
 	SectionStyle SectionsBaseStyle
 	ContentStyle ContentBaseStyle
-	
+
 	// markdown render
 	mdRender *glamour.TermRenderer
 }
@@ -79,7 +79,7 @@ type Model struct {
 func (m *Model) Init() tea.Cmd {
 	m.SectionsMap = make(map[Snippet]*list.Model)
 	m.updateKeyMap()
-	
+
 	return func() tea.Msg {
 		return updateContentMsg(m.selectedSection())
 	}
@@ -121,17 +121,17 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	case changeStateMsg:
 		m.Snippets().SetDelegate(snippetDelegate{m.pane, m.SnippetStyle, msg.newState})
 		m.Sections().SetDelegate(sectionDelegate{m.pane, m.SectionStyle, msg.newState})
-		
+
 		var cmd tea.Cmd
-		
+
 		if m.state == msg.newState {
 			break
 		}
-		
+
 		m.state = msg.newState
 		m.updateKeyMap()
 		m.updateActivePane(msg)
-		
+
 		switch msg.newState {
 		case copyingState:
 			m.state = copyingState
@@ -142,7 +142,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		default:
 			// do nothing
 		}
-		
+
 		m.updateKeyMap()
 		m.updateActivePane(msg)
 		return m, cmd
@@ -164,11 +164,11 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.Sections().FilterState() == list.Filtering {
 			break
 		}
-		
+
 		if m.state == copyingState {
 			return m, changeState(navigatingState)
 		}
-		
+
 		switch {
 		case key.Matches(msg, m.keys.NextPane):
 			m.nextPane()
@@ -184,7 +184,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.moveSnippetUp()
 		case key.Matches(msg, m.keys.ToggleHelp):
 			m.help.ShowAll = !m.help.ShowAll
-			
+
 			var newHeight int
 			if m.help.ShowAll {
 				newHeight = m.height - 1
@@ -198,7 +198,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.CopySnippet):
 			return m, func() tea.Msg {
 				var content string
-				
+
 				switch m.pane {
 				case snippetPane:
 					contentBytes, err := os.ReadFile(m.selectedSnippetFilePath())
@@ -222,7 +222,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 						return changeStateMsg{navigatingState}
 					}
 				}
-				
+
 				_ = clipboard.WriteAll(content)
 				return changeStateMsg{copyingState}
 			}
@@ -232,7 +232,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			//m.pane = sectionPane
 		}
 	}
-	
+
 	m.updateKeyMap()
 	cmd := m.updateActivePane(teaMsg)
 	return m, cmd
@@ -295,26 +295,26 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 	sections.DisableQuitKeybindings()
 	sections.Styles.Title = styles.Title
 	sections.Styles.TitleBar = styles.TitleBar
-	
+
 	m.SectionsMap[snippet] = &sections
-	
+
 	if len(m.Snippets().Items()) <= 0 {
 		m.displayKeyHint(m.noSnippetHints())
 		return
 	}
-	
+
 	snippetContentBytes, err := os.ReadFile(filepath.Join(m.config.Home, snippet.Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
 		return
 	}
 	snippetContent := strings.TrimSpace(string(snippetContentBytes))
-	
+
 	if snippetContent == "" {
 		m.displayKeyHint(m.noContentHints())
 		return
 	}
-	
+
 	// split snippetContent to sections
 	contentParts := strings.Split(snippetContent, "\n---\n")
 	sectionSlice := make([]Section, 0, len(contentParts))
@@ -333,7 +333,7 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 			CodeBlocks: mdElem.CodeBlocks,
 		})
 	}
-	
+
 	for i, sec := range sectionSlice {
 		sections.InsertItem(i, list.Item(sec))
 	}
@@ -346,7 +346,7 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 		m.displayKeyHint(m.noSnippetHints())
 		return m, nil
 	}
-	
+
 	section := Section(msg)
 	c, _ := m.mdRender.Render(section.Content)
 	c = strings.TrimPrefix(c, "\n")
@@ -354,7 +354,7 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	c = m.rewriteCodeBlockPrefix(c)
 	m.writeLineNumbers(lipgloss.Height(c))
 	m.Code.SetContent(c)
-	
+
 	return m, nil
 }
 
@@ -426,7 +426,7 @@ func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 	}
 	m.Snippets().SetDelegate(snippetDelegate{m.pane, m.SnippetStyle, m.state})
 	m.Sections().SetDelegate(sectionDelegate{m.pane, m.SectionStyle, m.state})
-	
+
 	return tea.Batch(cmds...)
 }
 
@@ -502,7 +502,7 @@ func (m *Model) View() string {
 	if m.state == quittingState {
 		return ""
 	}
-	
+
 	snippetList := m.Snippets()
 	sectionList := m.Sections()
 	selectedSnippet := m.selectedSnippet()
@@ -510,7 +510,7 @@ func (m *Model) View() string {
 	snippetTitleBar := m.SnippetStyle.TitleBar.Render("Snippets")
 	sectionTitleBar := m.SectionStyle.TitleBar.Render(selectedSnippet.Name)
 	contentTitleBar := m.ContentStyle.Title.Render(selectedSection.Title)
-	
+
 	if m.pane == snippetPane {
 		if m.state == copyingState {
 			snippetTitleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied")
@@ -528,7 +528,7 @@ func (m *Model) View() string {
 			contentTitleBar = m.ContentStyle.CopiedTitleBar.Render("Copied")
 		}
 	}
-	
+
 	return lipgloss.JoinVertical(
 		lipgloss.Top,
 		lipgloss.JoinHorizontal(
@@ -577,19 +577,19 @@ func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 	mdElem := &MarkdownElem{
 		CodeBlocks: make([]string, 0),
 	}
-	
+
 	// create parser
 	md := goldmark.New()
 	reader := text.NewReader([]byte(source))
 	doc := md.Parser().Parse(reader)
-	
+
 	// get first title and code block
 	firstTitle := ""
 	var walker = func(n ast.Node, entering bool) (ast.WalkStatus, error) {
 		if !entering {
 			return ast.WalkContinue, nil
 		}
-		
+
 		switch node := n.(type) {
 		case *ast.Heading:
 			if firstTitle == "" {
@@ -612,6 +612,6 @@ func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 	if err := ast.Walk(doc, walker); err != nil {
 		return nil, err
 	}
-	
+
 	return mdElem, nil
 }
