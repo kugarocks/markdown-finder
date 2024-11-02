@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	
+
 	"github.com/adrg/xdg"
 	"github.com/caarlos0/env/v6"
 	"gopkg.in/yaml.v3"
@@ -19,11 +19,11 @@ import (
 type Config struct {
 	Home string `env:"NAP_HOME" yaml:"home"`
 	File string `env:"NAP_FILE" yaml:"file"`
-	
+
 	DefaultLanguage string `env:"NAP_DEFAULT_LANGUAGE" yaml:"default_language"`
-	
+
 	Theme string `env:"NAP_THEME" yaml:"theme"`
-	
+
 	PrimaryColor        string `env:"NAP_PRIMARY_COLOR" yaml:"primary_color"`
 	PrimaryColorSubdued string `env:"NAP_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
 	BrightGreenColor    string `env:"NAP_BRIGHT_GREEN" yaml:"bright_green"`
@@ -41,7 +41,7 @@ type Config struct {
 func newConfig() Config {
 	return Config{
 		Home:                defaultHome(),
-		File:                "snippets.json",
+		File:                "snippet-config.json",
 		DefaultLanguage:     defaultLanguage,
 		Theme:               "dracula",
 		PrimaryColor:        "#AFBEE1",
@@ -88,18 +88,18 @@ func readConfig() Config {
 			return newConfig()
 		}
 	}
-	
+
 	if err := env.Parse(&config); err != nil {
 		return newConfig()
 	}
-	
+
 	if strings.HasPrefix(config.Home, "~") {
 		home, err := os.UserHomeDir()
 		if err == nil {
 			config.Home = filepath.Join(home, config.Home[1:])
 		}
 	}
-	
+
 	return config
 }
 
@@ -115,6 +115,6 @@ func (config Config) writeConfig() error {
 			return err
 		}
 	}
-	
+
 	return nil
 }

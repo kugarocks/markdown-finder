@@ -49,7 +49,6 @@ func main() {
 func runCLI(args []string) {
 	config := readConfig()
 	snippets := readSnippets(config)
-	snippets = migrateSnippets(config, snippets)
 	snippets = scanSnippets(config, snippets)
 
 	stdin := readStdin()
@@ -169,38 +168,7 @@ func readSnippets(config Config) []Snippet {
 	return wrapper.SnippetList
 }
 
-// migrateSnippets migrates any legacy snippet <dir>-<file> format to the new <dir>/<file> format
-func migrateSnippets(config Config, snippets []Snippet) []Snippet {
-	var migrated bool
-	for idx, snippet := range snippets {
-		legacyPath := filepath.Join(config.Home, snippet.LegacyPath())
-		if _, err := os.Stat(legacyPath); err != nil {
-			if !errors.Is(err, fs.ErrNotExist) {
-				fmt.Printf("could not access %q: %v\n", legacyPath, err)
-			}
-			continue
-		}
-		file := strings.TrimPrefix(snippet.LegacyPath(), fmt.Sprintf("%s-", snippet.Folder))
-		newDir := filepath.Join(config.Home, snippet.Folder)
-		newPath := filepath.Join(newDir, file)
-		if err := os.MkdirAll(newDir, os.ModePerm); err != nil {
-			fmt.Printf("could not create %q: %v\n", newDir, err)
-			continue
-		}
-		if err := os.Rename(legacyPath, newPath); err != nil {
-			fmt.Printf("could not move %q to %q: %v\n", legacyPath, newPath, err)
-		}
-		migrated = true
-		snippet.File = file
-		snippets[idx] = snippet
-	}
-	if migrated {
-		writeSnippets(config, snippets)
-	}
-	return snippets
-}
-
-// scanSnippets scans for any new/removed snippets and adds them to snippets.json
+// scanSnippets scans for any new/removed snippets and adds them to snippet-config.json
 func scanSnippets(config Config, snippets []Snippet) []Snippet {
 	var modified bool
 	snippetExists := func(path string) bool {
