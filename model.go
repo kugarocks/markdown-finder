@@ -604,7 +604,8 @@ func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 				line := lines.At(i)
 				content.Write(line.Value(reader.Source()))
 			}
-			mdElem.CodeBlocks = append(mdElem.CodeBlocks, content.String())
+			codeBlock := strings.TrimSuffix(content.String(), "\n")
+			mdElem.CodeBlocks = append(mdElem.CodeBlocks, codeBlock)
 		}
 		return ast.WalkContinue, nil
 	}
