@@ -132,7 +132,8 @@ func (m folderSelectModel) View() string {
 	return "\n" + m.list.View()
 }
 
-func setFolder(config *Config, snippets []Snippet) error {
+// getFolders returns a sorted list of unique folders from snippets
+func getFolders(snippets []Snippet) []string {
 	// collect all folders and sort
 	folderSet := make(map[string]struct{})
 	for _, snippet := range snippets {
@@ -144,6 +145,12 @@ func setFolder(config *Config, snippets []Snippet) error {
 		folders = append(folders, folder)
 	}
 	slices.Sort(folders)
+
+	return folders
+}
+
+func setFolder(config *Config, snippets []Snippet) error {
+	folders := getFolders(snippets)
 
 	// convert to list items
 	var items []list.Item
@@ -159,7 +166,6 @@ func setFolder(config *Config, snippets []Snippet) error {
 	l := list.New(items, folderSelectDelegate{}, 30, 14)
 	l.Title = "Choose a folder"
 	l.SetShowStatusBar(false)
-	// l.SetFilteringEnabled(false)
 	l.Styles.Title = folderTitleStyle
 	l.Styles.PaginationStyle = folderPaginationStyle
 	l.Styles.HelpStyle = folderHelpStyle
@@ -178,5 +184,19 @@ func setFolder(config *Config, snippets []Snippet) error {
 		return fmt.Errorf("run interactive program failed: %w", err)
 	}
 
+	return nil
+}
+
+func listFolders(config Config, snippets []Snippet) error {
+	folders := getFolders(snippets)
+
+	// show folders list, current selected folder with arrow mark
+	for _, folder := range folders {
+		if folder == config.FolderName {
+			fmt.Printf("%s\n", folderSelectedItemStyle.Render("> "+folder))
+		} else {
+			fmt.Printf("%s\n", folderItemStyle.Render(folder))
+		}
+	}
 	return nil
 }

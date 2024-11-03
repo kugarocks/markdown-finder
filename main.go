@@ -115,6 +115,11 @@ func runCLI(args []string) {
 					fmt.Println(err)
 				}
 				return
+			} else if len(args) > 1 && strings.Contains(args[1], "folder") {
+				if err := listFolders(config, snippets); err != nil {
+					fmt.Println(err)
+				}
+				return
 			} else if len(args) > 1 && strings.Contains(args[1], "snippet") {
 				listSnippets(snippets)
 			}
