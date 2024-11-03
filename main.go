@@ -311,7 +311,6 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		// welcome to nap!
 		snippets = append(snippets, defaultSnippet)
 	}
-	state := readState()
 
 	folders := make(map[Folder][]list.Item)
 	for _, snippet := range snippets {
@@ -339,28 +338,9 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
 	folderList.SetStatusBarItemName("folder", "folders")
 
-	for idx, folder := range foldersSlice {
-		if string(folder) == state.CurrentFolder {
-			folderList.Select(idx)
-			break
-		}
-	}
-
-	content := viewport.New(80, 0)
-
 	snippetsMap := map[Folder]*list.Model{}
-
-	currentFolder := folderList.SelectedItem().(Folder)
 	for folder, items := range folders {
 		snippetList := newList(items, 20, defaultStyles.Snippets.Focused)
-		if folder == currentFolder {
-			for idx, item := range snippetList.Items() {
-				if s, ok := item.(Snippet); ok && s.File == state.CurrentSnippet {
-					snippetList.Select(idx)
-					break
-				}
-			}
-		}
 		snippetsMap[folder] = snippetList
 	}
 
@@ -376,6 +356,7 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	defer file.Close()
 	log.SetOutput(file)
 
+	content := viewport.New(80, 0)
 	m := &Model{
 		SnippetsMap:  snippetsMap,
 		Folders:      folderList,
@@ -398,8 +379,8 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 		return err
 	}
 	var allSnippets []Snippet
-	for _, list := range fm.SnippetsMap {
-		for _, item := range list.Items() {
+	for _, snippetList := range fm.SnippetsMap {
+		for _, item := range snippetList.Items() {
 			allSnippets = append(allSnippets, item.(Snippet))
 		}
 	}

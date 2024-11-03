@@ -175,7 +175,6 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		case key.Matches(msg, m.keys.PreviousPane):
 			m.previousPane()
 		case key.Matches(msg, m.keys.Quit):
-			m.saveState()
 			m.state = quittingState
 			return m, tea.Quit
 		case key.Matches(msg, m.keys.MoveSnippetDown):
@@ -545,17 +544,6 @@ func (m *Model) View() string {
 		),
 		helpStyle.Render(m.help.View(m.keys)),
 	)
-}
-
-func (m *Model) saveState() {
-	s := State{
-		CurrentFolder:  string(m.selectedFolder()),
-		CurrentSnippet: m.selectedSnippet().File,
-	}
-	err := s.Save()
-	if err != nil {
-		panic(err.Error())
-	}
 }
 
 func (m *Model) rewriteCodeBlockPrefix(code string) string {
