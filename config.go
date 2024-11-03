@@ -19,6 +19,7 @@ import (
 type Config struct {
 	Home              string `env:"MDF_HOME" yaml:"home"`
 	SourceName        string `env:"MDF_SOURCE_NAME" yaml:"source_name"`
+	FolderName        string `env:"MDF_FOLDER_NAME" yaml:"folder_name"`
 	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
 	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 

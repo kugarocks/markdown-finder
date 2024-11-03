@@ -97,6 +97,8 @@ func runCLI(args []string) {
 	snippets := readSnippets(config)
 	snippets = scanSnippets(config, snippets)
 
+	initFolderName(&config, snippets)
+
 	stdin := readStdin()
 	if stdin != "" {
 		saveSnippet(stdin, args, config, snippets)
@@ -130,6 +132,11 @@ func runCLI(args []string) {
 			if len(args) > 1 && args[1] == "source" {
 				if err := setSource(&config); err != nil {
 					fmt.Printf("设置源失败: %v\n", err)
+				}
+				return
+			} else if len(args) > 1 && args[1] == "folder" {
+				if err := setFolder(&config, snippets); err != nil {
+					fmt.Printf("设置文件夹失败: %v\n", err)
 				}
 				return
 			}
@@ -411,6 +418,13 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
 	folderList.SetStatusBarItemName("folder", "folders")
 
+	for idx, folder := range foldersSlice {
+		if string(folder) == config.FolderName {
+			folderList.Select(idx)
+			break
+		}
+	}
+
 	snippetsMap := map[Folder]*list.Model{}
 	for folder, items := range folders {
 		snippetList := newList(items, 20, defaultStyles.Snippets.Focused)
@@ -620,5 +634,45 @@ func validateSourceName(config *Config) {
 	sourcePath := config.getSourcePath()
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
 		config.SourceName = defaultSourceName
+	}
+}
+
+func initFolderName(config *Config, snippets []Snippet) {
+	// create folder name list and sort
+	folderSet := make(map[string]struct{})
+	for _, snippet := range snippets {
+		folderSet[snippet.Folder] = struct{}{}
+	}
+
+	folderNameList := make([]string, 0, len(folderSet))
+	for folder := range folderSet {
+		folderNameList = append(folderNameList, folder)
+	}
+	slices.Sort(folderNameList)
+
+	if len(folderNameList) == 0 {
+		return
+	}
+
+	// if FolderName is empty, use the first folder
+	if strings.TrimSpace(config.FolderName) == "" {
+		config.FolderName = folderNameList[0]
+		config.writeConfig()
+		return
+	}
+
+	// validate folder name
+	found := false
+	for _, folder := range folderNameList {
+		if folder == config.FolderName {
+			found = true
+			break
+		}
+	}
+
+	// if not found, use the first folder
+	if !found {
+		config.FolderName = folderNameList[0]
+		config.writeConfig()
 	}
 }
