@@ -21,11 +21,12 @@ type SourceWrapper struct {
 }
 
 func readSources(config Config) ([]Source, error) {
-	configFile := filepath.Join(config.Home, config.SourceConfigFile)
-
-	if err := os.MkdirAll(config.Home, os.ModePerm); err != nil {
-		return nil, fmt.Errorf("无法创建目录 %s: %w", config.Home, err)
+	sourcesDir := config.getSourceBase()
+	if err := os.MkdirAll(sourcesDir, os.ModePerm); err != nil {
+		return nil, fmt.Errorf("unable to create sources directory %s: %w", sourcesDir, err)
 	}
+
+	configFile := filepath.Join(sourcesDir, config.SourceConfigFile)
 
 	data, err := os.ReadFile(configFile)
 	if err != nil {
@@ -36,12 +37,12 @@ func readSources(config Config) ([]Source, error) {
 
 			b, err := json.MarshalIndent(wrapper, "", "  ")
 			if err != nil {
-				return nil, fmt.Errorf("无法序列化默认配置: %w", err)
+				return nil, fmt.Errorf("unable to serialize default configuration: %w", err)
 			}
 
 			err = os.WriteFile(configFile, b, os.ModePerm)
 			if err != nil {
-				return nil, fmt.Errorf("无法写入配置文件 %s: %w", configFile, err)
+				return nil, fmt.Errorf("unable to write configuration file %s: %w", configFile, err)
 			}
 
 			return wrapper.SourceList, nil
@@ -51,7 +52,7 @@ func readSources(config Config) ([]Source, error) {
 
 	var wrapper SourceWrapper
 	if err := json.Unmarshal(data, &wrapper); err != nil {
-		return nil, fmt.Errorf("无法解析配置文件 %s: %w", configFile, err)
+		return nil, fmt.Errorf("unable to parse configuration file %s: %w", configFile, err)
 	}
 
 	if wrapper.SourceList == nil {
@@ -68,14 +69,15 @@ func writeSources(config Config, sources []Source) error {
 
 	b, err := json.MarshalIndent(wrapper, "", "  ")
 	if err != nil {
-		return fmt.Errorf("无法序列化配置: %w", err)
+		return fmt.Errorf("unable to serialize configuration: %w", err)
 	}
+	b = append(b, '\n')
 
-	configFile := filepath.Join(config.Home, config.SourceConfigFile)
+	configFile := filepath.Join(config.getSourceBase(), config.SourceConfigFile)
 
 	err = os.WriteFile(configFile, b, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("无法写入配置文件 %s: %w", configFile, err)
+		return fmt.Errorf("unable to write configuration file %s: %w", configFile, err)
 	}
 
 	return nil
