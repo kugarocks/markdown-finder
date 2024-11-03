@@ -39,7 +39,8 @@ Create:
   nap < main.go                 - save snippet from stdin
   nap example/main.go < main.go - save snippet with name`)
 
-	defaultSnippetsJson = `{"snippet_list":[]}`
+	defaultSourceConfigJson  = `{"source_list":[]}`
+	defaultSnippetConfigJson = `{"snippet_list":[]}`
 )
 
 func main() {
@@ -155,7 +156,7 @@ func readSnippets(config Config) []Snippet {
 			fmt.Printf("Unable to create file %s, %+v", file, err)
 		}
 		defer f.Close()
-		dir = []byte(defaultSnippetsJson)
+		dir = []byte(defaultSnippetConfigJson)
 		_, _ = f.Write(dir)
 	}
 
