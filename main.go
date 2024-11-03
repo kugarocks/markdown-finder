@@ -20,7 +20,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/mattn/go-isatty"
 	"github.com/sahilm/fuzzy"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
@@ -105,22 +104,21 @@ func runCLI(args []string) {
 		return
 	}
 
-	if len(args) > 0 {
+	var targetSnippet Snippet
+	if len(args) > 1 {
 		switch args[0] {
-		case "-h", "--help":
-			fmt.Println(helpText)
 		case "list":
-			if len(args) > 1 && strings.Contains(args[1], "source") {
+			if strings.Contains(args[1], "source") {
 				if err := listSources(config); err != nil {
 					fmt.Println(err)
 				}
 				return
-			} else if len(args) > 1 && strings.Contains(args[1], "folder") {
+			} else if strings.Contains(args[1], "folder") {
 				if err := listFolders(config, snippets); err != nil {
 					fmt.Println(err)
 				}
 				return
-			} else if len(args) > 1 && strings.Contains(args[1], "snippet") {
+			} else if strings.Contains(args[1], "snippet") {
 				listSnippets(snippets)
 			}
 		case "get":
@@ -134,25 +132,32 @@ func runCLI(args []string) {
 			}
 			return
 		case "set":
-			if len(args) > 1 && args[1] == "source" {
+			if strings.Contains(args[1], "source") {
 				if err := setSource(&config); err != nil {
-					fmt.Printf("设置源失败: %v\n", err)
+					fmt.Printf("set source failed: %v\n", err)
 				}
 				return
-			} else if len(args) > 1 && args[1] == "folder" {
+			} else if strings.Contains(args[1], "folder") {
 				if err := setFolder(&config, snippets); err != nil {
-					fmt.Printf("设置文件夹失败: %v\n", err)
+					fmt.Printf("set folder failed: %v\n", err)
 				}
 				return
 			}
 		default:
-			snippet := findSnippet(args[0], snippets)
-			fmt.Print(snippet.Content(isatty.IsTerminal(os.Stdout.Fd())))
+			fmt.Println("Unknown command")
 		}
 		return
+	} else if len(args) == 1 {
+		switch args[0] {
+		case "-h", "--help":
+			fmt.Println(helpText)
+			return
+		default:
+			targetSnippet = findSnippet(args[0], snippets)
+		}
 	}
 
-	err = runInteractiveMode(config, snippets)
+	err = runInteractiveMode(config, snippets, targetSnippet)
 	if err != nil {
 		fmt.Println("Alas, there's been an error", err)
 	}
@@ -391,7 +396,7 @@ func findSnippet(search string, snippets []Snippet) Snippet {
 	return Snippet{}
 }
 
-func runInteractiveMode(config Config, snippets []Snippet) error {
+func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet) error {
 	if len(snippets) == 0 {
 		// welcome to nap!
 		snippets = append(snippets, defaultSnippet)
@@ -424,16 +429,29 @@ func runInteractiveMode(config Config, snippets []Snippet) error {
 	folderList.SetStatusBarItemName("folder", "folders")
 
 	for idx, folder := range foldersSlice {
+		if string(folder) == targetSnippet.Folder {
+			folderList.Select(idx)
+			break
+		}
 		if string(folder) == config.FolderName {
 			folderList.Select(idx)
 			break
 		}
 	}
 
+	selectedFolder := folderList.SelectedItem().(Folder)
 	snippetsMap := map[Folder]*list.Model{}
 	for folder, items := range folders {
 		snippetList := newList(items, 20, defaultStyles.Snippets.Focused)
 		snippetsMap[folder] = snippetList
+		if folder == selectedFolder {
+			for idx, item := range snippetList.Items() {
+				if s, ok := item.(Snippet); ok && s.File == targetSnippet.File {
+					snippetList.Select(idx)
+					break
+				}
+			}
+		}
 	}
 
 	mdRender, _ := glamour.NewTermRenderer(
