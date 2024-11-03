@@ -105,10 +105,17 @@ func runCLI(args []string) {
 
 	if len(args) > 0 {
 		switch args[0] {
-		case "list":
-			listSnippets(snippets)
 		case "-h", "--help":
 			fmt.Println(helpText)
+		case "list":
+			if len(args) > 1 && strings.Contains(args[1], "source") {
+				if err := listSources(config); err != nil {
+					fmt.Println(err)
+				}
+				return
+			} else if len(args) > 1 && strings.Contains(args[1], "snippet") {
+				listSnippets(snippets)
+			}
 		case "get":
 			if len(args) < 3 || args[1] != "source" {
 				fmt.Println("Usage: mdf get source <user/repo>")
@@ -607,4 +614,16 @@ func validateSourceName(config *Config) {
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
 		config.SourceName = defaultSourceName
 	}
+}
+
+func listSources(config Config) error {
+	sources, err := readSources(config)
+	if err != nil {
+		return fmt.Errorf("failed to read source configuration: %w", err)
+	}
+
+	for _, source := range sources {
+		fmt.Printf("%s\n", source.Name)
+	}
+	return nil
 }
