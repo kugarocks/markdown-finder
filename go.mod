@@ -1,4 +1,4 @@
-module github.com/maaslalani/nap
+module github.com/kugarocks/mdf
 
 go 1.21
 
