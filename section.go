@@ -2,7 +2,13 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
+
+	"github.com/aquilax/truncate"
+	"github.com/charmbracelet/bubbles/list"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 // default values for empty state.
@@ -45,6 +51,64 @@ func (s Section) Path() string {
 // interface.
 type Sections struct {
 	sections []Section
+}
+
+// FilterValue is the section filter value that can be used when searching.
+func (s Section) FilterValue() string {
+	return s.Folder + "/" + s.File + s.Title + s.Content + "\n"
+}
+
+// sectionDelegate represents the section list item.
+type sectionDelegate struct {
+	pane   pane
+	styles SectionsBaseStyle
+	state  state
+}
+
+// Height is the number of lines the section list item takes up.
+func (d sectionDelegate) Height() int {
+	return 1
+}
+
+// Spacing is the number of lines to insert between list items.
+func (d sectionDelegate) Spacing() int {
+	return 0
+}
+
+// Update is called when the list is updated.
+// We use this to update the section code view.
+func (d sectionDelegate) Update(msg tea.Msg, m *list.Model) tea.Cmd {
+	return func() tea.Msg {
+		if m.SelectedItem() == nil {
+			return nil
+		}
+		return updateContentMsg(m.SelectedItem().(Section))
+	}
+}
+
+// Render renders the list item for the section.
+func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.Item) {
+	if item == nil {
+		return
+	}
+	s, ok := item.(Section)
+	if !ok {
+		return
+	}
+
+	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
+	//selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
+	selectedItemStyle := d.styles.SelectedTitle
+
+	if d.state == copyingState && d.pane == sectionPane {
+		selectedItemStyle = d.styles.CopiedTitle
+	}
+
+	if index == m.Index() {
+		_, _ = fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+		return
+	}
+	_, _ = fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 }
 
 // String returns the string of the section at the specified position i
