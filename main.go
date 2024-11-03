@@ -93,6 +93,7 @@ func runCLI(args []string) {
 		return
 	}
 
+	validateSourceName(&config)
 	snippets := readSnippets(config)
 	snippets = scanSnippets(config, snippets)
 
@@ -491,7 +492,7 @@ func initDefaultSource(config Config) error {
 	}
 
 	// Create default folder and file structure
-	sourcePath := config.getSourcePath()
+	sourcePath := config.getDefaultSourcePath()
 	defaultFolderPath := filepath.Join(sourcePath, defaultSnippetFolder)
 
 	if err := os.MkdirAll(defaultFolderPath, os.ModePerm); err != nil {
@@ -598,4 +599,12 @@ func getSource(config Config, repoURL string) error {
 
 	fmt.Printf("Successfully added source: %s\n", sourceName)
 	return nil
+}
+
+// validateSourceName if the source directory does not exist, switch to the default source
+func validateSourceName(config *Config) {
+	sourcePath := config.getSourcePath()
+	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
+		config.SourceName = defaultSourceName
+	}
 }

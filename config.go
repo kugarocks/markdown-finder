@@ -123,13 +123,19 @@ func (config Config) writeConfig() error {
 	return nil
 }
 
-// getSourcePath returns the full path for the configured source name
-func (config Config) getSourcePath() string {
-	parts := strings.Split(config.SourceName, "/")
-	return filepath.Join(append([]string{config.Home, "sources"}, parts...)...)
-}
-
 // getSourceBase returns the base path for the configured source name
 func (config Config) getSourceBase() string {
 	return filepath.Join(config.Home, "sources")
+}
+
+// getSourcePath returns the full path for the configured source name
+func (config Config) getSourcePath() string {
+	parts := strings.Split(config.SourceName, "/")
+	return filepath.Join(append([]string{config.getSourceBase()}, parts...)...)
+}
+
+// getDefaultSourcePath returns the full path for the default source name
+func (config Config) getDefaultSourcePath() string {
+	parts := strings.Split(defaultSourceName, "/")
+	return filepath.Join(append([]string{config.getSourceBase()}, parts...)...)
 }
