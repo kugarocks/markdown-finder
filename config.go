@@ -18,6 +18,7 @@ import (
 // file name of the metadata.
 type Config struct {
 	Home              string `env:"MDF_HOME" yaml:"home"`
+	SourceName        string `env:"MDF_SOURCE_NAME" yaml:"source_name"`
 	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
 	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 
@@ -62,8 +63,8 @@ func newConfig() Config {
 // For macOS: ~/Library/Application Support/mdf
 func defaultHome() string { return filepath.Join(xdg.DataHome, "mdf") }
 
-// defaultConfig returns the default config path
-func defaultConfig() string {
+// getConfigFilePath returns the config file path
+func getConfigFilePath() string {
 	if c := os.Getenv("MDF_CONFIG"); c != "" {
 		return c
 	}
@@ -77,23 +78,26 @@ func defaultConfig() string {
 // readConfig returns a configuration read from the environment.
 func readConfig() Config {
 	config := newConfig()
-	fi, err := os.Open(defaultConfig())
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return newConfig()
+	configFilePath := getConfigFilePath()
+
+	fi, err := os.Open(configFilePath)
+	if err != nil && errors.Is(err, fs.ErrNotExist) {
+		_ = config.writeConfig()
 	}
 	if fi != nil {
 		defer fi.Close()
-		if err := yaml.NewDecoder(fi).Decode(&config); err != nil {
+		if err = yaml.NewDecoder(fi).Decode(&config); err != nil {
 			return newConfig()
 		}
 	}
 
-	if err := env.Parse(&config); err != nil {
+	if err = env.Parse(&config); err != nil {
 		return newConfig()
 	}
 
 	if strings.HasPrefix(config.Home, "~") {
-		home, err := os.UserHomeDir()
+		var home string
+		home, err = os.UserHomeDir()
 		if err == nil {
 			config.Home = filepath.Join(home, config.Home[1:])
 		}
@@ -104,13 +108,13 @@ func readConfig() Config {
 
 // writeConfig returns a configuration read from the environment.
 func (config Config) writeConfig() error {
-	fi, err := os.Create(defaultConfig())
+	fi, err := os.Create(getConfigFilePath())
 	if err != nil {
 		return err
 	}
 	if fi != nil {
 		defer fi.Close()
-		if err := yaml.NewEncoder(fi).Encode(&config); err != nil {
+		if err = yaml.NewEncoder(fi).Encode(&config); err != nil {
 			return err
 		}
 	}

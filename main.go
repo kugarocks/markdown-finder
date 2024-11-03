@@ -39,8 +39,18 @@ Create:
   nap < main.go                 - save snippet from stdin
   nap example/main.go < main.go - save snippet with name`)
 
-	defaultSourceConfigJson  = `{"source_list":[]}`
-	defaultSnippetConfigJson = `{"snippet_list":[]}`
+	// 	defaultSourceConfigJson = `{
+	// 	"source_list": [
+	// 		{
+	// 			"name": "local/default",
+	// 			"repo": "https://github.com/local/default"
+	// 		}
+	// 	]
+	// }`
+
+	defaultSnippetConfigJson = `{
+	"snippet_list": []
+}`
 )
 
 func main() {

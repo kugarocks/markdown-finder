@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
 	"io"
 	"time"
-	
+
 	"github.com/aquilax/truncate"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
 )
 
@@ -57,22 +57,20 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	if !ok {
 		return
 	}
-	
+
 	titleStyle := d.styles.SelectedTitle
 	subtitleStyle := d.styles.SelectedSubtitle
 	if d.state == copyingState && d.pane == snippetPane {
 		titleStyle = d.styles.CopiedTitle
 		subtitleStyle = d.styles.CopiedSubtitle
 	}
-	
+
 	if index == m.Index() {
 		fmt.Fprintln(w, "  "+titleStyle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-		fmt.Fprint(w, "  "+subtitleStyle.Render("grep -V foobar..."))
-		//fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+		fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 		return
 	}
 	fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-	fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render("grep -V foobar..."))
 	//fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 }
 
@@ -118,15 +116,15 @@ func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	if !ok {
 		return
 	}
-	
+
 	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
 	//selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	selectedItemStyle := d.styles.SelectedTitle
-	
+
 	if d.state == copyingState && d.pane == sectionPane {
 		selectedItemStyle = d.styles.CopiedTitle
 	}
-	
+
 	if index == m.Index() {
 		_, _ = fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 		return
