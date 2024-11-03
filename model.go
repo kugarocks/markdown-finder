@@ -258,8 +258,18 @@ func (m *Model) previousPane() {
 
 // editSnippet opens the editor with the selected snippet file path.
 func (m *Model) editSnippet() tea.Cmd {
+	// 保存当前选中的 section 下标
+	currentIndex := m.Sections().Index()
+
 	return tea.ExecProcess(editorCmd(m.selectedSnippetFilePath()), func(err error) tea.Msg {
 		m.updateSnippetSections(m.selectedSnippet())
+
+		// 恢复之前选中的 section 位置
+		sections := m.Sections()
+		if currentIndex >= 0 && currentIndex < len(sections.Items()) {
+			sections.Select(currentIndex)
+		}
+
 		return updateContentMsg(m.selectedSection())
 	})
 }
