@@ -126,6 +126,13 @@ func runCLI(args []string) {
 				fmt.Printf("Failed to get source: %v\n", err)
 			}
 			return
+		case "set":
+			if len(args) > 1 && args[1] == "source" {
+				if err := setSource(&config); err != nil {
+					fmt.Printf("设置源失败: %v\n", err)
+				}
+				return
+			}
 		default:
 			snippet := findSnippet(args[0], snippets)
 			fmt.Print(snippet.Content(isatty.IsTerminal(os.Stdout.Fd())))
@@ -614,16 +621,4 @@ func validateSourceName(config *Config) {
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
 		config.SourceName = defaultSourceName
 	}
-}
-
-func listSources(config Config) error {
-	sources, err := readSources(config)
-	if err != nil {
-		return fmt.Errorf("failed to read source configuration: %w", err)
-	}
-
-	for _, source := range sources {
-		fmt.Printf("%s\n", source.Name)
-	}
-	return nil
 }
