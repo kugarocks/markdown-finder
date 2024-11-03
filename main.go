@@ -142,10 +142,10 @@ func readStdin() string {
 // readSnippets reads the snippets file and returns the snippets
 func readSnippets(config Config) []Snippet {
 	var snippets []Snippet
-	file := filepath.Join(config.Home, config.File)
+	file := filepath.Join(config.Home, config.SnippetConfigFile)
 	dir, err := os.ReadFile(file)
 	if err != nil {
-		// File does not exist, create one.
+		// SnippetConfigFile does not exist, create one.
 		err := os.MkdirAll(config.Home, os.ModePerm)
 		if err != nil {
 			fmt.Printf("Unable to create directory %s, %+v", config.Home, err)
@@ -286,7 +286,7 @@ func writeSnippets(config Config, snippets []Snippet) {
 	}
 	b = append(b, '\n')
 
-	err = os.WriteFile(filepath.Join(config.Home, config.File), b, os.ModePerm)
+	err = os.WriteFile(filepath.Join(config.Home, config.SnippetConfigFile), b, os.ModePerm)
 	if err != nil {
 		fmt.Println("Could not save snippets file.", err)
 	}

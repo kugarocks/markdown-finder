@@ -17,11 +17,11 @@ import (
 // At the moment, it is quite limited, only supporting the home folder and the
 // file name of the metadata.
 type Config struct {
-	Home string `env:"MDF_HOME" yaml:"home"`
-	File string `env:"MDF_FILE" yaml:"file"`
+	Home              string `env:"MDF_HOME" yaml:"home"`
+	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
+	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 
-	Theme string `env:"MDF_THEME" yaml:"theme"`
-
+	Theme               string `env:"MDF_THEME" yaml:"theme"`
 	PrimaryColor        string `env:"MDF_PRIMARY_COLOR" yaml:"primary_color"`
 	PrimaryColorSubdued string `env:"MDF_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
 	BrightGreenColor    string `env:"MDF_BRIGHT_GREEN" yaml:"bright_green"`
@@ -39,7 +39,8 @@ type Config struct {
 func newConfig() Config {
 	return Config{
 		Home:                defaultHome(),
-		File:                "snippet-config.json",
+		SourceConfigFile:    "source-config.json",
+		SnippetConfigFile:   "snippet-config.json",
 		Theme:               "dracula",
 		PrimaryColor:        "#AFBEE1",
 		PrimaryColorSubdued: "#64708D",
