@@ -73,6 +73,9 @@ type Model struct {
 
 	// markdown render
 	mdRender *glamour.TermRenderer
+
+	// 添加新字段
+	hideSnippetPane bool // 控制是否隐藏 snippetPane
 }
 
 // Init initialzes the application model.
@@ -80,14 +83,17 @@ func (m *Model) Init() tea.Cmd {
 	m.SectionsMap = make(map[Snippet]*list.Model)
 	m.updateKeyMap()
 
+	if m.hideSnippetPane {
+		m.pane = sectionPane
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
+		m.SectionStyle = DefaultStyles(m.config).Sections.Focused
+		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
+	}
+
 	return func() tea.Msg {
 		return updateContentMsg(m.selectedSection())
 	}
 }
-
-// updateSectionMsg tells the application to update the section view with the
-// given snippet.
-type updateSectionMsg Snippet
 
 // updateContentMsg tells the application to update the content view with the
 // given section.
@@ -171,9 +177,27 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case key.Matches(msg, m.keys.NextPane):
-			m.nextPane()
+			if m.hideSnippetPane {
+				// 当隐藏 snippetPane 时，只在 sectionPane 和 contentPane 之间切换
+				if m.pane == sectionPane {
+					m.pane = contentPane
+				} else {
+					m.pane = sectionPane
+				}
+			} else {
+				m.nextPane()
+			}
 		case key.Matches(msg, m.keys.PreviousPane):
-			m.previousPane()
+			if m.hideSnippetPane {
+				// 当隐藏 snippetPane 时，只在 sectionPane 和 contentPane 之间切换
+				if m.pane == sectionPane {
+					m.pane = contentPane
+				} else {
+					m.pane = sectionPane
+				}
+			} else {
+				m.previousPane()
+			}
 		case key.Matches(msg, m.keys.Quit):
 			m.state = quittingState
 			return m, tea.Quit
@@ -388,14 +412,6 @@ func (m *Model) displayKeyHint(hints []keyHint) {
 	m.Code.SetContent(s.String())
 }
 
-// displayError updates the content viewport with the error message provided.
-func (m *Model) displayError(error string) {
-	m.LineNumbers.SetContent(" ~ ")
-	m.Code.SetContent(fmt.Sprintf("%s",
-		m.ContentStyle.EmptyHint.Render(error),
-	))
-}
-
 // writeLineNumbers writes the number of line numbers to the line number
 // viewport.
 func (m *Model) writeLineNumbers(n int) {
@@ -538,20 +554,24 @@ func (m *Model) View() string {
 		}
 	}
 
-	return lipgloss.JoinVertical(
-		lipgloss.Top,
-		lipgloss.JoinHorizontal(
-			lipgloss.Left,
-			m.SnippetStyle.Base.Render(snippetTitleBar+snippetList.View()),
-			m.SectionStyle.Base.Render(sectionTitleBar+sectionList.View()),
-			lipgloss.JoinVertical(lipgloss.Top,
-				contentTitleBar,
-				lipgloss.JoinHorizontal(lipgloss.Left,
-					m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),
-					m.ContentStyle.Code.Render(m.Code.View()),
-				),
+	var components []string
+	if !m.hideSnippetPane {
+		components = append(components, m.SnippetStyle.Base.Render(snippetTitleBar+snippetList.View()))
+	}
+	components = append(components,
+		m.SectionStyle.Base.Render(sectionTitleBar+sectionList.View()),
+		lipgloss.JoinVertical(lipgloss.Top,
+			contentTitleBar,
+			lipgloss.JoinHorizontal(lipgloss.Left,
+				m.ContentStyle.LineNumber.Render(m.LineNumbers.View()),
+				m.ContentStyle.Code.Render(m.Code.View()),
 			),
 		),
+	)
+
+	return lipgloss.JoinVertical(
+		lipgloss.Top,
+		lipgloss.JoinHorizontal(lipgloss.Left, components...),
 		helpStyle.Render(m.help.View(m.keys)),
 	)
 }

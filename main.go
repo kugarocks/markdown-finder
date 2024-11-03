@@ -439,6 +439,7 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 		}
 	}
 
+	hideSnippetPane := false
 	selectedFolder := folderList.SelectedItem().(Folder)
 	snippetsMap := map[Folder]*list.Model{}
 	for folder, items := range folders {
@@ -448,6 +449,7 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 			for idx, item := range snippetList.Items() {
 				if s, ok := item.(Snippet); ok && s.File == targetSnippet.File {
 					snippetList.Select(idx)
+					hideSnippetPane = true
 					break
 				}
 			}
@@ -468,16 +470,17 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 
 	content := viewport.New(80, 0)
 	m := &Model{
-		SnippetsMap:  snippetsMap,
-		Folders:      folderList,
-		Code:         content,
-		ContentStyle: defaultStyles.Content.Blurred,
-		SnippetStyle: defaultStyles.Snippets.Focused,
-		SectionStyle: defaultStyles.Sections.Blurred,
-		keys:         DefaultKeyMap,
-		help:         help.New(),
-		config:       config,
-		mdRender:     mdRender,
+		SnippetsMap:     snippetsMap,
+		Folders:         folderList,
+		Code:            content,
+		ContentStyle:    defaultStyles.Content.Blurred,
+		SnippetStyle:    defaultStyles.Snippets.Focused,
+		SectionStyle:    defaultStyles.Sections.Blurred,
+		keys:            DefaultKeyMap,
+		help:            help.New(),
+		config:          config,
+		mdRender:        mdRender,
+		hideSnippetPane: hideSnippetPane,
 	}
 	p := tea.NewProgram(m, tea.WithAltScreen())
 	model, err := p.Run()
