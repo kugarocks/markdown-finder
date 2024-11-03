@@ -17,32 +17,29 @@ import (
 // At the moment, it is quite limited, only supporting the home folder and the
 // file name of the metadata.
 type Config struct {
-	Home string `env:"NAP_HOME" yaml:"home"`
-	File string `env:"NAP_FILE" yaml:"file"`
+	Home string `env:"MDF_HOME" yaml:"home"`
+	File string `env:"MDF_FILE" yaml:"file"`
 
-	DefaultLanguage string `env:"NAP_DEFAULT_LANGUAGE" yaml:"default_language"`
+	Theme string `env:"MDF_THEME" yaml:"theme"`
 
-	Theme string `env:"NAP_THEME" yaml:"theme"`
-
-	PrimaryColor        string `env:"NAP_PRIMARY_COLOR" yaml:"primary_color"`
-	PrimaryColorSubdued string `env:"NAP_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
-	BrightGreenColor    string `env:"NAP_BRIGHT_GREEN" yaml:"bright_green"`
-	GreenColor          string `env:"NAP_GREEN" yaml:"green"`
-	BrightRedColor      string `env:"NAP_BRIGHT_RED" yaml:"bright_red"`
-	RedColor            string `env:"NAP_RED" yaml:"red"`
-	ForegroundColor     string `env:"NAP_FOREGROUND" yaml:"foreground"`
-	BackgroundColor     string `env:"NAP_BACKGROUND" yaml:"background"`
-	GrayColor           string `env:"NAP_GRAY" yaml:"gray"`
-	BlackColor          string `env:"NAP_BLACK" yaml:"black"`
-	WhiteColor          string `env:"NAP_WHITE" yaml:"white"`
-	MarginTop           int    `env:"NAP_MARGIN_TOP" yaml:"margin_top"`
+	PrimaryColor        string `env:"MDF_PRIMARY_COLOR" yaml:"primary_color"`
+	PrimaryColorSubdued string `env:"MDF_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
+	BrightGreenColor    string `env:"MDF_BRIGHT_GREEN" yaml:"bright_green"`
+	GreenColor          string `env:"MDF_GREEN" yaml:"green"`
+	BrightRedColor      string `env:"MDF_BRIGHT_RED" yaml:"bright_red"`
+	RedColor            string `env:"MDF_RED" yaml:"red"`
+	ForegroundColor     string `env:"MDF_FOREGROUND" yaml:"foreground"`
+	BackgroundColor     string `env:"MDF_BACKGROUND" yaml:"background"`
+	GrayColor           string `env:"MDF_GRAY" yaml:"gray"`
+	BlackColor          string `env:"MDF_BLACK" yaml:"black"`
+	WhiteColor          string `env:"MDF_WHITE" yaml:"white"`
+	MarginTop           int    `env:"MDF_MARGIN_TOP" yaml:"margin_top"`
 }
 
 func newConfig() Config {
 	return Config{
 		Home:                defaultHome(),
 		File:                "snippet-config.json",
-		DefaultLanguage:     defaultLanguage,
 		Theme:               "dracula",
 		PrimaryColor:        "#AFBEE1",
 		PrimaryColorSubdued: "#64708D",
@@ -61,14 +58,15 @@ func newConfig() Config {
 
 // default helpers for the configuration.
 // We use $XDG_DATA_HOME to avoid cluttering the user's home directory.
-func defaultHome() string { return filepath.Join(xdg.DataHome, "nap") }
+// For macOS: ~/Library/Application Support/mdf
+func defaultHome() string { return filepath.Join(xdg.DataHome, "mdf") }
 
 // defaultConfig returns the default config path
 func defaultConfig() string {
-	if c := os.Getenv("NAP_CONFIG"); c != "" {
+	if c := os.Getenv("MDF_CONFIG"); c != "" {
 		return c
 	}
-	cfgPath, err := xdg.ConfigFile("nap/config.yaml")
+	cfgPath, err := xdg.ConfigFile("mdf/config.yaml")
 	if err != nil {
 		return "config.yaml"
 	}

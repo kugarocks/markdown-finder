@@ -14,7 +14,7 @@ import (
 const (
 	defaultSnippetFolder   = "default"
 	defaultLanguage        = "md"
-	defaultSnippetName     = "Untitled Snippet"
+	defaultSnippetName     = "default"
 	defaultSnippetFileName = defaultSnippetName + "." + defaultLanguage
 )
 
