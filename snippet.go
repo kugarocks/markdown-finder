@@ -12,9 +12,9 @@ import (
 
 // default values for empty state.
 const (
-	defaultSnippetFolder   = "default"
+	defaultSnippetFolder   = "folder"
 	defaultLanguage        = "md"
-	defaultSnippetName     = "default"
+	defaultSnippetName     = "Example"
 	defaultSnippetFileName = defaultSnippetName + "." + defaultLanguage
 )
 

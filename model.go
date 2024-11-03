@@ -240,7 +240,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 // selectedSnippetFilePath returns the file path of the snippet that is
 // currently selected.
 func (m *Model) selectedSnippetFilePath() string {
-	return filepath.Join(m.config.Home, m.selectedSnippet().Path())
+	return filepath.Join(m.config.getSourcePath(), m.selectedSnippet().Path())
 }
 
 // nextPane sets the next pane to be active.
@@ -302,7 +302,8 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 		return
 	}
 
-	snippetContentBytes, err := os.ReadFile(filepath.Join(m.config.Home, snippet.Path()))
+	sourcePath := m.config.getSourcePath()
+	snippetContentBytes, err := os.ReadFile(filepath.Join(sourcePath, snippet.Path()))
 	if err != nil {
 		m.displayKeyHint(m.noContentHints())
 		return
@@ -322,7 +323,7 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 		content = strings.TrimSpace(content)
 		mdElem, err = m.parseMarkdown(content)
 		if err != nil {
-			return
+			continue
 		}
 		sectionSlice = append(sectionSlice, Section{
 			Folder:     snippet.Folder,
@@ -505,10 +506,9 @@ func (m *Model) View() string {
 	snippetList := m.Snippets()
 	sectionList := m.Sections()
 	selectedSnippet := m.selectedSnippet()
-	selectedSection := m.selectedSection()
 	snippetTitleBar := m.SnippetStyle.TitleBar.Render("Snippets")
 	sectionTitleBar := m.SectionStyle.TitleBar.Render(selectedSnippet.Name)
-	contentTitleBar := m.ContentStyle.Title.Render(selectedSection.Title)
+	contentTitleBar := m.ContentStyle.Title.Render("Content")
 
 	if m.pane == snippetPane {
 		if m.state == copyingState {

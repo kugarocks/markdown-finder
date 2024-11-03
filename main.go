@@ -51,6 +51,32 @@ Create:
 	defaultSnippetConfigJson = `{
 	"snippet_list": []
 }`
+
+	defaultSnippetContent = `## Quick Start
+
+* e - edit snippet
+* c/d - copy code block
+* use "---" to separate sections
+* each section needs a title
+
+` + "```bash" + `
+echo "hello world"
+` + "```" + `
+
+` + "```bash" + `
+echo "Bananaaaaa 🍌"
+` + "```" + `
+
+---
+
+## Charm.sh
+
+We make the command line glamorous.
+
+` + "```bash" + `
+echo "Charm Rocks 🚀"
+` + "```" + `
+`
 )
 
 func main() {
@@ -59,6 +85,13 @@ func main() {
 
 func runCLI(args []string) {
 	config := readConfig()
+
+	err := initDefaultSource(config)
+	if err != nil {
+		fmt.Println("Init default source failed", err)
+		return
+	}
+
 	snippets := readSnippets(config)
 	snippets = scanSnippets(config, snippets)
 
@@ -81,7 +114,7 @@ func runCLI(args []string) {
 		return
 	}
 
-	err := runInteractiveMode(config, snippets)
+	err = runInteractiveMode(config, snippets)
 	if err != nil {
 		fmt.Println("Alas, there's been an error", err)
 	}
@@ -153,13 +186,14 @@ func readStdin() string {
 // readSnippets reads the snippets file and returns the snippets
 func readSnippets(config Config) []Snippet {
 	var snippets []Snippet
-	file := filepath.Join(config.Home, config.SnippetConfigFile)
+	sourcePath := config.getSourcePath()
+	file := filepath.Join(sourcePath, config.SnippetConfigFile)
 	dir, err := os.ReadFile(file)
 	if err != nil {
 		// SnippetConfigFile does not exist, create one.
-		err := os.MkdirAll(config.Home, os.ModePerm)
+		err := os.MkdirAll(sourcePath, os.ModePerm)
 		if err != nil {
-			fmt.Printf("Unable to create directory %s, %+v", config.Home, err)
+			fmt.Printf("Unable to create directory %s, %+v", sourcePath, err)
 		}
 		f, err := os.Create(file)
 		if err != nil {
@@ -191,7 +225,8 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		return false
 	}
 
-	homeEntries, err := os.ReadDir(config.Home)
+	sourcePath := config.getSourcePath()
+	homeEntries, err := os.ReadDir(sourcePath)
 	if err != nil {
 		fmt.Printf("could not scan config home: %v\n", err)
 		return snippets
@@ -205,7 +240,7 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 			continue
 		}
 
-		folderPath := filepath.Join(config.Home, homeEntry.Name())
+		folderPath := filepath.Join(sourcePath, homeEntry.Name())
 		folderEntries, err := os.ReadDir(folderPath)
 		if err != nil {
 			fmt.Printf("could not scan %q: %v\n", folderPath, err)
@@ -235,7 +270,7 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 
 	var idx int
 	for _, snippet := range snippets {
-		snippetPath := filepath.Join(config.Home, snippet.Path())
+		snippetPath := filepath.Join(sourcePath, snippet.Path())
 		if _, err := os.Stat(snippetPath); !errors.Is(err, fs.ErrNotExist) {
 			snippets[idx] = snippet
 			idx++
@@ -297,7 +332,8 @@ func writeSnippets(config Config, snippets []Snippet) {
 	}
 	b = append(b, '\n')
 
-	err = os.WriteFile(filepath.Join(config.Home, config.SnippetConfigFile), b, os.ModePerm)
+	sourcePath := config.getSourcePath()
+	err = os.WriteFile(filepath.Join(sourcePath, config.SnippetConfigFile), b, os.ModePerm)
 	if err != nil {
 		fmt.Println("Could not save snippets file.", err)
 	}
@@ -415,4 +451,37 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.Styles.TitleBar = styles.TitleBar
 
 	return &snippetList
+}
+
+func initDefaultSource(config Config) error {
+	// 只有当配置的源名称为默认源时才进行初始化
+	if config.SourceName != defaultSourceName {
+		return nil
+	}
+
+	// 获取完整的源路径
+	sourcePath := config.getSourcePath()
+
+	// 构建默认片段文件夹的完整路径
+	defaultFolderPath := filepath.Join(sourcePath, defaultSnippetFolder)
+
+	// 检查并创建默认文件夹
+	if _, err := os.Stat(defaultFolderPath); os.IsNotExist(err) {
+		if err := os.MkdirAll(defaultFolderPath, os.ModePerm); err != nil {
+			return fmt.Errorf("failed to create default folder: %w", err)
+		}
+	}
+
+	// 构建默认片段文件的完整路径
+	defaultFilePath := filepath.Join(defaultFolderPath, defaultSnippetFileName)
+
+	// 检查默认文件是否存在
+	if _, err := os.Stat(defaultFilePath); os.IsNotExist(err) {
+		// 创建并写入默认内容
+		if err := os.WriteFile(defaultFilePath, []byte(defaultSnippetContent), os.ModePerm); err != nil {
+			return fmt.Errorf("failed to create default snippet file: %w", err)
+		}
+	}
+
+	return nil
 }

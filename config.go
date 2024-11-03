@@ -40,6 +40,7 @@ type Config struct {
 func newConfig() Config {
 	return Config{
 		Home:                defaultHome(),
+		SourceName:          defaultSourceName,
 		SourceConfigFile:    "source-config.json",
 		SnippetConfigFile:   "snippet-config.json",
 		Theme:               "dracula",
@@ -120,4 +121,10 @@ func (config Config) writeConfig() error {
 	}
 
 	return nil
+}
+
+// getSourcePath returns the full path for the configured source name
+func (config Config) getSourcePath() string {
+	parts := strings.Split(config.SourceName, "/")
+	return filepath.Join(append([]string{config.Home, "sources"}, parts...)...)
 }

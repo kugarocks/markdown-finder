@@ -67,10 +67,12 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 
 	if index == m.Index() {
 		fmt.Fprintln(w, "  "+titleStyle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-		fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+		fmt.Fprint(w, "  "+subtitleStyle.Render(humanizeTime(s.Date)))
+		// fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 		return
 	}
 	fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
+	fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(humanizeTime(s.Date)))
 	//fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 }
 
