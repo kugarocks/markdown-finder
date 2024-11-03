@@ -19,11 +19,7 @@
     "bold": true
   },
   "h1": {
-    "prefix": " ",
-    "suffix": " ",
-    "color": "228",
-    "background_color": "63",
-    "bold": true
+    "prefix": "# "
   },
   "h2": {
     "prefix": "## "

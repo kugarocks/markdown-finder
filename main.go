@@ -9,6 +9,7 @@ import (
 	"io/fs"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -107,6 +108,16 @@ func runCLI(args []string) {
 			listSnippets(snippets)
 		case "-h", "--help":
 			fmt.Println(helpText)
+		case "get":
+			if len(args) < 3 || args[1] != "source" {
+				fmt.Println("用法: mdf get source <user/repo>")
+				return
+			}
+			err := getSource(config, args[2])
+			if err != nil {
+				fmt.Printf("获取源失败: %v\n", err)
+			}
+			return
 		default:
 			snippet := findSnippet(args[0], snippets)
 			fmt.Print(snippet.Content(isatty.IsTerminal(os.Stdout.Fd())))
@@ -483,5 +494,86 @@ func initDefaultSource(config Config) error {
 		}
 	}
 
+	return nil
+}
+
+func parseGitHubURL(repoURL string) (user, repo string, err error) {
+	// 支持的格式:
+	// https://github.com/user/repo.git
+	// https://github.com/user/repo
+	// git@github.com:user/repo.git
+	// user/repo
+
+	// 移除 .git 后缀
+	repoURL = strings.TrimSuffix(repoURL, ".git")
+
+	// 处理 SSH 格式
+	if strings.HasPrefix(repoURL, "git@github.com:") {
+		parts := strings.Split(strings.TrimPrefix(repoURL, "git@github.com:"), "/")
+		if len(parts) != 2 {
+			return "", "", fmt.Errorf("无效的 GitHub 仓库地址: %s", repoURL)
+		}
+		return parts[0], parts[1], nil
+	}
+
+	// 处理 HTTPS 格式
+	if strings.HasPrefix(repoURL, "https://github.com/") {
+		parts := strings.Split(strings.TrimPrefix(repoURL, "https://github.com/"), "/")
+		if len(parts) != 2 {
+			return "", "", fmt.Errorf("无效的 GitHub 仓库地址: %s", repoURL)
+		}
+		return parts[0], parts[1], nil
+	}
+
+	// 处理简短格式 user/repo
+	parts := strings.Split(repoURL, "/")
+	if len(parts) != 2 {
+		return "", "", fmt.Errorf("无效的 GitHub 仓库地址: %s", repoURL)
+	}
+	return parts[0], parts[1], nil
+}
+
+func getSource(config Config, repoURL string) error {
+	// 解析 GitHub 仓库 URL
+	user, repo, err := parseGitHubURL(repoURL)
+	if err != nil {
+		return err
+	}
+
+	// 读取现有源
+	sources, err := readSources(config)
+	if err != nil {
+		return fmt.Errorf("读取源配置失败: %w", err)
+	}
+
+	// 检查源是否已存在
+	sourceName := fmt.Sprintf("%s/%s", user, repo)
+	for _, source := range sources {
+		if source.Name == sourceName {
+			return fmt.Errorf("源 %s 已存在", sourceName)
+		}
+	}
+
+	// 创建源目录
+	sourcePath := filepath.Join(config.getSourceBase(), user, repo)
+	err = os.MkdirAll(sourcePath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("创建源目录失败: %w", err)
+	}
+
+	// 克隆仓库
+	cmd := exec.Command("git", "clone", repoURL, sourcePath)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("克隆仓库失败: %s: %w", string(output), err)
+	}
+
+	// 保存配置
+	err = writeSources(config, sources)
+	if err != nil {
+		return fmt.Errorf("保存源配置失败: %w", err)
+	}
+
+	fmt.Printf("成功添加源: %s\n", sourceName)
 	return nil
 }

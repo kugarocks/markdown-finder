@@ -128,3 +128,8 @@ func (config Config) getSourcePath() string {
 	parts := strings.Split(config.SourceName, "/")
 	return filepath.Join(append([]string{config.Home, "sources"}, parts...)...)
 }
+
+// getSourceBase returns the base path for the configured source name
+func (config Config) getSourceBase() string {
+	return filepath.Join(config.Home, "sources")
+}
