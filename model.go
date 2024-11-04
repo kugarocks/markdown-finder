@@ -536,6 +536,11 @@ func (m *Model) View() string {
 	sectionTitleBar := m.SectionStyle.TitleBar.Render(selectedSnippet.Name)
 	contentTitleBar := m.ContentStyle.Title.Render("Content")
 
+	if m.hideSnippetPane {
+		detailTitle := fmt.Sprintf("%s / %s", selectedSnippet.Folder, selectedSnippet.Name)
+		sectionTitleBar = m.SectionStyle.TitleBar.Render(detailTitle)
+	}
+
 	if m.pane == snippetPane {
 		if m.state == copyingState {
 			snippetTitleBar = m.SnippetStyle.CopiedTitleBar.Render("Copied")
