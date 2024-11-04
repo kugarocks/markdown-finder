@@ -40,10 +40,10 @@ echo "Bananaaaaa 🍌"
 
 ## Charm.sh
 
--We make the command line glamorous.
+We make the command line glamorous.
 
 ` + "```bash" + `
--echo "Charm Rocks 🚀"
+echo "Charm Rocks 🚀"
 ` + "```" + `
 `
 )
