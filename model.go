@@ -83,12 +83,10 @@ func (m *Model) Init() tea.Cmd {
 	m.SectionsMap = make(map[Snippet]*list.Model)
 	m.updateKeyMap()
 
-	if m.hideSnippetPane {
-		m.pane = sectionPane
-		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
-		m.SectionStyle = DefaultStyles(m.config).Sections.Focused
-		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
-	}
+	m.pane = sectionPane
+	m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
+	m.SectionStyle = DefaultStyles(m.config).Sections.Focused
+	m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 
 	return func() tea.Msg {
 		return updateContentMsg(m.selectedSection())
@@ -177,27 +175,9 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 
 		switch {
 		case key.Matches(msg, m.keys.NextPane):
-			if m.hideSnippetPane {
-				// 当隐藏 snippetPane 时，只在 sectionPane 和 contentPane 之间切换
-				if m.pane == sectionPane {
-					m.pane = contentPane
-				} else {
-					m.pane = sectionPane
-				}
-			} else {
-				m.nextPane()
-			}
+			m.nextPane()
 		case key.Matches(msg, m.keys.PreviousPane):
-			if m.hideSnippetPane {
-				// 当隐藏 snippetPane 时，只在 sectionPane 和 contentPane 之间切换
-				if m.pane == sectionPane {
-					m.pane = contentPane
-				} else {
-					m.pane = sectionPane
-				}
-			} else {
-				m.previousPane()
-			}
+			m.previousPane()
 		case key.Matches(msg, m.keys.Quit):
 			m.state = quittingState
 			return m, tea.Quit
@@ -270,6 +250,9 @@ func (m *Model) selectedSnippetFilePath() string {
 // nextPane sets the next pane to be active.
 func (m *Model) nextPane() {
 	m.pane = (m.pane + 1) % maxPane
+	if m.hideSnippetPane && m.pane == snippetPane {
+		m.pane = sectionPane
+	}
 }
 
 // previousPane sets the previous pane to be active.
@@ -277,6 +260,9 @@ func (m *Model) previousPane() {
 	m.pane--
 	if m.pane < 0 {
 		m.pane = maxPane - 1
+	}
+	if m.hideSnippetPane && m.pane == snippetPane {
+		m.pane = contentPane
 	}
 }
 

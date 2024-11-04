@@ -22,51 +22,6 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-var (
-	helpText = strings.TrimSpace(`
-Nap is a code snippet manager for your terminal.
-https://github.com/maaslalani/nap
-
-Usage:
-  nap           - for interactive mode
-  nap list      - list all snippets
-  nap <snippet> - print snippet to stdout
-
-Create:
-  nap < main.go                 - save snippet from stdin
-  nap example/main.go < main.go - save snippet with name`)
-
-	defaultSnippetConfigJson = `{
-	"snippet_list": []
-}`
-
-	defaultSnippetContent = `## Quick Start
-
-* e - edit snippet
-* c/d - copy code block
-* use "---" to separate sections
-* each section needs a title
-
-` + "```bash" + `
-echo "hello world"
-` + "```" + `
-
-` + "```bash" + `
-echo "Bananaaaaa 🍌"
-` + "```" + `
-
----
-
-## Charm.sh
-
-We make the command line glamorous.
-
-` + "```bash" + `
-echo "Charm Rocks 🚀"
-` + "```" + `
-`
-)
-
 func main() {
 	runCLI(os.Args[1:])
 }
@@ -132,7 +87,7 @@ func runCLI(args []string) {
 	} else if len(args) == 1 {
 		switch args[0] {
 		case "-h", "--help":
-			fmt.Println(helpText)
+			fmt.Print(HELP_TEXT)
 			return
 		default:
 			targetSnippet = findSnippet(args[0], snippets)
@@ -162,7 +117,7 @@ func readSnippets(config Config) []Snippet {
 			fmt.Printf("Unable to create file %s, %+v", file, err)
 		}
 		defer f.Close()
-		dir = []byte(defaultSnippetConfigJson)
+		dir = []byte(DEFAULT_SNIPPET_CONFIG)
 		_, _ = f.Write(dir)
 	}
 
@@ -432,7 +387,7 @@ func initDefaultSource(config Config) error {
 
 	defaultFilePath := filepath.Join(defaultFolderPath, defaultSnippetFileName)
 	if _, err := os.Stat(defaultFilePath); os.IsNotExist(err) {
-		if err := os.WriteFile(defaultFilePath, []byte(defaultSnippetContent), os.ModePerm); err != nil {
+		if err := os.WriteFile(defaultFilePath, []byte(DEFAULT_SNIPPET_CONTENT), os.ModePerm); err != nil {
 			return fmt.Errorf("failed to create default snippet file: %w", err)
 		}
 	}
