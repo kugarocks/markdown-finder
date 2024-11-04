@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/glamour/ansi"
+	"github.com/charmbracelet/glamour/styles"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -90,6 +92,7 @@ type Styles struct {
 	Snippets SnippetsStyle
 	Sections SectionsStyle
 	Content  ContentStyle
+	Glamour  map[string]ansi.StyleConfig
 }
 
 var helpStyle = lipgloss.NewStyle().Margin(0, 0, 0, 1)
@@ -99,22 +102,28 @@ var helpStyle = lipgloss.NewStyle().Margin(0, 0, 0, 1)
 func DefaultStyles(config Config) Styles {
 	white := lipgloss.Color(config.WhiteColor)
 	gray := lipgloss.Color(config.GrayColor)
-	//black := lipgloss.Color(config.BackgroundColor)
 	brightBlack := lipgloss.Color(config.BlackColor)
 	green := lipgloss.Color(config.GreenColor)
 	brightGreen := lipgloss.Color(config.BrightGreenColor)
 	brightBlue := lipgloss.Color(config.PrimaryColor)
 	blue := lipgloss.Color(config.PrimaryColorSubdued)
-	
+
 	defaultItemStyle := list.NewDefaultItemStyles()
 	sectionBarWidth := 36
 	contentBarWidth := 86
 	snippetListMarginLeft := 1
-	
+
 	sectionSelectedTitle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
 	sectionUnselectedTitle := lipgloss.NewStyle().PaddingLeft(4)
 	sectionCopiedTitle := list.NewDefaultItemStyles().SelectedTitle.Foreground(brightGreen).MarginLeft(1).BorderLeft(false)
-	
+
+	var marginZero uint = 0
+	glamourDarkStyle := styles.DarkStyleConfig
+	glamourDarkStyle.H1 = glamourDarkStyle.H2
+	glamourDarkStyle.CodeBlock.Margin = &marginZero
+	glamourDarkStyle.CodeBlock.StylePrimitive.BlockPrefix = "------------- CodeBlock -------------\n"
+	glamourDarkStyle.CodeBlock.StylePrimitive.BlockSuffix = "---------------- End ----------------\n"
+
 	return Styles{
 		Snippets: SnippetsStyle{
 			Focused: SnippetsBaseStyle{
@@ -175,6 +184,9 @@ func DefaultStyles(config Config) Styles {
 				EmptyHintKey:   lipgloss.NewStyle().Foreground(brightBlue),
 				CopiedTitleBar: lipgloss.NewStyle().Background(green).Width(contentBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(0, 1).Foreground(white),
 			},
+		},
+		Glamour: map[string]ansi.StyleConfig{
+			"dark": glamourDarkStyle,
 		},
 	}
 }

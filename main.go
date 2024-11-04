@@ -1,13 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -38,15 +35,6 @@ Usage:
 Create:
   nap < main.go                 - save snippet from stdin
   nap example/main.go < main.go - save snippet with name`)
-
-	// 	defaultSourceConfigJson = `{
-	// 	"source_list": [
-	// 		{
-	// 			"name": "local/default",
-	// 			"repo": "https://github.com/local/default"
-	// 		}
-	// 	]
-	// }`
 
 	defaultSnippetConfigJson = `{
 	"snippet_list": []
@@ -97,12 +85,6 @@ func runCLI(args []string) {
 	snippets = scanSnippets(config, snippets)
 
 	initFolderName(&config, snippets)
-
-	stdin := readStdin()
-	if stdin != "" {
-		saveSnippet(stdin, args, config, snippets)
-		return
-	}
 
 	var targetSnippet Snippet
 	if len(args) > 1 {
@@ -161,69 +143,6 @@ func runCLI(args []string) {
 	if err != nil {
 		fmt.Println("Alas, there's been an error", err)
 	}
-}
-
-// parseName returns a folder, name, and language for the given name.
-// this is useful for parsing file names when passed as command line arguments.
-//
-// Example:
-//
-//	Notes/Hello.go -> (Notes, Hello, go)
-//	Hello.go       -> (Misc, Hello, go)
-//	Notes/Hello    -> (Notes, Hello, go)
-func parseName(s string) (string, string, string) {
-	var (
-		folder    = defaultSnippetFolder
-		name      = defaultSnippetName
-		language  = defaultLanguage
-		remaining string
-	)
-
-	tokens := strings.Split(s, "/")
-	if len(tokens) > 1 {
-		folder = tokens[0]
-		remaining = tokens[1]
-	} else {
-		remaining = tokens[0]
-	}
-
-	tokens = strings.Split(remaining, ".")
-	if len(tokens) > 1 {
-		name = tokens[0]
-		language = tokens[1]
-	} else {
-		name = tokens[0]
-	}
-
-	return folder, name, language
-}
-
-// readStdin returns the stdin that is piped in to the command line interface.
-func readStdin() string {
-	stat, err := os.Stdin.Stat()
-	if err != nil {
-		return ""
-	}
-
-	if stat.Mode()&os.ModeCharDevice != 0 {
-		return ""
-	}
-
-	reader := bufio.NewReader(os.Stdin)
-	var b strings.Builder
-
-	for {
-		r, _, err := reader.ReadRune()
-		if err != nil && err == io.EOF {
-			break
-		}
-		_, err = b.WriteRune(r)
-		if err != nil {
-			return ""
-		}
-	}
-
-	return b.String()
 }
 
 // readSnippets reads the snippets file and returns the snippets
@@ -329,39 +248,6 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 	return snippets
 }
 
-func saveSnippet(content string, args []string, config Config, snippets []Snippet) {
-	// Save snippet to location
-	name := defaultSnippetName
-	if len(args) > 0 {
-		name = strings.Join(args, " ")
-	}
-
-	folder, name, language := parseName(name)
-	file := fmt.Sprintf("%s.%s", name, language)
-	filePath := filepath.Join(config.Home, folder, file)
-	if err := os.MkdirAll(filepath.Dir(filePath), os.ModePerm); err != nil {
-		fmt.Println("unable to create folder")
-		return
-	}
-	err := os.WriteFile(filePath, []byte(content), 0o644)
-	if err != nil {
-		fmt.Println("unable to create snippet")
-		return
-	}
-
-	// Add snippet metadata
-	snippet := Snippet{
-		Folder:   folder,
-		Date:     time.Now(),
-		Name:     name,
-		File:     file,
-		Language: language,
-	}
-
-	snippets = append([]Snippet{snippet}, snippets...)
-	writeSnippets(config, snippets)
-}
-
 // writeSnippets writes the snippets to the snippets file
 func writeSnippets(config Config, snippets []Snippet) {
 	wrapper := SnippetsWrapper{
@@ -457,16 +343,8 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 	}
 
 	mdRender, _ := glamour.NewTermRenderer(
-		glamour.WithStylesFromJSONFile("dark.json"),
+		glamour.WithStyles(defaultStyles.Glamour["dark"]),
 	)
-
-	// log file
-	file, err := os.OpenFile("app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Fatalf("Unable to open log file: %v", err)
-	}
-	defer file.Close()
-	log.SetOutput(file)
 
 	content := viewport.New(80, 0)
 	m := &Model{
@@ -511,7 +389,6 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	snippetList.FilterInput.Prompt = "Find: "
 	snippetList.FilterInput.PromptStyle = styles.Title
 	snippetList.SetStatusBarItemName("Snippet", "Snippets")
-	//snippetList.SetShowStatusBar(false)
 	snippetList.DisableQuitKeybindings()
 	snippetList.Styles.Title = styles.Title
 	snippetList.Styles.TitleBar = styles.TitleBar
