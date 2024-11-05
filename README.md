@@ -13,7 +13,7 @@ making it easy to copy code from each section.
 Build from source:
 
 ```bash
-go build -o mdf main.go
+go build -o mdf .
 ```
 
 ## GitHub Source
