@@ -117,10 +117,9 @@ func DefaultStyles(config Config) Styles {
 	sectionUnselectedTitle := lipgloss.NewStyle().PaddingLeft(4)
 	sectionCopiedTitle := list.NewDefaultItemStyles().SelectedTitle.Foreground(brightGreen).MarginLeft(1).BorderLeft(false)
 
-	var marginZero uint = 0
 	glamourDarkStyle := styles.DarkStyleConfig
 	glamourDarkStyle.H1 = glamourDarkStyle.H2
-	glamourDarkStyle.CodeBlock.Margin = &marginZero
+	glamourDarkStyle.CodeBlock.Margin = &CodeBlockMarginZero
 	glamourDarkStyle.CodeBlock.StylePrimitive.BlockPrefix = CodeBlockPrefix + "\n"
 	glamourDarkStyle.CodeBlock.StylePrimitive.BlockSuffix = CodeBlockSuffix + "\n"
 

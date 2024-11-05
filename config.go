@@ -16,6 +16,7 @@ var (
 	CodeBlockPrefix     = "------------- CodeBlock -------------"
 	CodeBlockSuffix     = "---------------- End ----------------"
 	CodeBlockCopyPrefix = "---------- Press %s to copy ----------"
+	CodeBlockMarginZero = uint(0)
 
 	HelpText = `
 Nap is a code snippet manager for your terminal.
