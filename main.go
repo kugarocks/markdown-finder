@@ -87,7 +87,7 @@ func runCLI(args []string) {
 	} else if len(args) == 1 {
 		switch args[0] {
 		case "-h", "--help":
-			fmt.Print(HELP_TEXT)
+			fmt.Print(HelpText)
 			return
 		default:
 			targetSnippet = findSnippet(args[0], snippets)
@@ -117,7 +117,7 @@ func readSnippets(config Config) []Snippet {
 			fmt.Printf("Unable to create file %s, %+v", file, err)
 		}
 		defer f.Close()
-		dir = []byte(DEFAULT_SNIPPET_CONFIG)
+		dir = []byte(DefaultSnippetConfig)
 		_, _ = f.Write(dir)
 	}
 
@@ -387,7 +387,7 @@ func initDefaultSource(config Config) error {
 
 	defaultFilePath := filepath.Join(defaultFolderPath, defaultSnippetFileName)
 	if _, err := os.Stat(defaultFilePath); os.IsNotExist(err) {
-		if err := os.WriteFile(defaultFilePath, []byte(DEFAULT_SNIPPET_CONTENT), os.ModePerm); err != nil {
+		if err := os.WriteFile(defaultFilePath, []byte(DefaultSnippetContent), os.ModePerm); err != nil {
 			return fmt.Errorf("failed to create default snippet file: %w", err)
 		}
 	}

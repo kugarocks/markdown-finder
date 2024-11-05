@@ -1,7 +1,7 @@
 package main
 
 const (
-	HELP_TEXT = `
+	HelpText = `
 Nap is a code snippet manager for your terminal.
 https://github.com/maaslalani/nap
 
@@ -15,11 +15,11 @@ Create:
   nap example/main.go < main.go - save snippet with name
 
 `
-	DEFAULT_SNIPPET_CONFIG = `{
+	DefaultSnippetConfig = `{
 	"snippet_list": []
 }`
 
-	DEFAULT_SNIPPET_CONTENT = `## Quick Start
+	DefaultSnippetContent = `## Quick Start
 
 * tab - switch pane
 * j/k - cursor down/up
