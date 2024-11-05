@@ -151,7 +151,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		m.updateActivePane(msg)
 		return m, cmd
 	case tea.WindowSizeMsg:
-		m.height = msg.Height - 4 - m.config.MarginTop
+		m.height = msg.Height - 4 - m.config.BaseMarginTop
 		for _, li := range m.SnippetsMap {
 			li.SetHeight(m.height)
 		}
@@ -318,20 +318,17 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 	m.SectionsMap[snippet] = &sections
 
 	if len(m.Snippets().Items()) <= 0 {
-		m.displayKeyHint(m.noSnippetHints())
 		return
 	}
 
 	sourcePath := m.config.getSourcePath()
 	snippetContentBytes, err := os.ReadFile(filepath.Join(sourcePath, snippet.Path()))
 	if err != nil {
-		m.displayKeyHint(m.noContentHints())
 		return
 	}
 	snippetContent := strings.TrimSpace(string(snippetContentBytes))
 
 	if snippetContent == "" {
-		m.displayKeyHint(m.noContentHints())
 		return
 	}
 
@@ -363,7 +360,6 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 // the active section or display the appropriate error message / hint message.
 func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	if len(m.Snippets().Items()) <= 0 {
-		m.displayKeyHint(m.noSnippetHints())
 		return m, nil
 	}
 
@@ -381,21 +377,6 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 type keyHint struct {
 	binding key.Binding
 	help    string
-}
-
-// displayKeyHint updates the content viewport with instructions on the
-// relevent key binding that the user should most likely press.
-func (m *Model) displayKeyHint(hints []keyHint) {
-	m.LineNumbers.SetContent(strings.Repeat("  ~ \n", len(hints)))
-	var s strings.Builder
-	for _, hint := range hints {
-		s.WriteString(
-			fmt.Sprintf("%s %s\n",
-				m.ContentStyle.EmptyHintKey.Render(hint.binding.Help().Key),
-				m.ContentStyle.EmptyHint.Render("• "+hint.help),
-			))
-	}
-	m.Code.SetContent(s.String())
 }
 
 // writeLineNumbers writes the number of line numbers to the line number

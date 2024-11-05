@@ -82,7 +82,7 @@ func (s Snippet) Content(highlight bool) string {
 	}
 
 	var b bytes.Buffer
-	err = quick.Highlight(&b, string(content), s.Language, "terminal16m", config.Theme)
+	err = quick.Highlight(&b, string(content), s.Language, "terminal16m", config.CodeBlockTheme)
 	if err != nil {
 		return string(content)
 	}

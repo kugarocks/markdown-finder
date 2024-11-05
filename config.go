@@ -13,30 +13,27 @@ import (
 )
 
 var (
-	BaseMarginTop = 1
-
-	CodeBlockPrefix     = "------------- CodeBlock -------------"
-	CodeBlockSuffix     = "---------------- End ----------------"
-	CodeBlockCopyPrefix = "---------- Press %s to copy ----------"
-	CodeBlockMarginZero = uint(0)
-
+	BaseMarginTop         = 1
 	SnippetTitleBarWidth  = 33
 	SectionTitleBarWidth  = 33
 	ContentTitleBarWidth  = 86
 	SnippetListMarginLeft = 1
 
-	FocusedBarBgColor     = "62"
-	FocusedBarFgColor     = "230"
-	BlurredBarBgColor     = "#64708D"
-	BlurredBarFgColor     = "#FFFFFF"
-	SelectedItemFgColor   = "170"
-	UnselectedItemFgColor = "c7c7c7"
-
+	FocusedBarBgColor        = "62"
+	FocusedBarFgColor        = "230"
+	BlurredBarBgColor        = "#64708D"
+	BlurredBarFgColor        = "#FFFFFF"
+	SelectedItemFgColor      = "170"
+	UnselectedItemFgColor    = "c7c7c7"
+	CopiedBarBgColor         = "#527251"
+	CopiedBarFgColor         = "#FFFFFF"
+	CopiedItemFgColor        = "#BCE1AF"
 	ContentLineNumberFgColor = "241"
 
-	CopiedBarBgColor  = "#527251"
-	CopiedBarFgColor  = "#FFFFFF"
-	CopiedItemFgColor = "#BCE1AF"
+	CodeBlockPrefix     = "------------- CodeBlock -------------"
+	CodeBlockSuffix     = "---------------- End ----------------"
+	CodeBlockCopyPrefix = "---------- Press %s to copy ----------"
+	CodeBlockMarginZero = uint(0)
 
 	TitlePadding      = []int{0, 1}
 	SnippetBarMargin  = []int{0, 1, 1, 2}
@@ -101,7 +98,7 @@ type Config struct {
 	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
 	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 
-	Theme               string `env:"MDF_THEME" yaml:"theme"`
+	CodeBlockTheme      string `env:"MDF_THEME" yaml:"theme"`
 	PrimaryColor        string `env:"MDF_PRIMARY_COLOR" yaml:"primary_color"`
 	PrimaryColorSubdued string `env:"MDF_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
 	BrightGreenColor    string `env:"MDF_BRIGHT_GREEN" yaml:"bright_green"`
@@ -113,7 +110,7 @@ type Config struct {
 	GrayColor           string `env:"MDF_GRAY" yaml:"gray"`
 	BlackColor          string `env:"MDF_BLACK" yaml:"black"`
 	WhiteColor          string `env:"MDF_WHITE" yaml:"white"`
-	MarginTop           int    `env:"MDF_MARGIN_TOP" yaml:"margin_top"`
+	BaseMarginTop       int    `env:"MDF_MARGIN_TOP" yaml:"margin_top"`
 }
 
 func newConfig() Config {
@@ -122,7 +119,7 @@ func newConfig() Config {
 		SourceName:          defaultSourceName,
 		SourceConfigFile:    "source-config.json",
 		SnippetConfigFile:   "snippet-config.json",
-		Theme:               "dracula",
+		CodeBlockTheme:      "dracula",
 		PrimaryColor:        "#AFBEE1",
 		PrimaryColorSubdued: "#64708D",
 		BrightGreenColor:    "#BCE1AF",
@@ -134,7 +131,7 @@ func newConfig() Config {
 		GrayColor:           "241",
 		BlackColor:          "#373b41",
 		WhiteColor:          "#FFFFFF",
-		MarginTop:           0,
+		BaseMarginTop:       BaseMarginTop,
 	}
 }
 

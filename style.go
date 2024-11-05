@@ -80,8 +80,6 @@ type ContentBaseStyle struct {
 	TitleBar       lipgloss.Style
 	Separator      lipgloss.Style
 	LineNumber     lipgloss.Style
-	EmptyHint      lipgloss.Style
-	EmptyHintKey   lipgloss.Style
 	CopiedTitleBar lipgloss.Style
 }
 
@@ -99,14 +97,11 @@ var helpStyle = lipgloss.NewStyle().Margin(0, 0, 0, 1)
 // DefaultStyles is the default implementation of the styles struct for all
 // styling in the application.
 func DefaultStyles(config Config) Styles {
-	gray := lipgloss.Color(config.GrayColor)
-	brightBlue := lipgloss.Color(config.PrimaryColor)
-
 	// snippets
 
 	snippetBase := lipgloss.NewStyle().
 		Width(SnippetTitleBarWidth + 3).
-		MarginTop(config.MarginTop)
+		MarginTop(config.BaseMarginTop)
 
 	snippetFocusedTitleBar := lipgloss.NewStyle().
 		Width(SnippetTitleBarWidth).
@@ -148,7 +143,7 @@ func DefaultStyles(config Config) Styles {
 
 	sectionBase := lipgloss.NewStyle().
 		Width(SectionTitleBarWidth + 3).
-		MarginTop(config.MarginTop)
+		MarginTop(config.BaseMarginTop)
 
 	sectionFocusedTitleBar := lipgloss.NewStyle().
 		Width(SectionTitleBarWidth).
@@ -188,7 +183,7 @@ func DefaultStyles(config Config) Styles {
 
 	contentFocusedTitleBar := lipgloss.NewStyle().
 		Width(ContentTitleBarWidth).
-		Margin(config.MarginTop, 0, 0, 0).
+		Margin(config.BaseMarginTop, 0, 0, 0).
 		Padding(TitlePadding...).
 		Background(lipgloss.Color(FocusedBarBgColor)).
 		Foreground(lipgloss.Color(FocusedBarFgColor))
@@ -204,7 +199,7 @@ func DefaultStyles(config Config) Styles {
 
 	contentCopiedTitleBar := lipgloss.NewStyle().
 		Width(ContentTitleBarWidth).
-		Margin(config.MarginTop, 0, 0, 0).
+		Margin(config.BaseMarginTop, 0, 0, 0).
 		Padding(TitlePadding...).
 		Background(lipgloss.Color(CopiedBarBgColor)).
 		Foreground(lipgloss.Color(CopiedBarFgColor))
@@ -264,16 +259,12 @@ func DefaultStyles(config Config) Styles {
 				Code:           contentCode,
 				TitleBar:       contentFocusedTitleBar,
 				LineNumber:     contentLineNumber,
-				EmptyHint:      lipgloss.NewStyle().Foreground(gray),
-				EmptyHintKey:   lipgloss.NewStyle().Foreground(brightBlue),
 				CopiedTitleBar: contentCopiedTitleBar,
 			},
 			Blurred: ContentBaseStyle{
 				Code:           contentCode,
 				TitleBar:       contentBlurredTitleBar,
 				LineNumber:     contentLineNumber,
-				EmptyHint:      lipgloss.NewStyle().Foreground(gray),
-				EmptyHintKey:   lipgloss.NewStyle().Foreground(brightBlue),
 				CopiedTitleBar: contentCopiedTitleBar,
 			},
 		},
