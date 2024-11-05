@@ -568,11 +568,9 @@ func (m *Model) View() string {
 }
 
 func (m *Model) rewriteCodeBlockPrefix(code string) string {
-	oldPrefix := "------------- CodeBlock -------------"
 	for _, k := range m.keys.CopySnippet.Keys() {
-		prefixFormat := "---------- Press %s to copy ----------"
-		newPrefix := fmt.Sprintf(prefixFormat, strings.ToUpper(k))
-		code = strings.Replace(code, oldPrefix, newPrefix, 1)
+		newPrefix := fmt.Sprintf(CodeBlockCopyPrefix, strings.ToUpper(k))
+		code = strings.Replace(code, CodeBlockPrefix, newPrefix, 1)
 	}
 	return code
 }
