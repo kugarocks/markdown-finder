@@ -22,6 +22,12 @@ import (
 	"golang.org/x/exp/slices"
 )
 
+const (
+	githubSSHPrefix   = "git@github.com:"
+	githubHTTPSPrefix = "https://github.com/"
+	githubSSHSuffix   = ".git"
+)
+
 func main() {
 	runCLI(os.Args[1:])
 }
@@ -396,11 +402,11 @@ func parseGitHubURL(repoURL string) (user, repo string, err error) {
 	// user/repo
 
 	// Remove .git suffix
-	repoURL = strings.TrimSuffix(repoURL, ".git")
+	repoURL = strings.TrimSuffix(repoURL, githubSSHSuffix)
 
 	// Handle SSH format
-	if strings.HasPrefix(repoURL, "git@github.com:") {
-		parts := strings.Split(strings.TrimPrefix(repoURL, "git@github.com:"), "/")
+	if strings.HasPrefix(repoURL, githubSSHPrefix) {
+		parts := strings.Split(strings.TrimPrefix(repoURL, githubSSHPrefix), "/")
 		if len(parts) != 2 {
 			return "", "", fmt.Errorf("invalid GitHub repository URL: %s", repoURL)
 		}
@@ -408,8 +414,8 @@ func parseGitHubURL(repoURL string) (user, repo string, err error) {
 	}
 
 	// Handle HTTPS format
-	if strings.HasPrefix(repoURL, "https://github.com/") {
-		parts := strings.Split(strings.TrimPrefix(repoURL, "https://github.com/"), "/")
+	if strings.HasPrefix(repoURL, githubHTTPSPrefix) {
+		parts := strings.Split(strings.TrimPrefix(repoURL, githubHTTPSPrefix), "/")
 		if len(parts) != 2 {
 			return "", "", fmt.Errorf("invalid GitHub repository URL: %s", repoURL)
 		}
@@ -429,6 +435,17 @@ func getSource(config Config, repoURL string) error {
 	user, repo, err := parseGitHubURL(repoURL)
 	if err != nil {
 		return err
+	}
+
+	// Determine the clone URL based on the input format
+	var cloneURL string
+	switch {
+	case strings.HasPrefix(repoURL, githubSSHPrefix):
+		cloneURL = repoURL
+	case strings.HasPrefix(repoURL, githubHTTPSPrefix):
+		cloneURL = repoURL
+	default:
+		cloneURL = fmt.Sprintf("git@github.com:%s/%s.git", user, repo)
 	}
 
 	// Read existing sources
@@ -452,7 +469,7 @@ func getSource(config Config, repoURL string) error {
 		return fmt.Errorf("failed to create source directory: %w", err)
 	}
 
-	cmd := exec.Command("git", "clone", repoURL, sourcePath)
+	cmd := exec.Command("git", "clone", cloneURL, sourcePath)
 
 	// Set up pipes for real-time output
 	cmd.Stdout = os.Stdout
@@ -466,7 +483,7 @@ func getSource(config Config, repoURL string) error {
 	// Add new source to the list
 	newSource := Source{
 		Name: sourceName,
-		Repo: repoURL,
+		Repo: cloneURL,
 	}
 	sources = append(sources, newSource)
 
