@@ -32,6 +32,8 @@ var (
 	SelectedItemFgColor   = "170"
 	UnselectedItemFgColor = "c7c7c7"
 
+	ContentLineNumberFgColor = "241"
+
 	CopiedBarBgColor  = "#527251"
 	CopiedBarFgColor  = "#FFFFFF"
 	CopiedItemFgColor = "#BCE1AF"

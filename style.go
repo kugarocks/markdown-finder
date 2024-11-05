@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/glamour/ansi"
 	"github.com/charmbracelet/glamour/styles"
 	"github.com/charmbracelet/lipgloss"
@@ -100,12 +99,10 @@ var helpStyle = lipgloss.NewStyle().Margin(0, 0, 0, 1)
 // DefaultStyles is the default implementation of the styles struct for all
 // styling in the application.
 func DefaultStyles(config Config) Styles {
-	white := lipgloss.Color(config.WhiteColor)
 	gray := lipgloss.Color(config.GrayColor)
-	brightBlack := lipgloss.Color(config.BlackColor)
-	green := lipgloss.Color(config.GreenColor)
 	brightBlue := lipgloss.Color(config.PrimaryColor)
-	blue := lipgloss.Color(config.PrimaryColorSubdued)
+
+	// snippets
 
 	snippetBase := lipgloss.NewStyle().
 		Width(SnippetTitleBarWidth + 3).
@@ -147,9 +144,70 @@ func DefaultStyles(config Config) Styles {
 		Foreground(lipgloss.Color(CopiedItemFgColor)).
 		BorderForeground(lipgloss.Color(CopiedItemFgColor))
 
-	sectionSelectedTitle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color(SelectedItemFgColor))
-	sectionUnselectedTitle := lipgloss.NewStyle().PaddingLeft(4)
-	sectionCopiedTitle := list.NewDefaultItemStyles().SelectedTitle.Foreground(lipgloss.Color(CopiedItemFgColor)).MarginLeft(1).BorderLeft(false)
+	// sections
+
+	sectionBase := lipgloss.NewStyle().
+		Width(SectionTitleBarWidth + 3).
+		MarginTop(config.MarginTop)
+
+	sectionFocusedTitleBar := lipgloss.NewStyle().
+		Width(SectionTitleBarWidth).
+		Margin(SectionBarMargin...).
+		Padding(TitlePadding...).
+		Background(lipgloss.Color(FocusedBarBgColor)).
+		Foreground(lipgloss.Color(FocusedBarFgColor))
+
+	sectionBlurredTitleBar := sectionFocusedTitleBar
+	sectionBlurredTitleBar = sectionBlurredTitleBar.
+		Background(lipgloss.Color(BlurredBarBgColor)).
+		Foreground(lipgloss.Color(BlurredBarFgColor))
+
+	sectionSelectedItem := lipgloss.NewStyle().
+		PaddingLeft(2).
+		Foreground(lipgloss.Color(SelectedItemFgColor))
+
+	sectionUnselectedItem := lipgloss.NewStyle().
+		PaddingLeft(4).
+		Foreground(lipgloss.Color(UnselectedItemFgColor))
+
+	sectionCopiedTitleBar := lipgloss.NewStyle().
+		Width(SectionTitleBarWidth).
+		Margin(SectionBarMargin...).
+		Padding(TitlePadding...).
+		Background(lipgloss.Color(CopiedBarBgColor)).
+		Foreground(lipgloss.Color(CopiedBarFgColor))
+
+	sectionCopiedItem := sectionSelectedItem
+	sectionCopiedItem = sectionCopiedItem.
+		Foreground(lipgloss.Color(CopiedItemFgColor)).
+		BorderForeground(lipgloss.Color(CopiedItemFgColor))
+
+	// content
+
+	contentCode := lipgloss.NewStyle().Margin(ContentCodeMargin...)
+
+	contentFocusedTitleBar := lipgloss.NewStyle().
+		Width(ContentTitleBarWidth).
+		Margin(config.MarginTop, 0, 0, 0).
+		Padding(TitlePadding...).
+		Background(lipgloss.Color(FocusedBarBgColor)).
+		Foreground(lipgloss.Color(FocusedBarFgColor))
+
+	contentBlurredTitleBar := contentFocusedTitleBar
+	contentBlurredTitleBar = contentBlurredTitleBar.
+		Background(lipgloss.Color(BlurredBarBgColor)).
+		Foreground(lipgloss.Color(BlurredBarFgColor))
+
+	contentLineNumber := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(ContentLineNumberFgColor)).
+		MarginTop(1)
+
+	contentCopiedTitleBar := lipgloss.NewStyle().
+		Width(ContentTitleBarWidth).
+		Margin(config.MarginTop, 0, 0, 0).
+		Padding(TitlePadding...).
+		Background(lipgloss.Color(CopiedBarBgColor)).
+		Foreground(lipgloss.Color(CopiedBarFgColor))
 
 	// custom glamour style
 	glamourDarkStyle := styles.DarkStyleConfig
@@ -185,38 +243,38 @@ func DefaultStyles(config Config) Styles {
 		},
 		Sections: SectionsStyle{
 			Focused: SectionsBaseStyle{
-				Base:                lipgloss.NewStyle().Width(SectionTitleBarWidth + 3).MarginTop(config.MarginTop),
-				TitleBar:            lipgloss.NewStyle().Background(lipgloss.Color(FocusedBarBgColor)).Width(SectionTitleBarWidth).Margin(SectionBarMargin...).Padding(TitlePadding...).Foreground(lipgloss.Color(FocusedBarFgColor)),
-				SelectedItemTitle:   sectionSelectedTitle,
-				UnselectedItemTitle: sectionUnselectedTitle,
-				CopiedTitleBar:      lipgloss.NewStyle().Background(green).Width(SectionTitleBarWidth).Margin(SectionBarMargin...).Padding(TitlePadding...).Foreground(white),
-				CopiedItemTitle:     sectionCopiedTitle,
+				Base:                sectionBase,
+				TitleBar:            sectionFocusedTitleBar,
+				SelectedItemTitle:   sectionSelectedItem,
+				UnselectedItemTitle: sectionUnselectedItem,
+				CopiedTitleBar:      sectionCopiedTitleBar,
+				CopiedItemTitle:     sectionCopiedItem,
 			},
 			Blurred: SectionsBaseStyle{
-				Base:                lipgloss.NewStyle().Width(SectionTitleBarWidth + 3).MarginTop(config.MarginTop),
-				TitleBar:            lipgloss.NewStyle().Background(blue).Width(SectionTitleBarWidth).Margin(SectionBarMargin...).Padding(TitlePadding...).Foreground(white),
-				SelectedItemTitle:   sectionSelectedTitle,
-				UnselectedItemTitle: sectionUnselectedTitle,
-				CopiedTitleBar:      lipgloss.NewStyle().Background(green).Width(SectionTitleBarWidth).Margin(SectionBarMargin...).Padding(TitlePadding...),
-				CopiedItemTitle:     sectionCopiedTitle,
+				Base:                sectionBase,
+				TitleBar:            sectionBlurredTitleBar,
+				SelectedItemTitle:   sectionSelectedItem,
+				UnselectedItemTitle: sectionUnselectedItem,
+				CopiedTitleBar:      sectionCopiedTitleBar,
+				CopiedItemTitle:     sectionCopiedItem,
 			},
 		},
 		Content: ContentStyle{
 			Focused: ContentBaseStyle{
-				Code:           lipgloss.NewStyle().Margin(ContentCodeMargin...),
-				TitleBar:       lipgloss.NewStyle().Background(lipgloss.Color(FocusedBarBgColor)).Width(ContentTitleBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(TitlePadding...).Foreground(lipgloss.Color(FocusedBarFgColor)),
-				LineNumber:     lipgloss.NewStyle().Foreground(brightBlack).MarginTop(1),
+				Code:           contentCode,
+				TitleBar:       contentFocusedTitleBar,
+				LineNumber:     contentLineNumber,
 				EmptyHint:      lipgloss.NewStyle().Foreground(gray),
 				EmptyHintKey:   lipgloss.NewStyle().Foreground(brightBlue),
-				CopiedTitleBar: lipgloss.NewStyle().Background(green).Width(ContentTitleBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(TitlePadding...).Foreground(white),
+				CopiedTitleBar: contentCopiedTitleBar,
 			},
 			Blurred: ContentBaseStyle{
-				Code:           lipgloss.NewStyle().Margin(ContentCodeMargin...),
-				TitleBar:       lipgloss.NewStyle().Background(blue).Width(ContentTitleBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(TitlePadding...).Foreground(white),
-				LineNumber:     lipgloss.NewStyle().Foreground(brightBlack).MarginTop(1),
+				Code:           contentCode,
+				TitleBar:       contentBlurredTitleBar,
+				LineNumber:     contentLineNumber,
 				EmptyHint:      lipgloss.NewStyle().Foreground(gray),
 				EmptyHintKey:   lipgloss.NewStyle().Foreground(brightBlue),
-				CopiedTitleBar: lipgloss.NewStyle().Background(green).Width(ContentTitleBarWidth).Margin(config.MarginTop, 0, 0, 0).Padding(TitlePadding...).Foreground(white),
+				CopiedTitleBar: contentCopiedTitleBar,
 			},
 		},
 		Glamour: map[string]ansi.StyleConfig{
