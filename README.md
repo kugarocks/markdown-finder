@@ -3,7 +3,7 @@
 > Forked from [maaslalani/nap](https://github.com/maaslalani/nap) which is a code snippet manager for your terminal.
 
 Markdown Finder is a tool for quickly locating code snippets in Markdown files.
-Use `---` to divide different sections of a Markdown file,
+Use `---` to divide sections of a Markdown file,
 making it easy to copy code from each section.
 
 ![mdf-demo](./assets/mdf-demo.png)
