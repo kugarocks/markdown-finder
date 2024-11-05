@@ -78,11 +78,12 @@ type Config struct {
 	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 
 	// Layout
-	BaseMarginTop         int `env:"MDF_BASE_MARGIN_TOP" yaml:"base_margin_top"`
-	SnippetTitleBarWidth  int `env:"MDF_SNIPPET_TITLE_BAR_WIDTH" yaml:"snippet_title_bar_width"`
-	SectionTitleBarWidth  int `env:"MDF_SECTION_TITLE_BAR_WIDTH" yaml:"section_title_bar_width"`
-	ContentTitleBarWidth  int `env:"MDF_CONTENT_TITLE_BAR_WIDTH" yaml:"content_title_bar_width"`
-	SnippetListMarginLeft int `env:"MDF_SNIPPET_LIST_MARGIN_LEFT" yaml:"snippet_list_margin_left"`
+	BaseMarginTop         int  `env:"MDF_BASE_MARGIN_TOP" yaml:"base_margin_top"`
+	SnippetTitleBarWidth  int  `env:"MDF_SNIPPET_TITLE_BAR_WIDTH" yaml:"snippet_title_bar_width"`
+	SectionTitleBarWidth  int  `env:"MDF_SECTION_TITLE_BAR_WIDTH" yaml:"section_title_bar_width"`
+	ContentTitleBarWidth  int  `env:"MDF_CONTENT_TITLE_BAR_WIDTH" yaml:"content_title_bar_width"`
+	SnippetListMarginLeft int  `env:"MDF_SNIPPET_LIST_MARGIN_LEFT" yaml:"snippet_list_margin_left"`
+	AlwaysShowSnippetPane bool `env:"MDF_ALWAYS_SHOW_SNIPPET_PANE" yaml:"always_show_snippet_pane"`
 
 	// Colors
 	FocusedBarBgColor        string `env:"MDF_FOCUSED_BAR_BG_COLOR" yaml:"focused_bar_bg_color"`
@@ -116,6 +117,7 @@ func newConfig() Config {
 		SectionTitleBarWidth:  33,
 		ContentTitleBarWidth:  86,
 		SnippetListMarginLeft: 1,
+		AlwaysShowSnippetPane: false,
 
 		// Colors
 		FocusedBarBgColor:        "62",

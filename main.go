@@ -289,6 +289,10 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 		}
 	}
 
+	if config.AlwaysShowSnippetPane {
+		hideSnippetPane = false
+	}
+
 	mdRender, _ := glamour.NewTermRenderer(
 		glamour.WithStyles(defaultStyles.Glamour["dark"]),
 	)
