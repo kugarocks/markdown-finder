@@ -71,7 +71,7 @@ echo "Charm Rocks 🚀"
 // At the moment, it is quite limited, only supporting the home folder and the
 // file name of the metadata.
 type Config struct {
-	Home              string
+	Home              string `yaml:"-"`
 	SourceName        string `env:"MDF_SOURCE_NAME" yaml:"source_name"`
 	FolderName        string `env:"MDF_FOLDER_NAME" yaml:"folder_name"`
 	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
