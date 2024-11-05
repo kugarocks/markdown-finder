@@ -550,8 +550,8 @@ func (m *Model) View() string {
 
 func (m *Model) rewriteCodeBlockPrefix(code string) string {
 	for _, k := range m.keys.CopySnippet.Keys() {
-		newPrefix := fmt.Sprintf(CodeBlockCopyPrefix, strings.ToUpper(k))
-		code = strings.Replace(code, CodeBlockPrefix, newPrefix, 1)
+		copiedHint := fmt.Sprintf(m.config.CodeBlockCopedHint, strings.ToUpper(k))
+		code = strings.Replace(code, m.config.CodeBlockPrefix, copiedHint, 1)
 	}
 	return code
 }

@@ -13,32 +13,11 @@ import (
 )
 
 var (
-	BaseMarginTop         = 1
-	SnippetTitleBarWidth  = 33
-	SectionTitleBarWidth  = 33
-	ContentTitleBarWidth  = 86
-	SnippetListMarginLeft = 1
-
-	FocusedBarBgColor        = "62"
-	FocusedBarFgColor        = "230"
-	BlurredBarBgColor        = "#64708D"
-	BlurredBarFgColor        = "#FFFFFF"
-	SelectedItemFgColor      = "170"
-	UnselectedItemFgColor    = "c7c7c7"
-	CopiedBarBgColor         = "#527251"
-	CopiedBarFgColor         = "#FFFFFF"
-	CopiedItemFgColor        = "#BCE1AF"
-	ContentLineNumberFgColor = "241"
-
-	CodeBlockPrefix     = "------------- CodeBlock -------------"
-	CodeBlockSuffix     = "---------------- End ----------------"
-	CodeBlockCopyPrefix = "---------- Press %s to copy ----------"
+	TitlePadding        = []int{0, 1}
+	SnippetBarMargin    = []int{0, 1, 1, 2}
+	SectionBarMargin    = []int{0, 1, 1, 1}
+	ContentCodeMargin   = []int{1, 0}
 	CodeBlockMarginZero = uint(0)
-
-	TitlePadding      = []int{0, 1}
-	SnippetBarMargin  = []int{0, 1, 1, 2}
-	SectionBarMargin  = []int{0, 1, 1, 1}
-	ContentCodeMargin = []int{1, 0}
 
 	HelpText = `
 Nap is a code snippet manager for your terminal.
@@ -98,40 +77,63 @@ type Config struct {
 	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
 	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 
-	CodeBlockTheme      string `env:"MDF_THEME" yaml:"theme"`
-	PrimaryColor        string `env:"MDF_PRIMARY_COLOR" yaml:"primary_color"`
-	PrimaryColorSubdued string `env:"MDF_PRIMARY_COLOR_SUBDUED" yaml:"primary_color_subdued"`
-	BrightGreenColor    string `env:"MDF_BRIGHT_GREEN" yaml:"bright_green"`
-	GreenColor          string `env:"MDF_GREEN" yaml:"green"`
-	BrightRedColor      string `env:"MDF_BRIGHT_RED" yaml:"bright_red"`
-	RedColor            string `env:"MDF_RED" yaml:"red"`
-	ForegroundColor     string `env:"MDF_FOREGROUND" yaml:"foreground"`
-	BackgroundColor     string `env:"MDF_BACKGROUND" yaml:"background"`
-	GrayColor           string `env:"MDF_GRAY" yaml:"gray"`
-	BlackColor          string `env:"MDF_BLACK" yaml:"black"`
-	WhiteColor          string `env:"MDF_WHITE" yaml:"white"`
-	BaseMarginTop       int    `env:"MDF_MARGIN_TOP" yaml:"margin_top"`
+	// Layout
+	BaseMarginTop         int `env:"MDF_BASE_MARGIN_TOP" yaml:"base_margin_top"`
+	SnippetTitleBarWidth  int `env:"MDF_SNIPPET_TITLE_BAR_WIDTH" yaml:"snippet_title_bar_width"`
+	SectionTitleBarWidth  int `env:"MDF_SECTION_TITLE_BAR_WIDTH" yaml:"section_title_bar_width"`
+	ContentTitleBarWidth  int `env:"MDF_CONTENT_TITLE_BAR_WIDTH" yaml:"content_title_bar_width"`
+	SnippetListMarginLeft int `env:"MDF_SNIPPET_LIST_MARGIN_LEFT" yaml:"snippet_list_margin_left"`
+
+	// Colors
+	FocusedBarBgColor        string `env:"MDF_FOCUSED_BAR_BG_COLOR" yaml:"focused_bar_bg_color"`
+	FocusedBarFgColor        string `env:"MDF_FOCUSED_BAR_FG_COLOR" yaml:"focused_bar_fg_color"`
+	BlurredBarBgColor        string `env:"MDF_BLURRED_BAR_BG_COLOR" yaml:"blurred_bar_bg_color"`
+	BlurredBarFgColor        string `env:"MDF_BLURRED_BAR_FG_COLOR" yaml:"blurred_bar_fg_color"`
+	SelectedItemFgColor      string `env:"MDF_SELECTED_ITEM_FG_COLOR" yaml:"selected_item_fg_color"`
+	UnselectedItemFgColor    string `env:"MDF_UNSELECTED_ITEM_FG_COLOR" yaml:"unselected_item_fg_color"`
+	CopiedBarBgColor         string `env:"MDF_COPIED_BAR_BG_COLOR" yaml:"copied_bar_bg_color"`
+	CopiedBarFgColor         string `env:"MDF_COPIED_BAR_FG_COLOR" yaml:"copied_bar_fg_color"`
+	CopiedItemFgColor        string `env:"MDF_COPIED_ITEM_FG_COLOR" yaml:"copied_item_fg_color"`
+	ContentLineNumberFgColor string `env:"MDF_CONTENT_LINE_NUMBER_FG_COLOR" yaml:"content_line_number_fg_color"`
+
+	// Code Block
+	CodeBlockTheme     string `env:"MDF_THEME" yaml:"theme"`
+	CodeBlockPrefix    string `env:"MDF_CODE_BLOCK_PREFIX" yaml:"code_block_prefix"`
+	CodeBlockSuffix    string `env:"MDF_CODE_BLOCK_SUFFIX" yaml:"code_block_suffix"`
+	CodeBlockCopedHint string `env:"MDF_CODE_BLOCK_COPIED_HINT" yaml:"code_block_copied_hint"`
 }
 
 func newConfig() Config {
 	return Config{
-		Home:                defaultHome(),
-		SourceName:          defaultSourceName,
-		SourceConfigFile:    "source-config.json",
-		SnippetConfigFile:   "snippet-config.json",
-		CodeBlockTheme:      "dracula",
-		PrimaryColor:        "#AFBEE1",
-		PrimaryColorSubdued: "#64708D",
-		BrightGreenColor:    "#BCE1AF",
-		GreenColor:          "#527251",
-		BrightRedColor:      "#E49393",
-		RedColor:            "#A46060",
-		ForegroundColor:     "15",
-		BackgroundColor:     "235",
-		GrayColor:           "241",
-		BlackColor:          "#373b41",
-		WhiteColor:          "#FFFFFF",
-		BaseMarginTop:       BaseMarginTop,
+		Home:              defaultHome(),
+		SourceName:        defaultSourceName,
+		SourceConfigFile:  "source-config.json",
+		SnippetConfigFile: "snippet-config.json",
+
+		// Layout
+		BaseMarginTop:         1,
+		SnippetTitleBarWidth:  33,
+		SectionTitleBarWidth:  33,
+		ContentTitleBarWidth:  86,
+		SnippetListMarginLeft: 1,
+
+		// Colors
+		FocusedBarBgColor:        "62",
+		FocusedBarFgColor:        "230",
+		BlurredBarBgColor:        "#64708D",
+		BlurredBarFgColor:        "#FFFFFF",
+		SelectedItemFgColor:      "170",
+		UnselectedItemFgColor:    "c7c7c7",
+		CopiedBarBgColor:         "#527251",
+		CopiedBarFgColor:         "#FFFFFF",
+		CopiedItemFgColor:        "#BCE1AF",
+		ContentLineNumberFgColor: "241",
+
+		// Code Block
+		CodeBlockTheme:     "dracula",
+		CodeBlockPrefix:    "------------- CodeBlock -------------",
+		CodeBlockSuffix:    "---------------- End ----------------",
+		CodeBlockCopedHint: "---------- Press %s to copy ----------",
 	}
 }
 

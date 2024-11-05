@@ -260,14 +260,6 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 		folderItems = append(folderItems, list.Item(Folder(defaultSnippetFolder)))
 	}
 	folderList := list.New(folderItems, folderDelegate{defaultStyles.Folders.Blurred}, 0, 0)
-	folderList.Title = "Folders"
-
-	folderList.SetShowHelp(false)
-	folderList.SetFilteringEnabled(false)
-	folderList.SetShowStatusBar(false)
-	folderList.DisableQuitKeybindings()
-	folderList.Styles.NoItems = lipgloss.NewStyle().Margin(0, 2).Foreground(lipgloss.Color(config.GrayColor))
-	folderList.SetStatusBarItemName("folder", "folders")
 
 	for idx, folder := range foldersSlice {
 		if string(folder) == targetSnippet.Folder {

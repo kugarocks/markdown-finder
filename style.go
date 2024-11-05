@@ -100,116 +100,116 @@ func DefaultStyles(config Config) Styles {
 	// snippets
 
 	snippetBase := lipgloss.NewStyle().
-		Width(SnippetTitleBarWidth + 3).
+		Width(config.SnippetTitleBarWidth + 3).
 		MarginTop(config.BaseMarginTop)
 
 	snippetFocusedTitleBar := lipgloss.NewStyle().
-		Width(SnippetTitleBarWidth).
+		Width(config.SnippetTitleBarWidth).
 		Margin(SnippetBarMargin...).
 		Padding(TitlePadding...).
-		Background(lipgloss.Color(FocusedBarBgColor)).
-		Foreground(lipgloss.Color(FocusedBarFgColor))
+		Background(lipgloss.Color(config.FocusedBarBgColor)).
+		Foreground(lipgloss.Color(config.FocusedBarFgColor))
 
 	snippetBlurredTitleBar := snippetFocusedTitleBar
 	snippetBlurredTitleBar = snippetBlurredTitleBar.
-		Background(lipgloss.Color(BlurredBarBgColor)).
-		Foreground(lipgloss.Color(BlurredBarFgColor))
+		Background(lipgloss.Color(config.BlurredBarBgColor)).
+		Foreground(lipgloss.Color(config.BlurredBarFgColor))
 
 	snippetSelectedItem := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder(), false, false, false, true).
-		MarginLeft(SnippetListMarginLeft).
+		MarginLeft(config.SnippetListMarginLeft).
 		Padding(0, 0, 0, 1).
-		Foreground(lipgloss.Color(SelectedItemFgColor)).
-		BorderForeground(lipgloss.Color(SelectedItemFgColor))
+		Foreground(lipgloss.Color(config.SelectedItemFgColor)).
+		BorderForeground(lipgloss.Color(config.SelectedItemFgColor))
 
 	snippetUnselectedItem := lipgloss.NewStyle().
-		MarginLeft(SnippetListMarginLeft).
+		MarginLeft(config.SnippetListMarginLeft).
 		Padding(0, 0, 0, 2).
-		Foreground(lipgloss.Color(UnselectedItemFgColor))
+		Foreground(lipgloss.Color(config.UnselectedItemFgColor))
 
 	snippetCopiedTitleBar := lipgloss.NewStyle().
-		Width(SnippetTitleBarWidth).
+		Width(config.SnippetTitleBarWidth).
 		Margin(SnippetBarMargin...).
 		Padding(TitlePadding...).
-		Background(lipgloss.Color(CopiedBarBgColor)).
-		Foreground(lipgloss.Color(CopiedBarFgColor))
+		Background(lipgloss.Color(config.CopiedBarBgColor)).
+		Foreground(lipgloss.Color(config.CopiedBarFgColor))
 
 	snippetCopiedItem := snippetSelectedItem
 	snippetCopiedItem = snippetCopiedItem.
-		Foreground(lipgloss.Color(CopiedItemFgColor)).
-		BorderForeground(lipgloss.Color(CopiedItemFgColor))
+		Foreground(lipgloss.Color(config.CopiedItemFgColor)).
+		BorderForeground(lipgloss.Color(config.CopiedItemFgColor))
 
 	// sections
 
 	sectionBase := lipgloss.NewStyle().
-		Width(SectionTitleBarWidth + 3).
+		Width(config.SectionTitleBarWidth + 3).
 		MarginTop(config.BaseMarginTop)
 
 	sectionFocusedTitleBar := lipgloss.NewStyle().
-		Width(SectionTitleBarWidth).
+		Width(config.SectionTitleBarWidth).
 		Margin(SectionBarMargin...).
 		Padding(TitlePadding...).
-		Background(lipgloss.Color(FocusedBarBgColor)).
-		Foreground(lipgloss.Color(FocusedBarFgColor))
+		Background(lipgloss.Color(config.FocusedBarBgColor)).
+		Foreground(lipgloss.Color(config.FocusedBarFgColor))
 
 	sectionBlurredTitleBar := sectionFocusedTitleBar
 	sectionBlurredTitleBar = sectionBlurredTitleBar.
-		Background(lipgloss.Color(BlurredBarBgColor)).
-		Foreground(lipgloss.Color(BlurredBarFgColor))
+		Background(lipgloss.Color(config.BlurredBarBgColor)).
+		Foreground(lipgloss.Color(config.BlurredBarFgColor))
 
 	sectionSelectedItem := lipgloss.NewStyle().
 		PaddingLeft(2).
-		Foreground(lipgloss.Color(SelectedItemFgColor))
+		Foreground(lipgloss.Color(config.SelectedItemFgColor))
 
 	sectionUnselectedItem := lipgloss.NewStyle().
 		PaddingLeft(4).
-		Foreground(lipgloss.Color(UnselectedItemFgColor))
+		Foreground(lipgloss.Color(config.UnselectedItemFgColor))
 
 	sectionCopiedTitleBar := lipgloss.NewStyle().
-		Width(SectionTitleBarWidth).
+		Width(config.SectionTitleBarWidth).
 		Margin(SectionBarMargin...).
 		Padding(TitlePadding...).
-		Background(lipgloss.Color(CopiedBarBgColor)).
-		Foreground(lipgloss.Color(CopiedBarFgColor))
+		Background(lipgloss.Color(config.CopiedBarBgColor)).
+		Foreground(lipgloss.Color(config.CopiedBarFgColor))
 
 	sectionCopiedItem := sectionSelectedItem
 	sectionCopiedItem = sectionCopiedItem.
-		Foreground(lipgloss.Color(CopiedItemFgColor)).
-		BorderForeground(lipgloss.Color(CopiedItemFgColor))
+		Foreground(lipgloss.Color(config.CopiedItemFgColor)).
+		BorderForeground(lipgloss.Color(config.CopiedItemFgColor))
 
 	// content
 
 	contentCode := lipgloss.NewStyle().Margin(ContentCodeMargin...)
 
 	contentFocusedTitleBar := lipgloss.NewStyle().
-		Width(ContentTitleBarWidth).
+		Width(config.ContentTitleBarWidth).
 		Margin(config.BaseMarginTop, 0, 0, 0).
 		Padding(TitlePadding...).
-		Background(lipgloss.Color(FocusedBarBgColor)).
-		Foreground(lipgloss.Color(FocusedBarFgColor))
+		Background(lipgloss.Color(config.FocusedBarBgColor)).
+		Foreground(lipgloss.Color(config.FocusedBarFgColor))
 
 	contentBlurredTitleBar := contentFocusedTitleBar
 	contentBlurredTitleBar = contentBlurredTitleBar.
-		Background(lipgloss.Color(BlurredBarBgColor)).
-		Foreground(lipgloss.Color(BlurredBarFgColor))
+		Background(lipgloss.Color(config.BlurredBarBgColor)).
+		Foreground(lipgloss.Color(config.BlurredBarFgColor))
 
 	contentLineNumber := lipgloss.NewStyle().
-		Foreground(lipgloss.Color(ContentLineNumberFgColor)).
+		Foreground(lipgloss.Color(config.ContentLineNumberFgColor)).
 		MarginTop(1)
 
 	contentCopiedTitleBar := lipgloss.NewStyle().
-		Width(ContentTitleBarWidth).
+		Width(config.ContentTitleBarWidth).
 		Margin(config.BaseMarginTop, 0, 0, 0).
 		Padding(TitlePadding...).
-		Background(lipgloss.Color(CopiedBarBgColor)).
-		Foreground(lipgloss.Color(CopiedBarFgColor))
+		Background(lipgloss.Color(config.CopiedBarBgColor)).
+		Foreground(lipgloss.Color(config.CopiedBarFgColor))
 
 	// custom glamour style
 	glamourDarkStyle := styles.DarkStyleConfig
 	glamourDarkStyle.H1 = glamourDarkStyle.H2
 	glamourDarkStyle.CodeBlock.Margin = &CodeBlockMarginZero
-	glamourDarkStyle.CodeBlock.StylePrimitive.BlockPrefix = CodeBlockPrefix + "\n"
-	glamourDarkStyle.CodeBlock.StylePrimitive.BlockSuffix = CodeBlockSuffix + "\n"
+	glamourDarkStyle.CodeBlock.StylePrimitive.BlockPrefix = config.CodeBlockPrefix + "\n"
+	glamourDarkStyle.CodeBlock.StylePrimitive.BlockSuffix = config.CodeBlockSuffix + "\n"
 
 	return Styles{
 		Snippets: SnippetsStyle{
