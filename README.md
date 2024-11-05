@@ -20,7 +20,7 @@ go build -o mdf main.go
 
 ![mdf-gh-source](./assets/mdf-gh-source.png)
 
-It will clone `git@github.com:kugarocks/mdf-src-en.git`.
+Clone `git@github.com:kugarocks/mdf-src-en.git`.
 
 ```bash
 mdf get source kugarocks/mdf-src-en
@@ -34,19 +34,19 @@ mdf get source https://github.com/kugarocks/mdf-src-en.git
 
 ## Switch Source
 
-![mdf-set-source](./assets/mdf-set-source.png)
-
 ```bash
 mdf set source
 ```
 
-## Switch Folder
+![mdf-set-source](./assets/mdf-set-source.png)
 
-![mdf-set-folder](./assets/mdf-set-folder.png)
+## Switch Folder
 
 ```bash
 mdf set folder
 ```
+
+![mdf-set-folder](./assets/mdf-set-folder.png)
 
 ## Fuzzy Find Snippet
 
