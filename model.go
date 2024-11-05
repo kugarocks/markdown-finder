@@ -520,7 +520,7 @@ func (m *Model) View() string {
 	selectedSnippet := m.selectedSnippet()
 	snippetTitleBar := m.SnippetStyle.TitleBar.Render("Snippets")
 	sectionTitleBar := m.SectionStyle.TitleBar.Render(selectedSnippet.Name)
-	contentTitleBar := m.ContentStyle.Title.Render("Content")
+	contentTitleBar := m.ContentStyle.TitleBar.Render("Content")
 
 	if m.hideSnippetPane {
 		detailTitle := fmt.Sprintf("%s / %s", selectedSnippet.Folder, selectedSnippet.Name)

@@ -15,7 +15,7 @@ import (
 const (
 	defaultSectionFolder  = "default"
 	defaultSectionFile    = "example.md"
-	defaultSectionTitle   = "No Title"
+	defaultSectionTitle   = "No TitleBar"
 	defaultSectionContent = ""
 )
 
@@ -97,18 +97,17 @@ func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	}
 
 	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
-	//selectedItemStyle := lipgloss.NewStyle().PaddingLeft(2).Foreground(lipgloss.Color("170"))
-	selectedItemStyle := d.styles.SelectedTitle
+	selectedItemStyle := d.styles.SelectedItemTitle
 
 	if d.state == copyingState && d.pane == sectionPane {
-		selectedItemStyle = d.styles.CopiedTitle
+		selectedItemStyle = d.styles.CopiedItemTitle
 	}
 
 	if index == m.Index() {
 		_, _ = fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
-		return
+	} else {
+		_, _ = fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 	}
-	_, _ = fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 }
 
 // String returns the string of the section at the specified position i

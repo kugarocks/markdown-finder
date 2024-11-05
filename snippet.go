@@ -135,20 +135,20 @@ func (d snippetDelegate) Render(w io.Writer, m list.Model, index int, item list.
 		return
 	}
 
-	titleStyle := d.styles.SelectedTitle
-	subtitleStyle := d.styles.SelectedSubtitle
+	titleStyle := d.styles.SelectedItemTitle
+	descStyle := d.styles.SelectedItemDesc
 	if d.state == copyingState && d.pane == snippetPane {
-		titleStyle = d.styles.CopiedTitle
-		subtitleStyle = d.styles.CopiedSubtitle
+		titleStyle = d.styles.CopiedItemTitle
+		descStyle = d.styles.CopiedItemDesc
 	}
 
 	if index == m.Index() {
 		_, _ = fmt.Fprintln(w, "  "+titleStyle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-		_, _ = fmt.Fprint(w, "  "+subtitleStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+		_, _ = fmt.Fprint(w, "  "+descStyle.Render(s.Folder+" • "+humanizeTime(s.Date)))
 		return
 	}
-	_, _ = fmt.Fprintln(w, "  "+d.styles.UnselectedTitle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
-	_, _ = fmt.Fprint(w, "  "+d.styles.UnselectedSubtitle.Render(s.Folder+" • "+humanizeTime(s.Date)))
+	_, _ = fmt.Fprintln(w, "  "+d.styles.UnselectedItemTitle.Render(truncate.Truncate(s.Name, 30, "...", truncate.PositionEnd)))
+	_, _ = fmt.Fprint(w, "  "+d.styles.UnselectedItemDesc.Render(s.Folder+" • "+humanizeTime(s.Date)))
 }
 
 var magnitudes = []humanize.RelTimeMagnitude{

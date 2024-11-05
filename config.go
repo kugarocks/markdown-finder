@@ -13,10 +13,33 @@ import (
 )
 
 var (
+	BaseMarginTop = 1
+
 	CodeBlockPrefix     = "------------- CodeBlock -------------"
 	CodeBlockSuffix     = "---------------- End ----------------"
 	CodeBlockCopyPrefix = "---------- Press %s to copy ----------"
 	CodeBlockMarginZero = uint(0)
+
+	SnippetTitleBarWidth  = 33
+	SectionTitleBarWidth  = 33
+	ContentTitleBarWidth  = 86
+	SnippetListMarginLeft = 1
+
+	FocusedBarBgColor     = "62"
+	FocusedBarFgColor     = "230"
+	BlurredBarBgColor     = "#64708D"
+	BlurredBarFgColor     = "#FFFFFF"
+	SelectedItemFgColor   = "170"
+	UnselectedItemFgColor = "c7c7c7"
+
+	CopiedBarBgColor  = "#527251"
+	CopiedBarFgColor  = "#FFFFFF"
+	CopiedItemFgColor = "#BCE1AF"
+
+	TitlePadding      = []int{0, 1}
+	SnippetBarMargin  = []int{0, 1, 1, 2}
+	SectionBarMargin  = []int{0, 1, 1, 1}
+	ContentCodeMargin = []int{1, 0}
 
 	HelpText = `
 Nap is a code snippet manager for your terminal.
@@ -109,7 +132,7 @@ func newConfig() Config {
 		GrayColor:           "241",
 		BlackColor:          "#373b41",
 		WhiteColor:          "#FFFFFF",
-		MarginTop:           1,
+		MarginTop:           0,
 	}
 }
 
