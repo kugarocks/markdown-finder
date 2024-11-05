@@ -46,12 +46,12 @@ func runCLI(args []string) {
 		switch args[0] {
 		case "list":
 			if strings.Contains(args[1], "source") {
-				if err := listSources(config); err != nil {
+				if err = listSources(config); err != nil {
 					fmt.Println(err)
 				}
 				return
 			} else if strings.Contains(args[1], "folder") {
-				if err := listFolders(config, snippets); err != nil {
+				if err = listFolders(config, snippets); err != nil {
 					fmt.Println(err)
 				}
 				return
@@ -63,19 +63,19 @@ func runCLI(args []string) {
 				fmt.Println("Usage: mdf get source <user/repo>")
 				return
 			}
-			err := getSource(config, args[2])
+			err = getSource(config, args[2])
 			if err != nil {
 				fmt.Printf("Failed to get source: %v\n", err)
 			}
 			return
 		case "set":
 			if strings.Contains(args[1], "source") {
-				if err := setSource(&config); err != nil {
+				if err = setSource(&config); err != nil {
 					fmt.Printf("set source failed: %v\n", err)
 				}
 				return
 			} else if strings.Contains(args[1], "folder") {
-				if err := setFolder(&config, snippets); err != nil {
+				if err = setFolder(&config, snippets); err != nil {
 					fmt.Printf("set folder failed: %v\n", err)
 				}
 				return
@@ -108,7 +108,7 @@ func readSnippets(config Config) []Snippet {
 	dir, err := os.ReadFile(file)
 	if err != nil {
 		// SnippetConfigFile does not exist, create one.
-		err := os.MkdirAll(sourcePath, os.ModePerm)
+		err = os.MkdirAll(sourcePath, os.ModePerm)
 		if err != nil {
 			fmt.Printf("Unable to create directory %s, %+v", sourcePath, err)
 		}
