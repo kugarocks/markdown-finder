@@ -56,12 +56,66 @@ echo "Bananaaaaa 🍌"
 
 ---
 
-## Charm.sh
+## GitHub Source
+
+Get source from GitHub by SSH:
+
+` + "```bash" + `
+mdf get source kugarocks/mdf-src-en
+` + "```" + `
+
+HTTPS URL is also supported:
+
+` + "```bash" + `
+mdf get source https://github.com/kugarocks/mdf-src-en.git
+` + "```" + `
+
+Switch source:
+
+` + "```bash" + `
+mdf set source
+` + "```" + `
+
+---
+
+## More Commands
+
+Switch folder:
+
+` + "```bash" + `
+mdf set folder
+` + "```" + `
+
+Fuzzy find snippet:
+
+` + "```bash" + `
+mdf examp
+` + "```" + `
+
+List folders:
+
+` + "```bash" + `
+mdf list folder
+` + "```" + `
+
+---
+
+## Configuration
+
+Checkout:
+
+` + "```bash" + `
+https://github.com/kugarocks/markdown-finder
+` + "```" + `
+
+---
+
+## Charm.sh Rocks
 
 We make the command line glamorous.
 
 ` + "```bash" + `
-echo "Charm Rocks 🚀"
+echo "Charm.sh Rocks 🚀"
 ` + "```" + `
 `
 )
