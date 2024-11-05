@@ -70,23 +70,18 @@ type Model struct {
 	SnippetStyle SnippetsBaseStyle
 	SectionStyle SectionsBaseStyle
 	ContentStyle ContentBaseStyle
-
 	// markdown render
 	mdRender *glamour.TermRenderer
-
-	// 添加新字段
-	hideSnippetPane bool // 控制是否隐藏 snippetPane
+	// default is true
+	hideSnippetPane bool
 }
 
 // Init initialzes the application model.
 func (m *Model) Init() tea.Cmd {
 	m.SectionsMap = make(map[Snippet]*list.Model)
+	m.pane = m.defaultPane()
+	m.updateStyleByPane()
 	m.updateKeyMap()
-
-	m.pane = sectionPane
-	m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
-	m.SectionStyle = DefaultStyles(m.config).Sections.Focused
-	m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 
 	return func() tea.Msg {
 		return updateContentMsg(m.selectedSection())
@@ -395,28 +390,23 @@ const tabSpaces = 4
 func (m *Model) updateActivePane(msg tea.Msg) tea.Cmd {
 	var cmds []tea.Cmd
 	var cmd tea.Cmd
+
+	m.updateStyleByPane()
+
 	switch m.pane {
 	case snippetPane:
-		m.SnippetStyle = DefaultStyles(m.config).Snippets.Focused
-		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
-		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 		*m.Snippets(), cmd = (*m.Snippets()).Update(msg)
 		cmds = append(cmds, cmd, m.updateContent())
 	case sectionPane:
-		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
-		m.SectionStyle = DefaultStyles(m.config).Sections.Focused
-		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
 		*m.Sections(), cmd = (*m.Sections()).Update(msg)
 		cmds = append(cmds, cmd)
 	case contentPane:
-		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
-		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
-		m.ContentStyle = DefaultStyles(m.config).Content.Focused
 		m.Code, cmd = m.Code.Update(msg)
 		cmds = append(cmds, cmd)
 		m.LineNumbers, cmd = m.LineNumbers.Update(msg)
 		cmds = append(cmds, cmd)
 	}
+
 	m.Snippets().SetDelegate(snippetDelegate{m.pane, m.SnippetStyle, m.state})
 	m.Sections().SetDelegate(sectionDelegate{m.pane, m.SectionStyle, m.state})
 
@@ -602,4 +592,32 @@ func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 	}
 
 	return mdElem, nil
+}
+
+func (m *Model) updateStyleByPane() {
+	switch m.pane {
+	case snippetPane:
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Focused
+		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
+		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
+	case contentPane:
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
+		m.SectionStyle = DefaultStyles(m.config).Sections.Blurred
+		m.ContentStyle = DefaultStyles(m.config).Content.Focused
+	case sectionPane:
+		m.SnippetStyle = DefaultStyles(m.config).Snippets.Blurred
+		m.SectionStyle = DefaultStyles(m.config).Sections.Focused
+		m.ContentStyle = DefaultStyles(m.config).Content.Blurred
+	}
+}
+
+func (m *Model) defaultPane() pane {
+	switch m.config.DefaultPane {
+	case "content":
+		return contentPane
+	case "snippet":
+		return snippetPane
+	default:
+		return sectionPane
+	}
 }
