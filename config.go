@@ -71,7 +71,7 @@ echo "Charm Rocks 🚀"
 // At the moment, it is quite limited, only supporting the home folder and the
 // file name of the metadata.
 type Config struct {
-	Home              string `env:"MDF_HOME" yaml:"home"`
+	Home              string
 	SourceName        string `env:"MDF_SOURCE_NAME" yaml:"source_name"`
 	FolderName        string `env:"MDF_FOLDER_NAME" yaml:"folder_name"`
 	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
@@ -139,21 +139,33 @@ func newConfig() Config {
 	}
 }
 
-// default helpers for the configuration.
-// We use $XDG_DATA_HOME to avoid cluttering the user's home directory.
-// For macOS: ~/Library/Application Support/mdf
-func defaultHome() string { return filepath.Join(xdg.DataHome, "mdf") }
+// defaultHome returns the default home directory for the application.
+func defaultHome() string {
+	// check environment variable first
+	if envHome := strings.TrimSpace(os.Getenv("MDF_HOME")); envHome != "" {
+		// if the environment variable starts with ~
+		if strings.HasPrefix(envHome, "~") {
+			if home, err := os.UserHomeDir(); err == nil {
+				return filepath.Join(home, envHome[1:])
+			}
+			// fallback to xdg
+			return filepath.Join(xdg.DataHome, "mdf")
+		}
+		return envHome
+	}
+
+	// try user home directory
+	if home, err := os.UserHomeDir(); err == nil {
+		return filepath.Join(home, ".mdf")
+	}
+
+	// fallback to xdg
+	return filepath.Join(xdg.DataHome, "mdf")
+}
 
 // getConfigFilePath returns the config file path
 func getConfigFilePath() string {
-	if c := os.Getenv("MDF_CONFIG"); c != "" {
-		return c
-	}
-	cfgPath, err := xdg.ConfigFile("mdf/config.yaml")
-	if err != nil {
-		return "config.yaml"
-	}
-	return cfgPath
+	return filepath.Join(defaultHome(), "config.yaml")
 }
 
 // readConfig returns a configuration read from the environment.
@@ -167,21 +179,14 @@ func readConfig() Config {
 	}
 	if fi != nil {
 		defer fi.Close()
-		if err = yaml.NewDecoder(fi).Decode(&config); err != nil {
-			return newConfig()
+		err = yaml.NewDecoder(fi).Decode(&config)
+		if err != nil {
+			config = newConfig()
 		}
 	}
 
 	if err = env.Parse(&config); err != nil {
-		return newConfig()
-	}
-
-	if strings.HasPrefix(config.Home, "~") {
-		var home string
-		home, err = os.UserHomeDir()
-		if err == nil {
-			config.Home = filepath.Join(home, config.Home[1:])
-		}
+		config = newConfig()
 	}
 
 	return config
