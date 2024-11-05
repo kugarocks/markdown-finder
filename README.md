@@ -6,6 +6,8 @@ Markdown Finder is a tool for quickly locating code snippets in Markdown files.
 Use `---` to divide different sections of a Markdown file,
 making it easy to copy code from each section.
 
+![mdf-demo](./assets/mdf-demo.png)
+
 ## Installation
 
 Build from source:
@@ -15,6 +17,8 @@ go build -o mdf main.go
 ```
 
 ## GitHub Source
+
+![mdf-gh-source](./assets/mdf-gh-source.png)
 
 It will clone `git@github.com:kugarocks/mdf-src-en.git`.
 
@@ -30,11 +34,15 @@ mdf get source https://github.com/kugarocks/mdf-src-en.git
 
 ## Switch Source
 
+![mdf-set-source](./assets/mdf-set-source.png)
+
 ```bash
 mdf set source
 ```
 
 ## Switch Folder
+
+![mdf-set-folder](./assets/mdf-set-folder.png)
 
 ```bash
 mdf set folder

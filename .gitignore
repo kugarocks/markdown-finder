@@ -2,3 +2,4 @@ tapes/*.gif
 /nap*
 .idea
 app.log
+.DS_Store
