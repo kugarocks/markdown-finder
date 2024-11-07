@@ -6,7 +6,7 @@ Markdown Finder is a tool for quickly locating code snippets in Markdown files.
 Use `---` to divide sections of a Markdown file,
 making it easy to copy code from each section.
 
-![mdf-demo](./assets/mdf-demo.png)
+![mdf-demo](./tapes/output/mdf-demo.gif)
 
 ## Installation
 
