@@ -3,6 +3,7 @@ Output tapes/mdf-demo.gif
 Set Width 1600
 Set Height 800
 Set FontSize 16
+Set Padding 30
 Set TypingSpeed 500ms
 
 Type "mdf"
