@@ -360,11 +360,6 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-type keyHint struct {
-	binding key.Binding
-	help    string
-}
-
 // writeLineNumbers writes the number of line numbers to the line number
 // viewport.
 func (m *Model) writeLineNumbers(n int) {
