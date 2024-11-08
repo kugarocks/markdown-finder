@@ -9,6 +9,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/caarlos0/env/v6"
+	"github.com/charmbracelet/bubbles/key"
 	"gopkg.in/yaml.v3"
 )
 
@@ -159,6 +160,12 @@ type Config struct {
 	CodeBlockPrefix    string `env:"MDF_CODE_BLOCK_PREFIX" yaml:"code_block_prefix"`
 	CodeBlockSuffix    string `env:"MDF_CODE_BLOCK_SUFFIX" yaml:"code_block_suffix"`
 	CodeBlockCopedHint string `env:"MDF_CODE_BLOCK_COPIED_HINT" yaml:"code_block_copied_hint"`
+
+	// keys
+	CopyContentKeys []string `env:"MDF_COPY_CONTENT_KEYS" envSeparator:"," yaml:"copy_content_keys"`
+	EditSnippetKeys []string `env:"MDF_EDIT_SNIPPET_KEYS" envSeparator:"," yaml:"edit_snippet_keys"`
+	NextPaneKeys    []string `env:"MDF_NEXT_PANE_KEYS" envSeparator:"," yaml:"next_pane_keys"`
+	PrevPaneKeys    []string `env:"MDF_PREV_PANE_KEYS" envSeparator:"," yaml:"prev_pane_keys"`
 }
 
 func newConfig() Config {
@@ -196,6 +203,12 @@ func newConfig() Config {
 		CodeBlockPrefix:    "------------- CodeBlock -------------",
 		CodeBlockSuffix:    "---------------- End ----------------",
 		CodeBlockCopedHint: "---------- Press %s to copy ----------",
+
+		// keys
+		CopyContentKeys: []string{"c", "d", "e", "f", "g"},
+		EditSnippetKeys: []string{"i"},
+		NextPaneKeys:    []string{"l", "n", "tab", "right"},
+		PrevPaneKeys:    []string{"h", "N", "shift+tab", "left"},
 	}
 }
 
@@ -283,4 +296,31 @@ func (config Config) getSourcePath() string {
 func (config Config) getDefaultSourcePath() string {
 	parts := strings.Split(defaultSourceName, "/")
 	return filepath.Join(append([]string{config.getSourceBase()}, parts...)...)
+}
+
+func (config Config) newKeyMap() KeyMap {
+	var km = KeyMap{
+		Quit:            key.NewBinding(key.WithKeys("q", "ctrl+c"), key.WithHelp("q", "exit")),
+		Search:          key.NewBinding(key.WithKeys("/"), key.WithHelp("/", "search")),
+		ToggleHelp:      key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
+		MoveSnippetDown: key.NewBinding(key.WithKeys("J"), key.WithHelp("J", "move snippet down")),
+		MoveSnippetUp:   key.NewBinding(key.WithKeys("K"), key.WithHelp("K", "move snippet up")),
+	}
+
+	setKeyBinding := func(binding *key.Binding, keys []string, helpText string) {
+		if len(keys) > 0 {
+			binding.SetKeys(keys...)
+			if len(keys) > 2 {
+				keys = keys[:2]
+			}
+			binding.SetHelp(strings.Join(keys, "/"), helpText)
+		}
+	}
+
+	setKeyBinding(&km.CopyContent, config.CopyContentKeys, "copy")
+	setKeyBinding(&km.EditSnippet, config.EditSnippetKeys, "edit")
+	setKeyBinding(&km.NextPane, config.NextPaneKeys, "next")
+	setKeyBinding(&km.PrevPane, config.PrevPaneKeys, "prev")
+
+	return km
 }

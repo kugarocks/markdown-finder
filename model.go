@@ -80,6 +80,7 @@ type Model struct {
 func (m *Model) Init() tea.Cmd {
 	m.SectionsMap = make(map[Snippet]*list.Model)
 	m.pane = m.defaultPane()
+	m.keys = m.config.newKeyMap()
 	m.updateStyleByPane()
 	m.updateKeyMap()
 

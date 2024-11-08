@@ -308,7 +308,6 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 		SnippetsMap:     snippetsMap,
 		Folders:         folderList,
 		Code:            content,
-		keys:            DefaultKeyMap,
 		help:            help.New(),
 		config:          config,
 		mdRender:        mdRender,
