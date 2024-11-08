@@ -265,20 +265,61 @@ func readConfig() Config {
 	return config
 }
 
-// writeConfig returns a configuration read from the environment.
+// writeConfig writes the configuration to a YAML file.
 func (config Config) writeConfig() error {
+	// Open file for writing
 	fi, err := os.Create(getConfigFilePath())
 	if err != nil {
 		return err
 	}
-	if fi != nil {
-		defer fi.Close()
-		if err = yaml.NewEncoder(fi).Encode(&config); err != nil {
-			return err
-		}
+	defer fi.Close()
+
+	// Create encoder with indentation
+	enc := yaml.NewEncoder(fi)
+	enc.SetIndent(2)
+	defer enc.Close()
+
+	// Encode config to YAML node
+	var node yaml.Node
+	if err := node.Encode(config); err != nil {
+		return err
 	}
 
-	return nil
+	// Set flow style for array fields
+	setFlowStyle(&node, map[string]struct{}{
+		"copy_content_keys": {},
+		"edit_snippet_keys": {},
+		"next_pane_keys":    {},
+		"prev_pane_keys":    {},
+	})
+
+	return enc.Encode(&node)
+}
+
+// setFlowStyle recursively traverses the YAML node tree and sets flow style
+// for specified fields that are sequences (arrays).
+func setFlowStyle(node *yaml.Node, fields map[string]struct{}) {
+	if node == nil {
+		return
+	}
+
+	switch node.Kind {
+	case yaml.DocumentNode:
+		// Process document content
+		for _, n := range node.Content {
+			setFlowStyle(n, fields)
+		}
+	case yaml.MappingNode:
+		// Process key-value pairs
+		for i := 0; i < len(node.Content); i += 2 {
+			key, value := node.Content[i], node.Content[i+1]
+			// Set flow style if field matches and is a sequence
+			if _, ok := fields[key.Value]; ok && value.Kind == yaml.SequenceNode {
+				value.Style = yaml.FlowStyle
+			}
+			setFlowStyle(value, fields)
+		}
+	}
 }
 
 // getSourceBase returns the base path for the configured source name
