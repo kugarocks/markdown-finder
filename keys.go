@@ -9,10 +9,10 @@ type KeyMap struct {
 	ToggleHelp      key.Binding
 	MoveSnippetUp   key.Binding
 	MoveSnippetDown key.Binding
-	CopySnippet     key.Binding
+	CopyContent     key.Binding
 	EditSnippet     key.Binding
 	NextPane        key.Binding
-	PreviousPane    key.Binding
+	PrevPane        key.Binding
 }
 
 // DefaultKeyMap is the default key map for the application.
@@ -22,10 +22,10 @@ var DefaultKeyMap = KeyMap{
 	ToggleHelp:      key.NewBinding(key.WithKeys("?"), key.WithHelp("?", "help")),
 	MoveSnippetDown: key.NewBinding(key.WithKeys("J"), key.WithHelp("J", "move snippet down")),
 	MoveSnippetUp:   key.NewBinding(key.WithKeys("K"), key.WithHelp("K", "move snippet up")),
-	CopySnippet:     key.NewBinding(key.WithKeys("c", "d", "f"), key.WithHelp("c", "copy")),
+	CopyContent:     key.NewBinding(key.WithKeys("c", "d", "f"), key.WithHelp("c", "copy")),
 	EditSnippet:     key.NewBinding(key.WithKeys("e"), key.WithHelp("e", "edit")),
 	NextPane:        key.NewBinding(key.WithKeys("tab", "right"), key.WithHelp("tab", "navigate")),
-	PreviousPane:    key.NewBinding(key.WithKeys("shift+tab", "left"), key.WithHelp("shift+tab", "navigate")),
+	PrevPane:        key.NewBinding(key.WithKeys("shift+tab", "left"), key.WithHelp("shift+tab", "navigate")),
 }
 
 // ShortHelp returns a quick help menu.
@@ -41,9 +41,9 @@ func (k KeyMap) ShortHelp() []key.Binding {
 // FullHelp returns all help options in a more detailed view.
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.CopySnippet, k.EditSnippet},
+		{k.CopyContent, k.EditSnippet},
 		{k.MoveSnippetDown, k.MoveSnippetUp},
-		{k.NextPane, k.PreviousPane},
+		{k.NextPane, k.PrevPane},
 		{k.Search, k.ToggleHelp},
 		{k.Quit},
 	}

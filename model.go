@@ -171,7 +171,7 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.keys.NextPane):
 			m.nextPane()
-		case key.Matches(msg, m.keys.PreviousPane):
+		case key.Matches(msg, m.keys.PrevPane):
 			m.previousPane()
 		case key.Matches(msg, m.keys.Quit):
 			m.state = quittingState
@@ -193,21 +193,23 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Folders.SetHeight(newHeight)
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
-		case key.Matches(msg, m.keys.CopySnippet):
+		case key.Matches(msg, m.keys.CopyContent):
 			return m, func() tea.Msg {
 				var content string
 
 				switch m.pane {
 				case snippetPane:
+					// copy snippet
 					contentBytes, err := os.ReadFile(m.selectedSnippetFilePath())
 					if err != nil {
 						return changeStateMsg{navigatingState}
 					}
 					content = string(contentBytes)
 				default:
+					// copy section code block
 					k := msg.String()
 					index := -1
-					for i, copyKey := range m.keys.CopySnippet.Keys() {
+					for i, copyKey := range m.keys.CopyContent.Keys() {
 						if k == copyKey {
 							index = i
 							break
@@ -277,18 +279,6 @@ func (m *Model) editSnippet() tea.Cmd {
 
 		return updateContentMsg(m.selectedSection())
 	})
-}
-
-func (m *Model) noContentHints() []keyHint {
-	return []keyHint{
-		{m.keys.EditSnippet, "edit contents"},
-	}
-}
-
-func (m *Model) noSnippetHints() []keyHint {
-	return []keyHint{
-		{m.keys.Quit, "no snippet"},
-	}
 }
 
 // updateSnippetSections updates the snippet sections
@@ -539,7 +529,7 @@ func (m *Model) View() string {
 }
 
 func (m *Model) rewriteCodeBlockPrefix(code string) string {
-	for _, k := range m.keys.CopySnippet.Keys() {
+	for _, k := range m.keys.CopyContent.Keys() {
 		copiedHint := fmt.Sprintf(m.config.CodeBlockCopedHint, strings.ToUpper(k))
 		code = strings.Replace(code, m.config.CodeBlockPrefix, copiedHint, 1)
 	}
