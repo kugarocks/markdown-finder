@@ -1,12 +1,12 @@
-Output output/mdf-demo.gif
+Output output/mdf-set-source.gif
 
-Set Width 1600
-Set Height 800
-Set FontSize 16
+Set Width 800
+Set Height 400
+Set FontSize 24
 Set Padding 30
 Set TypingSpeed 500ms
 
-Type "mdf"
+Type "mdf set source"
 Sleep 1
 Enter
 Sleep 3

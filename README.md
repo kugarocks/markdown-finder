@@ -18,9 +18,8 @@ go build -o mdf .
 
 ## GitHub Source
 
-![mdf-gh-source](./assets/mdf-gh-source.png)
-
-Clone `git@github.com:kugarocks/mdf-src-en.git`.
+You can manage or share your source by GitHub.
+The following command will clone `git@github.com:kugarocks/mdf-src-en.git`.
 
 ```bash
 mdf get source kugarocks/mdf-src-en
@@ -30,6 +29,29 @@ Supports HTTPS URL as well:
 
 ```bash
 mdf get source https://github.com/kugarocks/mdf-src-en.git
+```
+
+The source will be downloaded to `~/.mdf/sources/`.
+
+```bash
+.mdf
+├── config.yaml
+└── sources
+    ├── kugarocks
+    │   └── mdf-src-en
+    │       ├── README.md
+    │       ├── bash
+    │       │   ├── cat.md
+    │       │   └── ls.md
+    │       ├── cloud-native
+    │       │   └── k8s.md
+    │       └── snippet-config.json
+    ├── local
+    │   └── source
+    │       ├── folder
+    │       │   └── Example.md
+    │       └── snippet-config.json
+    └── source-config.json
 ```
 
 ## Switch Source
