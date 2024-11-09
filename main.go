@@ -23,10 +23,10 @@ import (
 )
 
 const (
+	Version           = "v1.0.0"
 	githubSSHPrefix   = "git@github.com:"
 	githubHTTPSPrefix = "https://github.com/"
 	githubSSHSuffix   = ".git"
-	Version           = "v1.0.0"
 )
 
 func main() {
