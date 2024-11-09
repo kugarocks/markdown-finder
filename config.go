@@ -21,17 +21,18 @@ var (
 	CodeBlockMarginZero = uint(0)
 
 	HelpText = `
-Nap is a code snippet manager for your terminal.
-https://github.com/maaslalani/nap
+mdf is a markdown finder in your terminal.
+https://github.com/kugarocks/markdown-finder
 
 Usage:
-  nap           - for interactive mode
-  nap list      - list all snippets
-  nap <snippet> - print snippet to stdout
-
-Create:
-  nap < main.go                 - save snippet from stdin
-  nap example/main.go < main.go - save snippet with name
+  mdf                   - for interactive mode (3 panes)
+  mdf example           - fuzzy find snippet (2 panes)
+  mdf get source <repo> - get source from github
+  mdf set source        - switch source
+  mdf set folder        - switch folder
+  mdf list source       - list all sources
+  mdf list folder       - list all folders
+  mdf list snippet      - list all snippets
 
 `
 	DefaultSnippetConfig = `{

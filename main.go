@@ -26,6 +26,7 @@ const (
 	githubSSHPrefix   = "git@github.com:"
 	githubHTTPSPrefix = "https://github.com/"
 	githubSSHSuffix   = ".git"
+	Version           = "v1.0.0"
 )
 
 func main() {
@@ -94,6 +95,9 @@ func runCLI(args []string) {
 		switch args[0] {
 		case "-h", "--help":
 			fmt.Print(HelpText)
+			return
+		case "-v", "--version", "version":
+			fmt.Println(Version)
 			return
 		default:
 			targetSnippet = findSnippet(args[0], snippets)
