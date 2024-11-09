@@ -40,10 +40,10 @@ Create:
 
 	DefaultSnippetContent = `## Quick Start
 
-* tab - switch pane
+* l/h - next/prev pane
 * j/k - cursor down/up
 * c/d - copy code block
-* e - edit snippet
+* i - edit snippet
 * use "---" to separate sections
 * each section needs a title
 
