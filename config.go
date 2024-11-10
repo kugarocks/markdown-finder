@@ -65,13 +65,13 @@ echo "https://minions.wiki"
 Get source from GitHub by SSH:
 
 ` + "```bash {copyable}" + `
-mdf get source kugarocks/mdf-src-en
+mdf get source kugarocks/mdf-src
 ` + "```" + `
 
 HTTPS URL is also supported:
 
 ` + "```bash {copyable}" + `
-mdf get source https://github.com/kugarocks/mdf-src-en.git
+mdf get source https://github.com/kugarocks/mdf-src.git
 ` + "```" + `
 
 Switch source:
