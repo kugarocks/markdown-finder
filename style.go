@@ -208,8 +208,8 @@ func DefaultStyles(config Config) Styles {
 	glamourDarkStyle := styles.DarkStyleConfig
 	glamourDarkStyle.H1 = glamourDarkStyle.H2
 	glamourDarkStyle.CodeBlock.Margin = &CodeBlockMarginZero
-	glamourDarkStyle.CodeBlock.StylePrimitive.BlockPrefix = config.CodeBlockPrefix + "\n"
-	glamourDarkStyle.CodeBlock.StylePrimitive.BlockSuffix = config.CodeBlockSuffix + "\n"
+	glamourDarkStyle.CodeBlock.StylePrimitive.BlockPrefix = config.CodeBlockPrefixTemp + "\n"
+	glamourDarkStyle.CodeBlock.StylePrimitive.BlockSuffix = config.CodeBlockSuffixTemp + "\n"
 
 	return Styles{
 		Snippets: SnippetsStyle{

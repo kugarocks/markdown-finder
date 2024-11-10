@@ -17,15 +17,25 @@ const (
 	defaultSectionFile    = "example.md"
 	defaultSectionTitle   = "No TitleBar"
 	defaultSectionContent = ""
+
+	metaKeyCopyable = "copyable"
+	metaKeyTitle    = "title"
 )
 
 // Section represents a partial content of section in markdown file.
 type Section struct {
-	Folder     string   `json:"folder"`
-	File       string   `json:"file"`
-	Title      string   `json:"title"`
-	Content    string   `json:"content"`
-	CodeBlocks []string `json:"code_blocks"`
+	Folder     string      `json:"folder"`
+	File       string      `json:"file"`
+	Title      string      `json:"title"`
+	Content    string      `json:"content"`
+	CodeBlocks []CodeBlock `json:"code_blocks"`
+}
+
+// CodeBlock represents a code block in a section.
+type CodeBlock struct {
+	Content  string
+	Language string
+	Meta     map[string]string
 }
 
 // defaultSection is a section with all the default values, used for when

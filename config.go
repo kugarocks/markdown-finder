@@ -20,6 +20,8 @@ var (
 	ContentCodeMargin   = []int{1, 0}
 	CodeBlockMarginZero = uint(0)
 
+	CodeBlockBorderLength = 39
+
 	HelpText = `
 mdf is a markdown finder in your terminal.
 https://github.com/kugarocks/markdown-finder
@@ -48,12 +50,12 @@ Usage:
 * use "---" to separate sections
 * each section needs a title
 
-` + "```bash" + `
-echo "hello world"
+` + "```bash {copyable}" + `
+echo "Charm.sh Rocks 🚀"
 ` + "```" + `
 
-` + "```bash" + `
-echo "Bananaaaaa 🍌"
+` + "```bash {title=\"Custom Title\"}" + `
+echo "https://minions.wiki"
 ` + "```" + `
 
 ---
@@ -62,19 +64,19 @@ echo "Bananaaaaa 🍌"
 
 Get source from GitHub by SSH:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 mdf get source kugarocks/mdf-src-en
 ` + "```" + `
 
 HTTPS URL is also supported:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 mdf get source https://github.com/kugarocks/mdf-src-en.git
 ` + "```" + `
 
 Switch source:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 mdf set source
 ` + "```" + `
 
@@ -84,19 +86,19 @@ mdf set source
 
 Switch folder:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 mdf set folder
 ` + "```" + `
 
 Fuzzy find snippet:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 mdf examp
 ` + "```" + `
 
 List folders:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 mdf list folder
 ` + "```" + `
 
@@ -106,7 +108,7 @@ mdf list folder
 
 Checkout:
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 https://github.com/kugarocks/markdown-finder
 ` + "```" + `
 
@@ -116,7 +118,7 @@ https://github.com/kugarocks/markdown-finder
 
 We make the command line glamorous.
 
-` + "```bash" + `
+` + "```bash {copyable}" + `
 echo "Charm.sh Rocks 🚀"
 ` + "```" + `
 `
@@ -157,10 +159,13 @@ type Config struct {
 	ContentLineNumberFgColor string `env:"MDF_CONTENT_LINE_NUMBER_FG_COLOR" yaml:"content_line_number_fg_color"`
 
 	// Code Block
-	CodeBlockTheme     string `env:"MDF_THEME" yaml:"theme"`
-	CodeBlockPrefix    string `env:"MDF_CODE_BLOCK_PREFIX" yaml:"code_block_prefix"`
-	CodeBlockSuffix    string `env:"MDF_CODE_BLOCK_SUFFIX" yaml:"code_block_suffix"`
-	CodeBlockCopedHint string `env:"MDF_CODE_BLOCK_COPIED_HINT" yaml:"code_block_copied_hint"`
+	CodeBlockTheme         string `env:"MDF_THEME" yaml:"theme"`
+	CodeBlockBorderPadding string `env:"MDF_CODE_BLOCK_BORDER_PADDING" yaml:"code_block_border_padding"`
+	CodeBlockBorderLength  int    `env:"MDF_CODE_BLOCK_BORDER_LENGTH" yaml:"code_block_border_length"`
+	CodeBlockTitleCopy     string `env:"MDF_CODE_BLOCK_TITLE_COPY" yaml:"code_block_title_copy"`
+	CodeBlockPrefixTemp    string `yaml:"-"`
+	CodeBlockSuffixTemp    string `yaml:"-"`
+	CodeBlockBorderDefault string `yaml:"-"`
 
 	// keys
 	CopyContentKeys []string `env:"MDF_COPY_CONTENT_KEYS" envSeparator:"," yaml:"copy_content_keys"`
@@ -200,10 +205,12 @@ func newConfig() Config {
 		ContentLineNumberFgColor: "241",
 
 		// Code Block
-		CodeBlockTheme:     "dracula",
-		CodeBlockPrefix:    "------------- CodeBlock -------------",
-		CodeBlockSuffix:    "---------------- End ----------------",
-		CodeBlockCopedHint: "---------- Press %s to copy ----------",
+		CodeBlockTheme:         "dracula",
+		CodeBlockBorderPadding: "-",
+		CodeBlockBorderLength:  CodeBlockBorderLength,
+		CodeBlockTitleCopy:     "Press {key} to copy",
+		CodeBlockPrefixTemp:    "------------------BEG------------------",
+		CodeBlockSuffixTemp:    "------------------END------------------",
 
 		// keys
 		CopyContentKeys: []string{"c", "d", "e", "f", "g"},
@@ -263,6 +270,13 @@ func readConfig() Config {
 		config = newConfig()
 	}
 
+	// set code block default config
+	if config.CodeBlockBorderLength <= 0 {
+		config.CodeBlockBorderLength = CodeBlockBorderLength
+	}
+	config.CodeBlockBorderPadding = config.CodeBlockBorderPadding[:1]
+	config.CodeBlockBorderDefault = strings.Repeat(config.CodeBlockBorderPadding, config.CodeBlockBorderLength)
+
 	return config
 }
 
@@ -313,9 +327,9 @@ func setFlowStyle(node *yaml.Node, fields map[string]struct{}) {
 	case yaml.MappingNode:
 		// Process key-value pairs
 		for i := 0; i < len(node.Content); i += 2 {
-			key, value := node.Content[i], node.Content[i+1]
+			k, value := node.Content[i], node.Content[i+1]
 			// Set flow style if field matches and is a sequence
-			if _, ok := fields[key.Value]; ok && value.Kind == yaml.SequenceNode {
+			if _, ok := fields[k.Value]; ok && value.Kind == yaml.SequenceNode {
 				value.Style = yaml.FlowStyle
 			}
 			setFlowStyle(value, fields)

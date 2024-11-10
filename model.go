@@ -10,7 +10,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/charmbracelet/bubbles/help"
-	"github.com/charmbracelet/bubbles/key"
+	bkey "github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -151,7 +151,6 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		for _, li := range m.SnippetsMap {
 			li.SetHeight(m.height)
 		}
-		//m.Folders.SetHeight(m.height)
 		m.Code.Height = m.height
 		m.LineNumbers.Height = m.height
 		m.Code.Width = msg.Width - m.Snippets().Width() - m.Folders.Width() - 20
@@ -170,18 +169,18 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		switch {
-		case key.Matches(msg, m.keys.NextPane):
+		case bkey.Matches(msg, m.keys.NextPane):
 			m.nextPane()
-		case key.Matches(msg, m.keys.PrevPane):
+		case bkey.Matches(msg, m.keys.PrevPane):
 			m.previousPane()
-		case key.Matches(msg, m.keys.Quit):
+		case bkey.Matches(msg, m.keys.Quit):
 			m.state = quittingState
 			return m, tea.Quit
-		case key.Matches(msg, m.keys.MoveSnippetDown):
+		case bkey.Matches(msg, m.keys.MoveSnippetDown):
 			m.moveSnippetDown()
-		case key.Matches(msg, m.keys.MoveSnippetUp):
+		case bkey.Matches(msg, m.keys.MoveSnippetUp):
 			m.moveSnippetUp()
-		case key.Matches(msg, m.keys.ToggleHelp):
+		case bkey.Matches(msg, m.keys.ToggleHelp):
 			m.help.ShowAll = !m.help.ShowAll
 
 			var newHeight int
@@ -194,42 +193,18 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Folders.SetHeight(newHeight)
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
-		case key.Matches(msg, m.keys.CopyContent):
+		case bkey.Matches(msg, m.keys.CopyContent):
 			return m, func() tea.Msg {
-				var content string
-
-				switch m.pane {
-				case snippetPane:
-					// copy snippet
-					contentBytes, err := os.ReadFile(m.selectedSnippetFilePath())
-					if err != nil {
-						return changeStateMsg{navigatingState}
-					}
-					content = string(contentBytes)
-				default:
-					// copy section code block
-					k := msg.String()
-					index := -1
-					for i, copyKey := range m.keys.CopyContent.Keys() {
-						if k == copyKey {
-							index = i
-							break
-						}
-					}
-					codeBlocks := m.selectedSection().CodeBlocks
-					if index >= 0 && index < len(codeBlocks) {
-						content = codeBlocks[index]
-					} else {
-						return changeStateMsg{navigatingState}
-					}
+				content, ok := m.getContentToCopy(msg)
+				if !ok {
+					return changeStateMsg{navigatingState}
 				}
-
 				_ = clipboard.WriteAll(content)
 				return changeStateMsg{copyingState}
 			}
-		case key.Matches(msg, m.keys.EditSnippet):
+		case bkey.Matches(msg, m.keys.EditSnippet):
 			return m, m.editSnippet()
-		case key.Matches(msg, m.keys.Search):
+		case bkey.Matches(msg, m.keys.Search):
 			//m.pane = sectionPane
 		}
 	}
@@ -237,6 +212,42 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	m.updateKeyMap()
 	cmd := m.updateActivePane(teaMsg)
 	return m, cmd
+}
+
+// getContentToCopy
+func (m *Model) getContentToCopy(msg tea.KeyMsg) (string, bool) {
+	switch m.pane {
+	case snippetPane:
+		// copy snippet
+		contentBytes, err := os.ReadFile(m.selectedSnippetFilePath())
+		if err != nil {
+			return "", false
+		}
+		return string(contentBytes), true
+	default:
+		// copy section code block
+		key := msg.String()
+		keyIndex := -1
+		for i, copyKey := range m.keys.CopyContent.Keys() {
+			if key == copyKey {
+				keyIndex = i
+				break
+			}
+		}
+
+		copyCount := 0
+		codeBlocks := m.selectedSection().CodeBlocks
+		for _, codeBlock := range codeBlocks {
+			_, copyable := codeBlock.Meta[metaKeyCopyable]
+			if copyable {
+				copyCount++
+				if keyIndex+1 == copyCount {
+					return codeBlock.Content, true
+				}
+			}
+		}
+	}
+	return "", false
 }
 
 // selectedSnippetFilePath returns the file path of the snippet that is
@@ -353,7 +364,7 @@ func (m *Model) updateContentView(msg updateContentMsg) (tea.Model, tea.Cmd) {
 	c, _ := m.mdRender.Render(section.Content)
 	c = strings.TrimPrefix(c, "\n")
 	c = strings.ReplaceAll(c, "\t", strings.Repeat(" ", tabSpaces))
-	c = m.rewriteCodeBlockPrefix(c)
+	c = m.handleCodeBlockBorder(c, section)
 	m.writeLineNumbers(lipgloss.Height(c))
 	m.Code.SetContent(c)
 
@@ -524,22 +535,79 @@ func (m *Model) View() string {
 	)
 }
 
-func (m *Model) rewriteCodeBlockPrefix(code string) string {
-	for _, k := range m.keys.CopyContent.Keys() {
-		copiedHint := fmt.Sprintf(m.config.CodeBlockCopedHint, strings.ToUpper(k))
-		code = strings.Replace(code, m.config.CodeBlockPrefix, copiedHint, 1)
+func (m *Model) handleCodeBlockBorder(content string, section Section) string {
+	s := content
+
+	defaultBorder := m.config.CodeBlockBorderDefault
+	copyKeys := m.config.CopyContentKeys
+	copyKeysIndex := 0
+
+	// handle prefix
+	for _, codeBlock := range section.CodeBlocks {
+		prefix := ""
+
+		// handle copy title
+		_, copyable := codeBlock.Meta[metaKeyCopyable]
+		if copyable {
+			if copyKeysIndex < len(copyKeys) {
+				key := strings.ToUpper(copyKeys[copyKeysIndex])
+				title := strings.ReplaceAll(m.config.CodeBlockTitleCopy, "{key}", key)
+				prefix = m.paddingBorderWithTitle(title)
+				copyKeysIndex++
+			} else {
+				prefix = defaultBorder
+			}
+			s = strings.Replace(s, m.config.CodeBlockPrefixTemp, prefix, 1)
+			continue
+		}
+
+		// handle normal title
+		title, titleExists := codeBlock.Meta[metaKeyTitle]
+		title = strings.TrimSpace(title)
+		if titleExists && len(title) > 0 {
+			prefix = m.paddingBorderWithTitle(title)
+		} else {
+			// no title
+			prefix = defaultBorder
+		}
+
+		s = strings.Replace(s, m.config.CodeBlockPrefixTemp, prefix, 1)
 	}
-	return code
+
+	// handle suffix
+	s = strings.ReplaceAll(s, m.config.CodeBlockSuffixTemp, defaultBorder)
+
+	return s
+}
+
+func (m *Model) paddingBorderWithTitle(title string) string {
+	maxTitleLen := m.config.CodeBlockBorderLength - 4
+	if maxTitleLen <= 0 {
+		return m.config.CodeBlockBorderDefault
+	}
+	if len(title) > maxTitleLen {
+		title = title[:maxTitleLen]
+	}
+
+	paddingNum := m.config.CodeBlockBorderLength - len(title) - 2
+	leftPaddingNum := paddingNum / 2
+	rightPaddingNum := paddingNum - leftPaddingNum
+
+	leftPadding := strings.Repeat(m.config.CodeBlockBorderPadding, leftPaddingNum)
+	rightPadding := strings.Repeat(m.config.CodeBlockBorderPadding, rightPaddingNum)
+	border := fmt.Sprintf("%s %s %s", leftPadding, title, rightPadding)
+
+	return border
 }
 
 type MarkdownElem struct {
 	FirstTitle string
-	CodeBlocks []string
+	CodeBlocks []CodeBlock
 }
 
 func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 	mdElem := &MarkdownElem{
-		CodeBlocks: make([]string, 0),
+		CodeBlocks: make([]CodeBlock, 0),
 	}
 
 	// create parser
@@ -568,7 +636,21 @@ func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 				line := lines.At(i)
 				content.Write(line.Value(reader.Source()))
 			}
-			codeBlock := strings.TrimSuffix(content.String(), "\n")
+
+			// 获取代码内容
+			codeContent := strings.TrimSuffix(content.String(), "\n")
+
+			// 解析信息字符串
+			info := string(node.Info.Text(reader.Source()))
+			language, meta := parseCodeBlockInfo(info)
+
+			// 创建新的代码块
+			codeBlock := CodeBlock{
+				Content:  codeContent,
+				Language: language,
+				Meta:     meta,
+			}
+
 			mdElem.CodeBlocks = append(mdElem.CodeBlocks, codeBlock)
 		}
 		return ast.WalkContinue, nil
@@ -578,6 +660,71 @@ func (m *Model) parseMarkdown(source string) (*MarkdownElem, error) {
 	}
 
 	return mdElem, nil
+}
+
+// parseCodeBlockInfo Created by claude-3.5-sonnet
+func parseCodeBlockInfo(info string) (string, map[string]string) {
+	meta := make(map[string]string)
+
+	// If the input is empty, return immediately
+	info = strings.TrimSpace(info)
+	if info == "" {
+		return "", meta
+	}
+
+	// Split the language and metadata parts
+	parts := strings.SplitN(info, " ", 2)
+	language := parts[0]
+
+	// If there is only a language without metadata, return immediately
+	if len(parts) == 1 {
+		return language, meta
+	}
+
+	// Process the metadata part
+	metaStr := strings.TrimSpace(parts[1])
+	metaStr = strings.Trim(metaStr, "{}")
+
+	// Use a state machine to parse metadata
+	var key, value string
+	var inQuote bool
+	var quoteChar rune
+	var isKey = true
+	var buf strings.Builder
+
+	for _, ch := range metaStr + " " { // Add space to handle the last value
+		switch {
+		case ch == '"' || ch == '\'':
+			if !inQuote {
+				inQuote = true
+				quoteChar = ch
+			} else if ch == quoteChar {
+				inQuote = false
+			} else {
+				buf.WriteRune(ch)
+			}
+		case ch == '=' && isKey && !inQuote:
+			key = strings.TrimSpace(buf.String())
+			buf.Reset()
+			isKey = false
+		case ch == ' ' && !inQuote:
+			if !isKey {
+				value = strings.TrimSpace(buf.String())
+				if key != "" {
+					meta[key] = value
+				}
+			} else if buf.Len() > 0 {
+				key = strings.TrimSpace(buf.String())
+				meta[key] = "true"
+			}
+			buf.Reset()
+			isKey = true
+		default:
+			buf.WriteRune(ch)
+		}
+	}
+
+	return language, meta
 }
 
 func (m *Model) updateStyleByPane() {
