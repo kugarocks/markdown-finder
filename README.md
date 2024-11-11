@@ -22,13 +22,13 @@ You can manage or share your source by GitHub.
 The following command will clone `git@github.com:kugarocks/mdf-src-en.git`.
 
 ```bash
-mdf get source kugarocks/mdf-src-en
+mdf get source kugarocks/mdf-src
 ```
 
 Supports HTTPS URL as well:
 
 ```bash
-mdf get source https://github.com/kugarocks/mdf-src-en.git
+mdf get source https://github.com/kugarocks/mdf-src.git
 ```
 
 The source will be downloaded to `~/.mdf/sources/`.
@@ -38,7 +38,7 @@ The source will be downloaded to `~/.mdf/sources/`.
 ├── config.yaml
 └── sources
     ├── kugarocks
-    │   └── mdf-src-en
+    │   └── mdf-src
     │       ├── README.md
     │       ├── bash
     │       │   ├── cat.md
@@ -60,7 +60,7 @@ The source will be downloaded to `~/.mdf/sources/`.
 mdf set source
 ```
 
-![mdf-set-source](./assets/mdf-set-source.png)
+![mdf-set-source](./tapes/output/mdf-set-source.gif)
 
 ## Switch Folder
 
@@ -68,7 +68,7 @@ mdf set source
 mdf set folder
 ```
 
-![mdf-set-folder](./assets/mdf-set-folder.png)
+![mdf-set-folder](./tapes/output/mdf-set-folder.gif)
 
 ## Fuzzy Find Snippet
 

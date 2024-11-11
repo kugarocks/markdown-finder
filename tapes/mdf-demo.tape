@@ -14,7 +14,7 @@ Type "j"
 Sleep 4
 Type "k"
 Sleep 4
-Type "d"
+Type "c"
 Sleep 5
 Type "q"
 Sleep 2
