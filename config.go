@@ -43,7 +43,7 @@ Usage:
 
 	DefaultSnippetContent = `## Quick Start
 
-* l/h - next/prev pane
+* n/N - next/prev pane
 * j/k - cursor down/up
 * c/d - copy code block
 * i - edit snippet
@@ -215,8 +215,8 @@ func newConfig() Config {
 		// keys
 		CopyContentKeys: []string{"c", "d", "e", "f", "g"},
 		EditSnippetKeys: []string{"i"},
-		NextPaneKeys:    []string{"l", "n", "tab", "right"},
-		PrevPaneKeys:    []string{"h", "N", "shift+tab", "left"},
+		NextPaneKeys:    []string{"n", "tab", "right"},
+		PrevPaneKeys:    []string{"N", "shift+tab", "left"},
 	}
 }
 
