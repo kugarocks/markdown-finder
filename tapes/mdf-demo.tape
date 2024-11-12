@@ -1,4 +1,4 @@
-Output output/mdf-demo.gif
+Output ../assets/mdf-demo.gif
 
 Set Width 1600
 Set Height 800

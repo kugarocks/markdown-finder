@@ -1,4 +1,4 @@
-Output output/mdf-set-source.gif
+Output ../assets/mdf-set-source.gif
 
 Set Width 600
 Set Height 250

@@ -1,4 +1,4 @@
-Output output/mdf-set-folder.gif
+Output ../assets/mdf-set-folder.gif
 
 Set Width 600
 Set Height 250

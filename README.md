@@ -6,7 +6,7 @@ Markdown Finder is a tool for quickly locating code snippets in Markdown files.
 Use `---` to divide sections of a Markdown file,
 making it easy to copy code from each section.
 
-![mdf-demo](./tapes/output/mdf-demo.gif)
+![mdf-demo](./assets/mdf-demo.gif)
 
 ## Installation
 
@@ -16,9 +16,27 @@ Build from source:
 go build -o mdf .
 ```
 
+## Fuzzy Find Snippet
+
+The `example.md` snippet will be found.
+
+```bash
+mdf examp
+```
+
+The `bash/cat.md` snippet will be found.
+
+```bash
+mdf bas/ca
+```
+
+If the snippet is specified, two panes are displayed by default.
+
+![mdf-two-panes](./assets/mdf-two-panes.png)
+
 ## GitHub Source
 
-You can manage or share your source by GitHub.
+Manage your source from GitHub.
 The following command will clone `git@github.com:kugarocks/mdf-src-en.git`.
 
 ```bash
@@ -60,7 +78,7 @@ The source will be downloaded to `~/.mdf/sources/`.
 mdf set source
 ```
 
-![mdf-set-source](./tapes/output/mdf-set-source.gif)
+![mdf-set-source](./assets/mdf-set-source.gif)
 
 ## Switch Folder
 
@@ -68,15 +86,7 @@ mdf set source
 mdf set folder
 ```
 
-![mdf-set-folder](./tapes/output/mdf-set-folder.gif)
-
-## Fuzzy Find Snippet
-
-The `example` snippet will be found.
-
-```bash
-mdf examp
-```
+![mdf-set-folder](./assets/mdf-set-folder.gif)
 
 ## Configuration
 
@@ -88,6 +98,8 @@ export MDF_HOME=/path/to/mdf
 ```
 
 ## config.yaml
+
+Feel free to customize the following configuration.
 
 ```yaml
 source_name: local/source
@@ -112,18 +124,19 @@ copied_bar_fg_color: '#FFFFFF'
 copied_item_fg_color: '#BCE1AF'
 content_line_number_fg_color: "241"
 theme: dracula
-code_block_prefix: '------------- CodeBlock -------------'
-code_block_suffix: '---------------- End ----------------'
-code_block_copied_hint: '---------- Press %s to copy ----------'
+code_block_border_padding: '-'
+code_block_border_length: 39
+code_block_title_copy: Press {key} to copy
+copy_content_keys: [c, d, e, f, g]
+edit_snippet_keys: [i]
+next_pane_keys: ["n", tab, right]
+prev_pane_keys: ["N", shift+tab, left]
 ```
 
-## TODO
-
-- [ ] Add copied keys configuration
-- [ ] Add Homebrew installation
-- [ ] Add apt-get installation
-- [ ] Add more documentation
-- [ ] Clean up code
+* source_name: Set by `mdf set source`
+* folder_name: Set by `mdf set folder`
+* default_pane: `section` or `snippet`
+* always_show_snippet_pane: `true` or `false`
 
 ## License
 
