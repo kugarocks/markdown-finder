@@ -10,7 +10,7 @@ making it easy to copy code from each section.
 
 ## Installation
 
-### Homebrew
+Homebrew:
 
 ```bash
 brew tap kugarocks/markdown-finder
@@ -20,7 +20,7 @@ brew tap kugarocks/markdown-finder
 brew install markdown-finder
 ```
 
-### Build from source
+Build from source:
 
 ```bash
 go build -o mdf .
