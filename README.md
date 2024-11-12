@@ -131,10 +131,12 @@ next_pane_keys: ["n", tab, right]
 prev_pane_keys: ["N", shift+tab, left]
 ```
 
-* source_name: Set by `mdf set source`
-* folder_name: Set by `mdf set folder`
-* default_pane: `section` or `snippet`
-* always_show_snippet_pane: `true` or `false`
+| Key        | Description                   |
+|---------------------------|-------------------------------|
+| source_name               | Set by `mdf set source`       |
+| folder_name               | Set by `mdf set folder`       |
+| default_pane              | `section` or `snippet`        |
+| always_show_snippet_pane  | `true` or `false`             |
 
 ## License
 
