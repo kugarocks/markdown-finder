@@ -3,3 +3,4 @@ tapes/*.gif
 .idea
 app.log
 .DS_Store
+/build
