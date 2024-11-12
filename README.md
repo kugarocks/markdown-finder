@@ -10,6 +10,16 @@ making it easy to copy code from each section.
 
 ## Installation
 
+Homebrew:
+
+```bash
+brew tap kugarocks/markdown-finder
+```
+
+```bash
+brew install markdown-finder
+```
+
 Build from source:
 
 ```bash
