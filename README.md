@@ -36,8 +36,7 @@ If the snippet is specified, two panes are displayed by default.
 
 ## GitHub Source
 
-Manage your source from GitHub.
-The following command will clone `git@github.com:kugarocks/mdf-src-en.git`.
+Manage your source from GitHub by SSH.
 
 ```bash
 mdf get source kugarocks/mdf-src
@@ -90,8 +89,7 @@ mdf set folder
 
 ## Configuration
 
-This configuration file is located at `~/.mdf/` by default.
-You can change by setting the `MDF_HOME` environment variable.
+The config file defaults to `~/.mdf/`. Set the `MDF_HOME` environment variable to change it.
 
 ```bash
 export MDF_HOME=/path/to/mdf
