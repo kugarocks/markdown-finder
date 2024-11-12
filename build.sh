@@ -15,7 +15,8 @@ mkdir -p build
 build_and_zip() {
   GOOS=$1
   GOARCH=$2
-  OUTPUT="mdf_${VERSION}_${GOOS}_${GOARCH}/mdf"
+  BUILD_DIR="mdf_${VERSION}_${GOOS}_${GOARCH}"
+  OUTPUT="${BUILD_DIR}/mdf"
 
   # Build
   echo "Building for $GOOS $GOARCH..."
@@ -28,6 +29,7 @@ build_and_zip() {
 
   # Optionally, remove the uncompressed binary
   rm "$OUTPUT"
+  rm -r "$BUILD_DIR"
 }
 
 # Build and zip for different architectures
