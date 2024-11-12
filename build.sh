@@ -15,14 +15,14 @@ mkdir -p build
 build_and_zip() {
   GOOS=$1
   GOARCH=$2
-  OUTPUT="build/mdf_${GOOS}_${GOARCH}"
+  OUTPUT="mdf_${VERSION}_${GOOS}_${GOARCH}/mdf"
 
   # Build
   echo "Building for $GOOS $GOARCH..."
   GOOS=$GOOS GOARCH=$GOARCH go build -o "$OUTPUT"
 
   # Zip with version number in the filename
-  ZIPFILE="build/mdf_version_${VERSION}_${GOOS}_${GOARCH}.zip"
+  ZIPFILE="build/mdf_${VERSION}_${GOOS}_${GOARCH}.zip"
   echo "Compressing $OUTPUT to $ZIPFILE..."
   zip "$ZIPFILE" "$OUTPUT"
 
