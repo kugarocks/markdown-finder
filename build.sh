@@ -25,6 +25,9 @@ build_and_zip() {
   ZIPFILE="build/mdf_version_${VERSION}_${GOOS}_${GOARCH}.zip"
   echo "Compressing $OUTPUT to $ZIPFILE..."
   zip "$ZIPFILE" "$OUTPUT"
+
+  # Optionally, remove the uncompressed binary
+  rm "$OUTPUT"
 }
 
 # Build and zip for different architectures
