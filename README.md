@@ -81,6 +81,9 @@ The source will be downloaded to `~/.mdf/sources/`.
     └── source-config.json
 ```
 
+The `source-config.json` file is automatically updated when you run `mdf get source`.
+If you manually add sources to `~/.mdf/sources/`, you will also need to manually update `source-config.json`.
+
 ## Switch Source
 
 ```bash
@@ -147,6 +150,10 @@ prev_pane_keys: ["N", shift+tab, left]
 | folder_name               | Set by `mdf set folder`       |
 | default_pane              | `section` or `snippet`        |
 | always_show_snippet_pane  | `true` or `false`             |
+
+TODO
+
+- [ ] Update `source-config.json` when sources are added manually.
 
 ## License
 
