@@ -151,7 +151,7 @@ prev_pane_keys: ["N", shift+tab, left]
 | default_pane              | `section` or `snippet`        |
 | always_show_snippet_pane  | `true` or `false`             |
 
-TODO
+## TODO
 
 - [ ] Update `source-config.json` when sources are added manually.
 
