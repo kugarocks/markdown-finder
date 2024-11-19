@@ -15,7 +15,6 @@ require (
 	github.com/charmbracelet/glamour v0.8.0
 	github.com/charmbracelet/lipgloss v0.12.1
 	github.com/dustin/go-humanize v1.0.1
-	github.com/mattn/go-isatty v0.0.20
 	github.com/sahilm/fuzzy v0.1.0
 	github.com/yuin/goldmark v1.7.4
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
@@ -31,6 +30,7 @@ require (
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect

@@ -206,6 +206,9 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, m.editSnippet()
 		case bkey.Matches(msg, m.keys.Search):
 			//m.pane = sectionPane
+		case bkey.Matches(msg, m.keys.ToggleSnippetPane):
+			m.hideSnippetPane = !m.hideSnippetPane
+			return m, nil
 		}
 	}
 

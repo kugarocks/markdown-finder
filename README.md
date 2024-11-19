@@ -44,6 +44,8 @@ If the snippet is specified, two panes are displayed by default.
 
 ![mdf-two-panes](./assets/mdf-two-panes.png)
 
+You can toggle the snippet pane by pressing `s` or `p`.
+
 ## GitHub Source
 
 Manage your source from GitHub by SSH.
@@ -142,6 +144,7 @@ copy_content_keys: [c, d, e, f, g]
 edit_snippet_keys: [i]
 next_pane_keys: ["n", tab, right]
 prev_pane_keys: ["N", shift+tab, left]
+toggle_snippet_pane_keys: [s, p]
 ```
 
 | Key        | Description                   |

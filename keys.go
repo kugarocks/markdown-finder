@@ -4,15 +4,16 @@ import "github.com/charmbracelet/bubbles/key"
 
 // KeyMap is the mappings of actions to key bindings.
 type KeyMap struct {
-	Quit            key.Binding
-	Search          key.Binding
-	ToggleHelp      key.Binding
-	MoveSnippetUp   key.Binding
-	MoveSnippetDown key.Binding
-	CopyContent     key.Binding
-	EditSnippet     key.Binding
-	NextPane        key.Binding
-	PrevPane        key.Binding
+	Quit              key.Binding
+	Search            key.Binding
+	ToggleHelp        key.Binding
+	MoveSnippetUp     key.Binding
+	MoveSnippetDown   key.Binding
+	CopyContent       key.Binding
+	EditSnippet       key.Binding
+	NextPane          key.Binding
+	PrevPane          key.Binding
+	ToggleSnippetPane key.Binding
 }
 
 // ShortHelp returns a quick help menu.
@@ -21,6 +22,7 @@ func (k KeyMap) ShortHelp() []key.Binding {
 		k.NextPane,
 		k.Search,
 		k.EditSnippet,
+		k.ToggleSnippetPane,
 		k.ToggleHelp,
 	}
 }
@@ -31,7 +33,7 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 		{k.CopyContent, k.EditSnippet},
 		{k.MoveSnippetDown, k.MoveSnippetUp},
 		{k.NextPane, k.PrevPane},
-		{k.Search, k.ToggleHelp},
-		{k.Quit},
+		{k.Search, k.ToggleSnippetPane},
+		{k.ToggleHelp, k.Quit},
 	}
 }

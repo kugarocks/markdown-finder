@@ -168,10 +168,11 @@ type Config struct {
 	CodeBlockBorderDefault string `yaml:"-"`
 
 	// keys
-	CopyContentKeys []string `env:"MDF_COPY_CONTENT_KEYS" envSeparator:"," yaml:"copy_content_keys"`
-	EditSnippetKeys []string `env:"MDF_EDIT_SNIPPET_KEYS" envSeparator:"," yaml:"edit_snippet_keys"`
-	NextPaneKeys    []string `env:"MDF_NEXT_PANE_KEYS" envSeparator:"," yaml:"next_pane_keys"`
-	PrevPaneKeys    []string `env:"MDF_PREV_PANE_KEYS" envSeparator:"," yaml:"prev_pane_keys"`
+	CopyContentKeys       []string `env:"MDF_COPY_CONTENT_KEYS" envSeparator:"," yaml:"copy_content_keys"`
+	EditSnippetKeys       []string `env:"MDF_EDIT_SNIPPET_KEYS" envSeparator:"," yaml:"edit_snippet_keys"`
+	NextPaneKeys          []string `env:"MDF_NEXT_PANE_KEYS" envSeparator:"," yaml:"next_pane_keys"`
+	PrevPaneKeys          []string `env:"MDF_PREV_PANE_KEYS" envSeparator:"," yaml:"prev_pane_keys"`
+	ToggleSnippetPaneKeys []string `env:"MDF_TOGGLE_SNIPPET_PANE_KEYS" envSeparator:"," yaml:"toggle_snippet_pane_keys"`
 }
 
 func newConfig() Config {
@@ -213,10 +214,11 @@ func newConfig() Config {
 		CodeBlockSuffixTemp:    "------------------END------------------",
 
 		// keys
-		CopyContentKeys: []string{"c", "d", "e", "f", "g"},
-		EditSnippetKeys: []string{"i"},
-		NextPaneKeys:    []string{"n", "tab", "right"},
-		PrevPaneKeys:    []string{"N", "shift+tab", "left"},
+		CopyContentKeys:       []string{"c", "d", "e", "f", "g"},
+		EditSnippetKeys:       []string{"i"},
+		NextPaneKeys:          []string{"n", "tab", "right"},
+		PrevPaneKeys:          []string{"N", "shift+tab", "left"},
+		ToggleSnippetPaneKeys: []string{"s", "p"},
 	}
 }
 
@@ -302,10 +304,11 @@ func (config Config) writeConfig() error {
 
 	// Set flow style for array fields
 	setFlowStyle(&node, map[string]struct{}{
-		"copy_content_keys": {},
-		"edit_snippet_keys": {},
-		"next_pane_keys":    {},
-		"prev_pane_keys":    {},
+		"copy_content_keys":        {},
+		"edit_snippet_keys":        {},
+		"next_pane_keys":           {},
+		"prev_pane_keys":           {},
+		"toggle_snippet_pane_keys": {},
 	})
 
 	return enc.Encode(&node)
@@ -377,6 +380,7 @@ func (config Config) newKeyMap() KeyMap {
 	setKeyBinding(&km.EditSnippet, config.EditSnippetKeys, "edit")
 	setKeyBinding(&km.NextPane, config.NextPaneKeys, "next")
 	setKeyBinding(&km.PrevPane, config.PrevPaneKeys, "prev")
+	setKeyBinding(&km.ToggleSnippetPane, config.ToggleSnippetPaneKeys, "toggle snippet")
 
 	return km
 }
