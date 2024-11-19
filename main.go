@@ -278,7 +278,6 @@ func runInteractiveMode(config Config, snippets []Snippet, targetSnippet Snippet
 		}
 		if string(folder) == config.FolderName {
 			folderList.Select(idx)
-			break
 		}
 	}
 
