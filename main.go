@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	Version           = "v1.0.0"
+	Version           = "v2.0.0"
 	githubSSHPrefix   = "git@github.com:"
 	githubHTTPSPrefix = "https://github.com/"
 	githubSSHSuffix   = ".git"
