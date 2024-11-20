@@ -457,15 +457,15 @@ func getRepo(config Config, repoURL string) error {
 	}
 
 	// Check if the repo already exists
-	fullRepoName := fmt.Sprintf("%s/%s", user, repoName)
+	userRepoName := fmt.Sprintf("%s/%s", user, repoName)
 	for _, repo := range repos {
-		if repo.Name == fullRepoName {
-			return fmt.Errorf("repo %s already exists", fullRepoName)
+		if repo.Name == userRepoName {
+			return fmt.Errorf("repo %s already exists", userRepoName)
 		}
 	}
 
 	// Create repo directory
-	repoPath := filepath.Join(config.getRepoBase(), user, repoName)
+	repoPath := filepath.Join(config.getRepoBase(), userRepoName)
 	err = os.MkdirAll(repoPath, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("failed to create repo directory: %w", err)
@@ -484,7 +484,7 @@ func getRepo(config Config, repoURL string) error {
 
 	// Add new repo to the list
 	newRepo := Repo{
-		Name: repoName,
+		Name: userRepoName,
 		Url:  cloneURL,
 	}
 	repos = append(repos, newRepo)
@@ -495,7 +495,7 @@ func getRepo(config Config, repoURL string) error {
 		return fmt.Errorf("failed to save repo configuration: %w", err)
 	}
 
-	fmt.Printf("Successfully added repo: %s\n", repoName)
+	fmt.Printf("Successfully added repo: %s\n", userRepoName)
 	return nil
 }
 
