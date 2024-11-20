@@ -23,11 +23,7 @@ brew install markdown-finder
 Upgrade:
 
 ```bash
-brew upgrade kugarocks/markdown-finder
-```
-
-```bash
-brew reinstall markdown-finder
+brew update && brew reinstall markdown-finder
 ```
 
 Build from source:
