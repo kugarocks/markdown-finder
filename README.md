@@ -20,6 +20,13 @@ brew tap kugarocks/markdown-finder
 brew install markdown-finder
 ```
 
+Upgrade:
+
+```bash
+brew cleanup markdown-finder
+brew reinstall markdown-finder
+```
+
 Build from source:
 
 ```bash
