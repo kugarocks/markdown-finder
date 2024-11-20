@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	Version           = "v2.0.0"
+	Version           = "v1.0.0"
 	githubSSHPrefix   = "git@github.com:"
 	githubHTTPSPrefix = "https://github.com/"
 	githubSSHSuffix   = ".git"
@@ -36,13 +36,13 @@ func main() {
 func runCLI(args []string) {
 	config := readConfig()
 
-	err := initDefaultSource(config)
+	err := initDefaultRepo(config)
 	if err != nil {
-		fmt.Println("Init default source failed", err)
+		fmt.Println("Init default repo failed", err)
 		return
 	}
 
-	validateSourceName(&config)
+	validateRepoName(&config)
 	snippets := readSnippets(config)
 	snippets = scanSnippets(config, snippets)
 
@@ -52,8 +52,8 @@ func runCLI(args []string) {
 	if len(args) > 1 {
 		switch args[0] {
 		case "list":
-			if strings.Contains(args[1], "source") {
-				if err = listSources(config); err != nil {
+			if strings.Contains(args[1], "repo") {
+				if err = listRepos(config); err != nil {
 					fmt.Println(err)
 				}
 				return
@@ -66,19 +66,19 @@ func runCLI(args []string) {
 				listSnippets(snippets)
 			}
 		case "get":
-			if len(args) < 3 || args[1] != "source" {
-				fmt.Println("Usage: mdf get source <user/repo>")
+			if len(args) < 3 || args[1] != "repo" {
+				fmt.Println("Usage: mdf get repo <user/repo>")
 				return
 			}
-			err = getSource(config, args[2])
+			err = getRepo(config, args[2])
 			if err != nil {
-				fmt.Printf("Failed to get source: %v\n", err)
+				fmt.Printf("Failed to get repo: %v\n", err)
 			}
 			return
 		case "set":
-			if strings.Contains(args[1], "source") {
-				if err = setSource(&config); err != nil {
-					fmt.Printf("set source failed: %v\n", err)
+			if strings.Contains(args[1], "repo") {
+				if err = setRepo(&config); err != nil {
+					fmt.Printf("set repo failed: %v\n", err)
 				}
 				return
 			} else if strings.Contains(args[1], "folder") {
@@ -113,14 +113,14 @@ func runCLI(args []string) {
 // readSnippets reads the snippets file and returns the snippets
 func readSnippets(config Config) []Snippet {
 	var snippets []Snippet
-	sourcePath := config.getSourcePath()
-	file := filepath.Join(sourcePath, config.SnippetConfigFile)
+	repoPath := config.getRepoPath()
+	file := filepath.Join(repoPath, config.SnippetConfigFile)
 	dir, err := os.ReadFile(file)
 	if err != nil {
 		// SnippetConfigFile does not exist, create one.
-		err = os.MkdirAll(sourcePath, os.ModePerm)
+		err = os.MkdirAll(repoPath, os.ModePerm)
 		if err != nil {
-			fmt.Printf("Unable to create directory %s, %+v", sourcePath, err)
+			fmt.Printf("Unable to create directory %s, %+v", repoPath, err)
 		}
 		f, err := os.Create(file)
 		if err != nil {
@@ -152,8 +152,8 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 		return false
 	}
 
-	sourcePath := config.getSourcePath()
-	homeEntries, err := os.ReadDir(sourcePath)
+	repoPath := config.getRepoPath()
+	homeEntries, err := os.ReadDir(repoPath)
 	if err != nil {
 		fmt.Printf("could not scan config home: %v\n", err)
 		return snippets
@@ -167,7 +167,7 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 			continue
 		}
 
-		folderPath := filepath.Join(sourcePath, homeEntry.Name())
+		folderPath := filepath.Join(repoPath, homeEntry.Name())
 		folderEntries, err := os.ReadDir(folderPath)
 		if err != nil {
 			fmt.Printf("could not scan %q: %v\n", folderPath, err)
@@ -197,7 +197,7 @@ func scanSnippets(config Config, snippets []Snippet) []Snippet {
 
 	var idx int
 	for _, snippet := range snippets {
-		snippetPath := filepath.Join(sourcePath, snippet.Path())
+		snippetPath := filepath.Join(repoPath, snippet.Path())
 		if _, err := os.Stat(snippetPath); !errors.Is(err, fs.ErrNotExist) {
 			snippets[idx] = snippet
 			idx++
@@ -226,8 +226,8 @@ func writeSnippets(config Config, snippets []Snippet) {
 	}
 	b = append(b, '\n')
 
-	sourcePath := config.getSourcePath()
-	err = os.WriteFile(filepath.Join(sourcePath, config.SnippetConfigFile), b, os.ModePerm)
+	repoPath := config.getRepoPath()
+	err = os.WriteFile(filepath.Join(repoPath, config.SnippetConfigFile), b, os.ModePerm)
 	if err != nil {
 		fmt.Println("Could not save snippets file.", err)
 	}
@@ -352,35 +352,35 @@ func newList(items []list.Item, height int, styles SnippetsBaseStyle) *list.Mode
 	return &snippetList
 }
 
-func initDefaultSource(config Config) error {
-	// Read existing sources
-	sources, err := readSources(config)
+func initDefaultRepo(config Config) error {
+	// Read existing repos
+	repos, err := readRepos(config)
 	if err != nil {
-		return fmt.Errorf("failed to read sources: %w", err)
+		return fmt.Errorf("failed to read repos: %w", err)
 	}
 
-	// Check if default source already exists
-	for _, source := range sources {
-		if source.Name == defaultSourceName {
+	// Check if default repo already exists
+	for _, repo := range repos {
+		if repo.Name == defaultRepoName {
 			return nil // Already exists, nothing to do
 		}
 	}
 
-	// Add default source
-	defaultSource := Source{
-		Name: defaultSourceName,
-		Repo: "", // Local source has no repo URL
+	// Add default repo
+	defaultRepo := Repo{
+		Name: defaultRepoName,
+		Url:  "", // Local repo has no repo URL
 	}
-	sources = append(sources, defaultSource)
+	repos = append(repos, defaultRepo)
 
-	// Save updated sources
-	if err := writeSources(config, sources); err != nil {
-		return fmt.Errorf("failed to save sources: %w", err)
+	// Save updated repos
+	if err = writeRepos(config, repos); err != nil {
+		return fmt.Errorf("failed to save repos: %w", err)
 	}
 
 	// Create default folder and file structure
-	sourcePath := config.getDefaultSourcePath()
-	defaultFolderPath := filepath.Join(sourcePath, defaultSnippetFolder)
+	repoPath := config.getDefaultRepoPath()
+	defaultFolderPath := filepath.Join(repoPath, defaultSnippetFolder)
 
 	if err := os.MkdirAll(defaultFolderPath, os.ModePerm); err != nil {
 		return fmt.Errorf("failed to create default folder: %w", err)
@@ -396,12 +396,12 @@ func initDefaultSource(config Config) error {
 	return nil
 }
 
-func parseGitHubURL(repoURL string) (user, repo string, err error) {
+func parseGitHubURL(repoURL string) (user, repoName string, err error) {
 	// Supported formats:
-	// https://github.com/user/repo.git
-	// https://github.com/user/repo
-	// git@github.com:user/repo.git
-	// user/repo
+	// https://github.com/user/repo-name.git
+	// https://github.com/user/repo-name
+	// git@github.com:user/repo-name.git
+	// user/repo-name
 
 	// Remove .git suffix
 	repoURL = strings.TrimSuffix(repoURL, githubSSHSuffix)
@@ -432,9 +432,9 @@ func parseGitHubURL(repoURL string) (user, repo string, err error) {
 	return parts[0], parts[1], nil
 }
 
-func getSource(config Config, repoURL string) error {
+func getRepo(config Config, repoURL string) error {
 	// Parse GitHub repository URL
-	user, repo, err := parseGitHubURL(repoURL)
+	user, repoName, err := parseGitHubURL(repoURL)
 	if err != nil {
 		return err
 	}
@@ -447,31 +447,31 @@ func getSource(config Config, repoURL string) error {
 	case strings.HasPrefix(repoURL, githubHTTPSPrefix):
 		cloneURL = repoURL
 	default:
-		cloneURL = fmt.Sprintf("git@github.com:%s/%s.git", user, repo)
+		cloneURL = fmt.Sprintf("git@github.com:%s/%s.git", user, repoName)
 	}
 
-	// Read existing sources
-	sources, err := readSources(config)
+	// Read existing repos
+	repos, err := readRepos(config)
 	if err != nil {
-		return fmt.Errorf("failed to read source configuration: %w", err)
+		return fmt.Errorf("failed to read repo configuration: %w", err)
 	}
 
-	// Check if the source already exists
-	sourceName := fmt.Sprintf("%s/%s", user, repo)
-	for _, source := range sources {
-		if source.Name == sourceName {
-			return fmt.Errorf("source %s already exists", sourceName)
+	// Check if the repo already exists
+	fullRepoName := fmt.Sprintf("%s/%s", user, repoName)
+	for _, repo := range repos {
+		if repo.Name == fullRepoName {
+			return fmt.Errorf("repo %s already exists", fullRepoName)
 		}
 	}
 
-	// Create source directory
-	sourcePath := filepath.Join(config.getSourceBase(), user, repo)
-	err = os.MkdirAll(sourcePath, os.ModePerm)
+	// Create repo directory
+	repoPath := filepath.Join(config.getRepoBase(), user, repoName)
+	err = os.MkdirAll(repoPath, os.ModePerm)
 	if err != nil {
-		return fmt.Errorf("failed to create source directory: %w", err)
+		return fmt.Errorf("failed to create repo directory: %w", err)
 	}
 
-	cmd := exec.Command("git", "clone", cloneURL, sourcePath)
+	cmd := exec.Command("git", "clone", cloneURL, repoPath)
 
 	// Set up pipes for real-time output
 	cmd.Stdout = os.Stdout
@@ -482,28 +482,28 @@ func getSource(config Config, repoURL string) error {
 		return fmt.Errorf("failed to clone repository: %w", err)
 	}
 
-	// Add new source to the list
-	newSource := Source{
-		Name: sourceName,
-		Repo: cloneURL,
+	// Add new repo to the list
+	newRepo := Repo{
+		Name: repoName,
+		Url:  cloneURL,
 	}
-	sources = append(sources, newSource)
+	repos = append(repos, newRepo)
 
 	// Save configuration
-	err = writeSources(config, sources)
+	err = writeRepos(config, repos)
 	if err != nil {
-		return fmt.Errorf("failed to save source configuration: %w", err)
+		return fmt.Errorf("failed to save repo configuration: %w", err)
 	}
 
-	fmt.Printf("Successfully added source: %s\n", sourceName)
+	fmt.Printf("Successfully added repo: %s\n", repoName)
 	return nil
 }
 
-// validateSourceName if the source directory does not exist, switch to the default source
-func validateSourceName(config *Config) {
-	sourcePath := config.getSourcePath()
-	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
-		config.SourceName = defaultSourceName
+// validateRepoName if the repo directory does not exist, switch to the default repo
+func validateRepoName(config *Config) {
+	repoPath := config.getRepoPath()
+	if _, err := os.Stat(repoPath); os.IsNotExist(err) {
+		config.RepoName = defaultRepoName
 	}
 }
 

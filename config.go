@@ -29,10 +29,10 @@ https://github.com/kugarocks/markdown-finder
 Usage:
   mdf                   - for interactive mode (3 panes)
   mdf example           - fuzzy find snippet (2 panes)
-  mdf get source <repo> - get source from github
-  mdf set source        - switch source
+  mdf get repo <name>   - get repo from github
+  mdf set repo          - switch repo
   mdf set folder        - switch folder
-  mdf list source       - list all sources
+  mdf list repo         - list all repos
   mdf list folder       - list all folders
   mdf list snippet      - list all snippets
 
@@ -47,6 +47,7 @@ Usage:
 * j/k - cursor down/up
 * c/d - copy code block
 * i - edit snippet
+* s - toggle snippet pane
 * use "---" to separate sections
 * each section needs a title
 
@@ -60,24 +61,24 @@ echo "https://minions.wiki"
 
 ---
 
-## GitHub Source
+## GitHub Repository
 
-Get source from GitHub by SSH:
+Get repo from GitHub by SSH:
 
 ` + "```bash {copyable}" + `
-mdf get source kugarocks/mdf-src
+mdf get repo kugarocks/rockman
 ` + "```" + `
 
 HTTPS URL is also supported:
 
 ` + "```bash {copyable}" + `
-mdf get source https://github.com/kugarocks/mdf-src.git
+mdf get repo https://github.com/kugarocks/rockman.git
 ` + "```" + `
 
-Switch source:
+Switch repo:
 
 ` + "```bash {copyable}" + `
-mdf set source
+mdf set repo
 ` + "```" + `
 
 ---
@@ -130,9 +131,9 @@ echo "Charm.sh Rocks 🚀"
 // file name of the metadata.
 type Config struct {
 	Home              string `yaml:"-"`
-	SourceName        string `env:"MDF_SOURCE_NAME" yaml:"source_name"`
+	RepoName          string `env:"MDF_REPO_NAME" yaml:"repo_name"`
 	FolderName        string `env:"MDF_FOLDER_NAME" yaml:"folder_name"`
-	SourceConfigFile  string `env:"MDF_SOURCE_CONFIG_FILE" yaml:"source_config_file"`
+	RepoConfigFile    string `env:"MDF_REPO_CONFIG_FILE" yaml:"repo_config_file"`
 	SnippetConfigFile string `env:"MDF_SNIPPET_CONFIG_FILE" yaml:"snippet_config_file"`
 
 	// Pane
@@ -178,8 +179,8 @@ type Config struct {
 func newConfig() Config {
 	return Config{
 		Home:              defaultHome(),
-		SourceName:        defaultSourceName,
-		SourceConfigFile:  "source-config.json",
+		RepoName:          defaultRepoName,
+		RepoConfigFile:    "repo-config.json",
 		SnippetConfigFile: "snippet-config.json",
 
 		// Pane
@@ -340,21 +341,21 @@ func setFlowStyle(node *yaml.Node, fields map[string]struct{}) {
 	}
 }
 
-// getSourceBase returns the base path for the configured source name
-func (config Config) getSourceBase() string {
-	return filepath.Join(config.Home, "sources")
+// getRepoBase returns the base path for the configured repo name
+func (config Config) getRepoBase() string {
+	return filepath.Join(config.Home, "repos")
 }
 
-// getSourcePath returns the full path for the configured source name
-func (config Config) getSourcePath() string {
-	parts := strings.Split(config.SourceName, "/")
-	return filepath.Join(append([]string{config.getSourceBase()}, parts...)...)
+// getRepoPath returns the full path for the configured repo name
+func (config Config) getRepoPath() string {
+	parts := strings.Split(config.RepoName, "/")
+	return filepath.Join(append([]string{config.getRepoBase()}, parts...)...)
 }
 
-// getDefaultSourcePath returns the full path for the default source name
-func (config Config) getDefaultSourcePath() string {
-	parts := strings.Split(defaultSourceName, "/")
-	return filepath.Join(append([]string{config.getSourceBase()}, parts...)...)
+// getDefaultRepoPath returns the full path for the default repo name
+func (config Config) getDefaultRepoPath() string {
+	parts := strings.Split(defaultRepoName, "/")
+	return filepath.Join(append([]string{config.getRepoBase()}, parts...)...)
 }
 
 func (config Config) newKeyMap() KeyMap {

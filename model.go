@@ -256,7 +256,7 @@ func (m *Model) getContentToCopy(msg tea.KeyMsg) (string, bool) {
 // selectedSnippetFilePath returns the file path of the snippet that is
 // currently selected.
 func (m *Model) selectedSnippetFilePath() string {
-	return filepath.Join(m.config.getSourcePath(), m.selectedSnippet().Path())
+	return filepath.Join(m.config.getRepoPath(), m.selectedSnippet().Path())
 }
 
 // nextPane sets the next pane to be active.
@@ -321,8 +321,8 @@ func (m *Model) updateSnippetSections(snippet Snippet) {
 		return
 	}
 
-	sourcePath := m.config.getSourcePath()
-	snippetContentBytes, err := os.ReadFile(filepath.Join(sourcePath, snippet.Path()))
+	repoPath := m.config.getRepoPath()
+	snippetContentBytes, err := os.ReadFile(filepath.Join(repoPath, snippet.Path()))
 	if err != nil {
 		return
 	}

@@ -55,27 +55,26 @@ Toggle the snippet pane by pressing `s` or `p`.
 
 ![mdf-two-panes](./assets/mdf-two-panes.png)
 
+## GitHub Repository
 
-## GitHub Source
-
-Manage your source from GitHub by SSH.
+Manage your snippets by GitHub repository(SSH).
 
 ```bash
-mdf get source kugarocks/mdf-src
+mdf get repo kugarocks/mdf-src
 ```
 
 Supports HTTPS URL as well:
 
 ```bash
-mdf get source https://github.com/kugarocks/mdf-src.git
+mdf get repo https://github.com/kugarocks/mdf-src.git
 ```
 
-The source will be downloaded to `~/.mdf/sources/`.
+The repo will be downloaded to `~/.mdf/repos/`.
 
 ```bash
 .mdf
 ├── config.yaml
-└── sources
+└── repos
     ├── kugarocks
     │   └── mdf-src
     │       ├── README.md
@@ -86,23 +85,23 @@ The source will be downloaded to `~/.mdf/sources/`.
     │       │   └── k8s.md
     │       └── snippet-config.json
     ├── local
-    │   └── source
+    │   └── repo
     │       ├── folder
     │       │   └── Example.md
     │       └── snippet-config.json
-    └── source-config.json
+    └── repo-config.json
 ```
 
-The `source-config.json` file is automatically updated when you run `mdf get source`.
-If you manually add sources to `~/.mdf/sources/`, you will also need to manually update `source-config.json`.
+The `repo-config.json` file is automatically updated when you run `mdf get repo`.
+If you manually add repo to `~/.mdf/repos/`, you will also need to manually update `repo-config.json`.
 
-## Switch Source
+## Switch Repo
 
 ```bash
-mdf set source
+mdf set repo
 ```
 
-![mdf-set-source](./assets/mdf-set-source.gif)
+![mdf-set-repo](./assets/mdf-set-repo.gif)
 
 ## Switch Folder
 
@@ -125,9 +124,9 @@ export MDF_HOME=/path/to/mdf
 Feel free to customize the following configuration.
 
 ```yaml
-source_name: local/source
+repo_name: local/repo
 folder_name: folder
-source_config_file: source-config.json
+repo_config_file: repo-config.json
 snippet_config_file: snippet-config.json
 default_pane: section
 always_show_snippet_pane: false
@@ -157,16 +156,16 @@ prev_pane_keys: ["N", shift+tab, left]
 toggle_snippet_pane_keys: [s, p]
 ```
 
-| Key        | Description                   |
-|---------------------------|-------------------------------|
-| source_name               | Set by `mdf set source`       |
-| folder_name               | Set by `mdf set folder`       |
-| default_pane              | `section` or `snippet`        |
-| always_show_snippet_pane  | `true` or `false`             |
+| Key                      | Description             |
+|--------------------------|-------------------------|
+| repo_name                | Set by `mdf set repo`   |
+| folder_name              | Set by `mdf set folder` |
+| default_pane             | `section` or `snippet`  |
+| always_show_snippet_pane | `true` or `false`       |
 
 ## TODO
 
-- [ ] Update `source-config.json` when sources are added manually.
+- [ ] Update `repo-config.json` when repo is added manually.
 
 ## License
 
