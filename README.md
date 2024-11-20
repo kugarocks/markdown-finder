@@ -51,10 +51,10 @@ mdf bas/ca
 ```
 
 If the snippet is specified, two panes are displayed by default.
+Toggle the snippet pane by pressing `s` or `p`.
 
 ![mdf-two-panes](./assets/mdf-two-panes.png)
 
-You can toggle the snippet pane by pressing `s` or `p`.
 
 ## GitHub Source
 
