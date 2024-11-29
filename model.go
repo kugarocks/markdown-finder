@@ -202,6 +202,13 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 				_ = clipboard.WriteAll(content)
 				return changeStateMsg{copyingState}
 			}
+		case bkey.Matches(msg, m.keys.CopyContentExit):
+			content, ok := m.getContentToCopy(msg)
+			if ok {
+				_ = clipboard.WriteAll(content)
+			}
+			m.state = quittingState
+			return m, tea.Quit
 		case bkey.Matches(msg, m.keys.EditSnippet):
 			return m, m.editSnippet()
 		case bkey.Matches(msg, m.keys.Search):
@@ -229,10 +236,10 @@ func (m *Model) getContentToCopy(msg tea.KeyMsg) (string, bool) {
 		return string(contentBytes), true
 	default:
 		// copy section code block
-		key := msg.String()
+		key := strings.ToLower(msg.String())
 		keyIndex := -1
 		for i, copyKey := range m.keys.CopyContent.Keys() {
-			if key == copyKey {
+			if key == strings.ToLower(copyKey) {
 				keyIndex = i
 				break
 			}

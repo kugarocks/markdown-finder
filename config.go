@@ -169,11 +169,12 @@ type Config struct {
 	CodeBlockBorderDefault string `yaml:"-"`
 
 	// keys
-	CopyContentKeys       []string `env:"MDF_COPY_CONTENT_KEYS" envSeparator:"," yaml:"copy_content_keys"`
-	EditSnippetKeys       []string `env:"MDF_EDIT_SNIPPET_KEYS" envSeparator:"," yaml:"edit_snippet_keys"`
-	NextPaneKeys          []string `env:"MDF_NEXT_PANE_KEYS" envSeparator:"," yaml:"next_pane_keys"`
-	PrevPaneKeys          []string `env:"MDF_PREV_PANE_KEYS" envSeparator:"," yaml:"prev_pane_keys"`
-	ToggleSnippetPaneKeys []string `env:"MDF_TOGGLE_SNIPPET_PANE_KEYS" envSeparator:"," yaml:"toggle_snippet_pane_keys"`
+	CopyContentKeys        []string `env:"MDF_COPY_CONTENT_KEYS" envSeparator:"," yaml:"copy_content_keys"`
+	CopyContentKeysCapital []string `yaml:"-"`
+	EditSnippetKeys        []string `env:"MDF_EDIT_SNIPPET_KEYS" envSeparator:"," yaml:"edit_snippet_keys"`
+	NextPaneKeys           []string `env:"MDF_NEXT_PANE_KEYS" envSeparator:"," yaml:"next_pane_keys"`
+	PrevPaneKeys           []string `env:"MDF_PREV_PANE_KEYS" envSeparator:"," yaml:"prev_pane_keys"`
+	ToggleSnippetPaneKeys  []string `env:"MDF_TOGGLE_SNIPPET_PANE_KEYS" envSeparator:"," yaml:"toggle_snippet_pane_keys"`
 }
 
 func newConfig() Config {
@@ -280,6 +281,12 @@ func readConfig() Config {
 	config.CodeBlockBorderPadding = config.CodeBlockBorderPadding[:1]
 	config.CodeBlockBorderDefault = strings.Repeat(config.CodeBlockBorderPadding, config.CodeBlockBorderLength)
 
+	// Capital CopyContentKeys
+	config.CopyContentKeysCapital = make([]string, len(config.CopyContentKeys))
+	for i, key := range config.CopyContentKeys {
+		config.CopyContentKeysCapital[i] = strings.ToUpper(key)
+	}
+
 	return config
 }
 
@@ -378,6 +385,7 @@ func (config Config) newKeyMap() KeyMap {
 	}
 
 	setKeyBinding(&km.CopyContent, config.CopyContentKeys, "copy")
+	setKeyBinding(&km.CopyContentExit, config.CopyContentKeysCapital, "copy & exit")
 	setKeyBinding(&km.EditSnippet, config.EditSnippetKeys, "edit")
 	setKeyBinding(&km.NextPane, config.NextPaneKeys, "next")
 	setKeyBinding(&km.PrevPane, config.PrevPaneKeys, "prev")

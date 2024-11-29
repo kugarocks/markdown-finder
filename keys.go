@@ -10,6 +10,7 @@ type KeyMap struct {
 	MoveSnippetUp     key.Binding
 	MoveSnippetDown   key.Binding
 	CopyContent       key.Binding
+	CopyContentExit   key.Binding
 	EditSnippet       key.Binding
 	NextPane          key.Binding
 	PrevPane          key.Binding
