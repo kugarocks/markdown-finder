@@ -163,7 +163,6 @@ toggle_snippet_pane_keys: [s, p]
 
 ## Exit After Copy
 
-If you set `exit_after_copy` to `true`, Markdown Finder will exit after copying the content.
 You can also press `shift` + `copy_content_keys` to copy the content and exit.
 
 ## TODO
