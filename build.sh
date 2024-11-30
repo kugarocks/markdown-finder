@@ -33,9 +33,11 @@ build_and_zip() {
 }
 
 # Build and zip for different architectures
-build_and_zip darwin amd64
-build_and_zip darwin arm64
 build_and_zip linux amd64
 build_and_zip linux arm64
+build_and_zip darwin amd64
+build_and_zip darwin arm64
+build_and_zip windows amd64
+build_and_zip windows arm64
 
 echo "Build and compression complete for version $VERSION!"
