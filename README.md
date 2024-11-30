@@ -67,7 +67,7 @@ mdf get repo https://github.com/kugarocks/mdf-src.git
 
 The repo will be downloaded to `~/.mdf/repos/`.
 
-```bash
+```txt
 .mdf
 ├── config.yaml
 └── repos
