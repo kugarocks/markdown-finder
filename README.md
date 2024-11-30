@@ -56,13 +56,13 @@ Toggle the snippet pane by pressing `s` or `p`.
 Manage your snippets by GitHub repository(SSH).
 
 ```bash
-mdf get repo kugarocks/mdf-src
+mdf get repo kugarocks/rockman
 ```
 
 Supports HTTPS URL as well:
 
 ```bash
-mdf get repo https://github.com/kugarocks/mdf-src.git
+mdf get repo https://github.com/kugarocks/rockman.git
 ```
 
 The repo will be downloaded to `~/.mdf/repos/`.
@@ -72,7 +72,7 @@ The repo will be downloaded to `~/.mdf/repos/`.
 ├── config.yaml
 └── repos
     ├── kugarocks
-    │   └── mdf-src
+    │   └── rockman
     │       ├── README.md
     │       ├── bash
     │       │   ├── cat.md
