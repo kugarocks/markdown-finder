@@ -126,6 +126,7 @@ repo_config_file: repo-config.json
 snippet_config_file: snippet-config.json
 default_pane: section
 always_show_snippet_pane: false
+exit_after_copy: false
 base_margin_top: 1
 snippet_title_bar_width: 33
 section_title_bar_width: 33
@@ -157,7 +158,13 @@ toggle_snippet_pane_keys: [s, p]
 | repo_name                | Set by `mdf set repo`   |
 | folder_name              | Set by `mdf set folder` |
 | default_pane             | `section` or `snippet`  |
-| always_show_snippet_pane | `true` or `false`       |
+| always_show_snippet_pane | `true` or `false`(default) |
+| exit_after_copy          | `true` or `false`(default) |
+
+## Exit After Copy
+
+If you set `exit_after_copy` to `true`, Markdown Finder will exit after copying the content.
+You can also press `shift` + `copy_content_keys` to copy the content and exit.
 
 ## TODO
 

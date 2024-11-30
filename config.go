@@ -139,6 +139,7 @@ type Config struct {
 	// Pane
 	DefaultPane           string `env:"MDF_DEFAULT_PANE" yaml:"default_pane"`
 	AlwaysShowSnippetPane bool   `env:"MDF_ALWAYS_SHOW_SNIPPET_PANE" yaml:"always_show_snippet_pane"`
+	ExitAfterCopy         bool   `env:"MDF_EXIT_AFTER_COPY" yaml:"exit_after_copy"`
 
 	// Layout
 	BaseMarginTop         int `env:"MDF_BASE_MARGIN_TOP" yaml:"base_margin_top"`
@@ -187,6 +188,7 @@ func newConfig() Config {
 		// Pane
 		DefaultPane:           "section",
 		AlwaysShowSnippetPane: false,
+		ExitAfterCopy:         false,
 
 		// Layout
 		BaseMarginTop:         1,

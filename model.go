@@ -194,6 +194,14 @@ func (m *Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.Code.Height = newHeight
 			m.LineNumbers.Height = newHeight
 		case bkey.Matches(msg, m.keys.CopyContent):
+			if m.config.ExitAfterCopy {
+				content, ok := m.getContentToCopy(msg)
+				if ok {
+					_ = clipboard.WriteAll(content)
+				}
+				m.state = quittingState
+				return m, tea.Quit
+			}
 			return m, func() tea.Msg {
 				content, ok := m.getContentToCopy(msg)
 				if !ok {
