@@ -198,15 +198,17 @@ func newConfig() Config {
 		SnippetListMarginLeft: 1,
 
 		// Colors
+		// https://commons.wikimedia.org/wiki/File:Xterm_256color_chart.svg
+		// Support RGB color as well: #5f5fd7
 		FocusedBarBgColor:        "62",
-		FocusedBarFgColor:        "230",
-		BlurredBarBgColor:        "#64708D",
-		BlurredBarFgColor:        "#FFFFFF",
+		FocusedBarFgColor:        "255",
+		BlurredBarBgColor:        "103",
+		BlurredBarFgColor:        "255",
 		SelectedItemFgColor:      "170",
-		UnselectedItemFgColor:    "c7c7c7",
-		CopiedBarBgColor:         "#527251",
-		CopiedBarFgColor:         "#FFFFFF",
-		CopiedItemFgColor:        "#BCE1AF",
+		UnselectedItemFgColor:    "252",
+		CopiedBarBgColor:         "42",
+		CopiedBarFgColor:         "238",
+		CopiedItemFgColor:        "42",
 		ContentLineNumberFgColor: "241",
 
 		// Code Block

@@ -8,7 +8,6 @@ import (
 	"github.com/aquilax/truncate"
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 // default values for empty state.
@@ -106,8 +105,8 @@ func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.
 		return
 	}
 
-	itemStyle := lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle := d.styles.SelectedItemTitle
+	unselectedItemStyle := d.styles.UnselectedItemTitle
 
 	if d.state == copyingState && d.pane == sectionPane {
 		selectedItemStyle = d.styles.CopiedItemTitle
@@ -116,7 +115,7 @@ func (d sectionDelegate) Render(w io.Writer, m list.Model, index int, item list.
 	if index == m.Index() {
 		_, _ = fmt.Fprint(w, selectedItemStyle.Render("> "+truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 	} else {
-		_, _ = fmt.Fprint(w, itemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
+		_, _ = fmt.Fprint(w, unselectedItemStyle.Render(truncate.Truncate(s.Title, 30, "...", truncate.PositionEnd)))
 	}
 }
 

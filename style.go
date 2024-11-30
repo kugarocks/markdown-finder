@@ -178,7 +178,6 @@ func DefaultStyles(config Config) Styles {
 		BorderForeground(lipgloss.Color(config.CopiedItemFgColor))
 
 	// content
-
 	contentCode := lipgloss.NewStyle().Margin(ContentCodeMargin...)
 
 	contentFocusedTitleBar := lipgloss.NewStyle().
