@@ -72,11 +72,13 @@ https://github.com/kugarocks/markdown-finder
 
 ---
 
-## Charm.sh Rocks
-
-We make the command line glamorous.
+## Raycast Script Command
 
 ```bash {copyable}
-echo "Charm.sh Rocks 🚀"
+LANG=en_US.UTF-8 \
+MDF_HOME=/Users/kuga/mdf \
+/Applications/Alacritty.app/Contents/MacOS/alacritty \
+    --config-file /Users/kuga/alacritty.toml \
+    -e /usr/local/bin/mdf "$1" \
+    > /dev/null 2>&1
 ```
-
