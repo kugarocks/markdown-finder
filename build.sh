@@ -18,16 +18,16 @@ build_and_zip() {
   BUILD_DIR="mdf_${VERSION}_${GOOS}_${GOARCH}"
   OUTPUT="${BUILD_DIR}/mdf"
 
-  # Build
+  # Build from src directory
   echo "Building for $GOOS $GOARCH..."
-  GOOS=$GOOS GOARCH=$GOARCH go build -o "$OUTPUT"
+  (cd src && GOOS=$GOOS GOARCH=$GOARCH go build -o "../$OUTPUT" .)
 
   # Zip with version number in the filename
   ZIPFILE="build/mdf_${VERSION}_${GOOS}_${GOARCH}.zip"
   echo "Compressing $OUTPUT to $ZIPFILE..."
   zip "$ZIPFILE" "$OUTPUT"
 
-  # Optionally, remove the uncompressed binary
+  # Cleanup
   rm "$OUTPUT"
   rm -r "$BUILD_DIR"
 }

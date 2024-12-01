@@ -107,6 +107,23 @@ mdf set folder
 
 ![mdf-set-folder](./assets/mdf-set-folder.gif)
 
+## Raycast Script Command
+
+You can use the following command as a Raycast script command.
+
+* `LANG=en_US.UTF-8`: Emoji support.
+* `MDF_HOME`: MDF home path.
+* `--config-file`: Alacritty config file path.
+
+```bash
+LANG=en_US.UTF-8 \
+MDF_HOME=/Users/kuga/mdf \
+/Applications/Alacritty.app/Contents/MacOS/alacritty \
+    --config-file /Users/kuga/alacritty.toml \
+    -e /usr/local/bin/mdf "$1" \
+    > /dev/null 2>&1
+```
+
 ## Configuration
 
 The config file defaults to `~/.mdf/`. Set the `MDF_HOME` environment variable to change it.

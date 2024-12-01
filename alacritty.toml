@@ -1,0 +1,219 @@
+# https://alacritty.org/config-alacritty.html
+# https://gist.github.com/nightgrey/2ed92d362077843502e3dce639aae9c7
+# alacritty 0.14.0 (22a4475)
+
+[env]
+TERM = "xterm-256color"
+
+[general]
+
+# Import additional configuration files.
+# Imports are loaded in order, skipping all missing files, with the importing file being loaded last.
+# If a field is already present in a previous import, it will be replaced.
+#
+# All imports must either be absolute paths starting with `/`, or paths relative to the user's home directory starting with `~/`.
+#
+# Example:
+#   ```
+#   import = [
+#     #~/.config/alacritty/base16-dark.toml",
+#     "~/.config/alacritty/keybindings.toml",
+#   ]
+#   ```
+#
+# Schema: `["<string>",]`
+
+import = [
+    "~/.config/alacritty/themes/themes/xterm.toml"
+]
+
+# Directory the shell is started in. When this is unset, or "None", the working directory of the parent process will be used.
+# Default: "None"
+# Schema: `"<string>" | "None"`
+
+working_directory = "None"
+
+# Live config reload (changes require restart)
+# Default: true
+# Schema: `true | false`
+
+live_config_reload = true
+
+[window]
+
+# Window dimensions (changes require restart).
+# Number of lines/columns (not pixels) in the terminal. Both lines and columns must be non-zero for this to take effect.
+# The number of columns must be at least 2, while using a value of 0 for columns and lines will fall back to the window manager's recommended size
+# Schema: `{ columns = <integer>, lines = <integer> }`
+
+dimensions = { columns = 120, lines = 25 }
+
+# Window startup position.
+# Specified in number of pixels.
+# If the position is "None", the window manager will handle placement.
+# Schema: `"None" | { x = <integer>, y = <integer> }`
+
+#position = "None"
+position = { x = 500, y = 250 }
+
+# Blank space added around the window in pixels.
+# This padding is scaled by DPI and the specified value is always added at both opposing sides.
+# Schema: `{ x = <integer>, y = <integer> }`
+
+padding = { x = 10, y = 10 }
+
+# Spread additional padding evenly around the terminal content.
+# Default: false
+# Schema: `true | false`
+
+dynamic_padding = false
+
+# Background opacity as a floating point number from 0.0 to 1.0.
+# The value 0.0 is completely transparent and 1.0 is opaque.
+# Default: 1.0
+# Schema: `<float>`
+
+opacity = 1
+
+# Request compositor to blur content behind transparent windows.
+# Default: false
+# Schema: `true | false` # (works on macOS/KDE Wayland)
+
+blur = true
+
+# Startup mode (changes require restart)
+#
+# "Windowed"
+#   Regular window.
+#
+# "Maximized"
+#   The window will be maximized on startup.
+#
+# "Fullscreen"
+#   The window will be fullscreened on startup.
+#
+# "SimpleFullscreen" (macOS only)
+#   Same as Fullscreen, but you can stack windows on top.
+#
+# Default: "Windowed"
+# Schema: `"Windowed" | "Maximized" | "Fullscreen" | "SimpleFullscreen"`
+
+startup_mode = "Windowed"
+
+# Window title.
+# Default: "Alacritty"
+# Schema: `"<string>"`
+
+title = "Alacritty"
+
+# Allow terminal applications to change Alacritty's window title.
+# Default: true
+# Schema: `true | false`
+
+dynamic_title = true
+
+# Window class (Linux/BSD only).
+# On Wayland, "general" is used as app_id and "instance" is ignored.
+# Default: { instance = "Alacritty", general = "Alacritty" }
+# Schema: `{ instance = "<string>", general = "<string>" }`
+
+class = { instance = "Alacritty", general = "Alacritty" }
+
+# Override the variant of the System theme/GTK theme/Wayland client side decorations. Set this to "None" to use the system's default theme variant.
+# Default: "None"
+# Schema: `"Dark" | "Light" | "None"`
+
+decorations_theme_variant = "None"
+
+# Prefer resizing window by discrete steps equal to cell dimensions.
+# Default: false
+# Schema: `true | false`
+
+resize_increments = false
+
+# Make Option key behave as Alt (macOS only).
+# Default: "None"
+# Schema: `"OnlyLeft" | "OnlyRight" | "Both" | "None"`
+
+option_as_alt = "None" # (macos only)
+
+# Remove Top Bar
+
+decorations = "Buttonless"
+
+[scrolling]
+
+# This section documents the [scrolling] table of the configuration file.
+
+# Maximum number of lines in the scrollback buffer.
+# Specifying 0 will disable scrolling.
+# Limited to 100000.
+# Default: 10000
+# Schema: `<integer>`
+
+history = 10000
+
+# Number of line scrolled for every input scroll increment.
+# Default: 3
+# Schema: `<integer>`
+
+multiplier = 3
+
+[font]
+
+# This section documents the [font] table of the configuration file.
+
+# Default:
+#   Linux/BSD: { family = "monospace", style = "Regular" }
+#   Windows: { family = "Consolas", style = "Regular" }
+#   macOS: { family = "Menlo", style = "Regular" }
+#
+# Schema: `{ family = "<string>", style = "<string>" }`
+
+#normal = { family = "MesloLGS NF", style = "Regular" }
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+
+# If the family is not specified, it will fall back to the value specified for the normal font.
+# Default: { style = "Bold" }
+# Schema: `{ family = "<string>", style = "<string>" }`
+
+bold = { style = "Regular" }
+
+# If the family is not specified, it will fall back to the value specified for the normal font.
+# Default: { style = "Italic" }
+# Schema: `{ family = "<string>", style = "<string>" }`
+
+italic = { style = "Italic" }
+
+# If the family is not specified, it will fall back to the value specified for the normal font.
+# Default: { style = "Bold Italic" }
+# Schema: `{ family = "<string>", style = "<string>" }`
+
+bold_italic = { style="Italic" }
+
+# Font size in points.
+# Default: 11.25
+# Schema: `<float>`
+
+size = 13
+
+# Offset is the extra space around each character.
+# y can be thought of as modifying the line spacing, and x as modifying the letter spacing.
+# Default: { x = 0, y = 0 }
+# Schema: `{ x = <integer>, y = <integer> }`
+
+offset = { x = 1, y = 10 }
+
+# Glyph offset determines the locations of the glyphs within their cells with the default being at the bottom.
+# Increasing x moves the glyph to the right, increasing y moves the glyph upward.
+
+glyph_offset = { y = 5 }
+
+# When true, Alacritty will use a custom built-in font for box drawing characters (Unicode points U+2500 - U+259F)
+# and powerline symbols (Unicode points U+E0B0 - U+E0B3).
+#
+# Default: true
+# Schema: `true | false`
+
+builtin_box_drawing = true
+
