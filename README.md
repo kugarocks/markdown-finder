@@ -109,7 +109,7 @@ mdf set folder
 
 ## Raycast Script Command
 
-You can use the following command as a Raycast script command.
+You can use the following command as a Raycast script command([Tutorial](https://www.youtube.com/watch?v=RIpPFOJtQ-o)).
 
 * `LANG=en_US.UTF-8`: Emoji support.
 * `MDF_HOME`: MDF home path.
@@ -123,6 +123,7 @@ MDF_HOME=/Users/kuga/mdf \
     -e /usr/local/bin/mdf "$1" \
     > /dev/null 2>&1
 ```
+
 
 ## Configuration
 
