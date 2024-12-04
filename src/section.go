@@ -64,7 +64,8 @@ type Sections struct {
 
 // FilterValue is the section filter value that can be used when searching.
 func (s Section) FilterValue() string {
-	return s.Folder + "/" + s.File + s.Title + s.Content + "\n"
+	return s.Title + "\n"
+	// return s.Folder + "/" + s.File + s.Title + s.Content + "\n"
 }
 
 // sectionDelegate represents the section list item.

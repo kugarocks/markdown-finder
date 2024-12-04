@@ -91,7 +91,7 @@ func (s Snippet) Content(highlight bool) string {
 
 // FilterValue is the snippet filter value that can be used when searching.
 func (s Snippet) FilterValue() string {
-	return s.Folder + "/" + s.Name + "\n"
+	return s.Name + "\n"
 	//return s.Folder + "/" + s.Name + "\n" + "+" + strings.Join(s.Tags, "+") + "\n" + s.Language
 }
 
